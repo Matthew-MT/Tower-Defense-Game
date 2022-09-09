@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include "include/game.hpp"
 
 int main(int argc, char *argv[]) {
     SDL_Window *win = NULL;

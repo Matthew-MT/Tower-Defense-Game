@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <string>
 
 namespace game {
     class Game {
@@ -8,6 +9,6 @@ namespace game {
         SDL_Window* win = nullptr;
         SDL_Renderer* renderer = nullptr;
     public:
-        Game();
+        Game(const std::string& title, int x, int y, int w, int h);
     };
 };
