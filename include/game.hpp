@@ -3,6 +3,19 @@
 #include <string>
 
 namespace game {
+    class RenderableTexture {
+    private:
+        SDL_Texture* texture;
+        SDL_Rect* sourceRect = nullptr;
+        SDL_Rect* destRect = nullptr;
+    public:
+        RenderableTexture() {}
+        ~RenderableTexture() {}
+        void render(SDL_Renderer* renderer) {
+            SDL_RenderCopy(renderer, this->texture, this->sourceRect, this->destRect);
+        }
+    };
+
     class Game {
     private:
         SDL_bool exit = SDL_FALSE;
@@ -15,6 +28,9 @@ namespace game {
         }
         ~Game() {
             SDL_DestroyWindow(this->window);
+        }
+        void render() {
+            SDL_RenderClear(this->renderer);
         }
     };
 };
