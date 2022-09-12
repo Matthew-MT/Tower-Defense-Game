@@ -14,6 +14,7 @@ namespace game {
         void render(SDL_Renderer* renderer) {
             SDL_RenderCopy(renderer, this->texture, this->sourceRect, this->destRect);
         }
+        void setSourceRect(int x, int y, int w, int h) {}
     };
 
     class Game {
