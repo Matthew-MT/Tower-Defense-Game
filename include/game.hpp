@@ -1,7 +1,8 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <forward_list>
+#include <iostream>
 #include <string>
-#include <vector>
 
 namespace game {
     template<typename Type> class Point {
@@ -12,15 +13,14 @@ namespace game {
 
     using IPoint = Point<int>;
 
-    class Sprite {
-    private:
+    class StaticSprite {
+    protected:
         SDL_Renderer* renderer;
         SDL_Texture* texture;
         SDL_Rect* sourceRect = nullptr;
         SDL_Rect* destRect = nullptr;
-        double angle = 0.f;
     public:
-        Sprite(
+        StaticSprite(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
             SDL_Rect* initSourceRect,
@@ -30,17 +30,18 @@ namespace game {
             texture{initTexture},
             sourceRect{initSourceRect},
             destRect{initDestRect} {}
-        ~Sprite() {}
+        ~StaticSprite() {}
         void render() {
-            SDL_RenderCopyEx(
+            if (this->renderer == nullptr) std::cout << "Warning: Detected a failed renderer association. Make sure to specify a renderer.\n";
+            SDL_RenderCopy(
                 this->renderer,
                 this->texture,
                 this->sourceRect,
-                this->destRect,
-                this->angle,
-                nullptr,
-                SDL_FLIP_NONE
+                this->destRect
             );
+        }
+        void setRenderer(SDL_Renderer* renderer) {
+            this->renderer = renderer;
         }
         void setTexture(SDL_Texture* texture) {
             this->texture = texture;
@@ -55,9 +56,6 @@ namespace game {
             this->destRect->x = x;
             this->destRect->y = y;
         }
-        void setAngle(double angle) {
-            this->angle = angle;
-        }
         const SDL_Rect* getSourceRect() {
             return this->sourceRect;
         }
@@ -66,6 +64,34 @@ namespace game {
         }
         IPoint getPosition() {
             return {this->destRect->x, this->destRect->y};
+        }
+    };
+
+    class Sprite : public StaticSprite {
+    protected:
+        double angle = 0.f;
+    public:
+        Sprite(
+            SDL_Renderer* initRenderer,
+            SDL_Texture* initTexture,
+            SDL_Rect* initSourceRect,
+            SDL_Rect* initDestRect
+        ) : StaticSprite{initRenderer, initTexture, initSourceRect, initDestRect} {}
+        ~Sprite() {}
+        void render() {
+            if (this->renderer == nullptr) std::cout << "Warning: Detected a failed renderer association. Make sure to specify a renderer.\n";
+            SDL_RenderCopyEx(
+                this->renderer,
+                this->texture,
+                this->sourceRect,
+                this->destRect,
+                this->angle,
+                nullptr,
+                SDL_FLIP_NONE
+            );
+        }
+        void setAngle(double angle) {
+            this->angle = angle;
         }
         double getAngle(double angle) {
             return this->angle;
@@ -77,7 +103,7 @@ namespace game {
         SDL_bool exit = SDL_FALSE;
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
-        std::vector<Sprite> renderList;
+        std::forward_list<Sprite> renderList;
     public:
         Game(const std::string& title, int x, int y, int w, int h) {
             this->window = SDL_CreateWindow(title.c_str(), x, y, w, h, 0);
@@ -91,8 +117,23 @@ namespace game {
             for (Sprite sprite : this->renderList) sprite.render();
             SDL_RenderPresent(this->renderer);
         }
-        void spawnSprite(Sprite& sprite) {
-            this->renderList.push_back(sprite);
+        template<typename Type = Sprite> Type& spawn(
+            SDL_Texture* initTexture,
+            SDL_Rect* initSourceRect,
+            SDL_Rect* initDestRect
+        ) {
+            if (!std::is_base_of<Sprite, Type>::value) throw "Must request a sprite or derivative.";
+            Type sprite{this->renderer, initTexture, initSourceRect, initDestRect};
+            this->renderList.push_front(sprite);
+            return sprite;
+        }
+        Sprite& spawn(Sprite& sprite) {
+            sprite.setRenderer(this->renderer);
+            this->renderList.push_front(sprite);
+            return sprite;
+        }
+        SDL_Renderer* getRenderer() {
+            return this->renderer;
         }
     };
 };
