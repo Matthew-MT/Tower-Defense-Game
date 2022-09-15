@@ -18,6 +18,8 @@ namespace game {
         }
 
         ~Game() {
+            for (Sprite sprite : this->renderList) delete &sprite;
+            SDL_DestroyRenderer(this->renderer);
             SDL_DestroyWindow(this->window);
         }
 
