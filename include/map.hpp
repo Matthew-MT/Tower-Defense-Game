@@ -40,8 +40,12 @@ namespace game {
 
             while (!textureAssociation.eof()) {
                 std::getline(textureAssociation, buffer);
-                SDL_Texture* texture = SDL_CreateTextureFromSurface(this->renderer, SDL_LoadBMP(buffer.c_str()));
-                this->textures.push_back(texture);
+                this->textures.push_back(
+                    SDL_CreateTextureFromSurface(
+                        this->renderer,
+                        SDL_LoadBMP(buffer.c_str())
+                    )
+                );
             }
 
             while (!mapFile.eof()) {
@@ -55,12 +59,11 @@ namespace game {
             }
 
             for (int i = 0; i < this->map.size(); i++) {
-                std::vector<int>& row = this->map[i];
                 this->mapSprites.push_back({});
-                for (int j = 0; j < row.size(); j++) {
-                    this->mapSprites.back().push_back(StaticSprite{
+                for (int j = 0; j < this->map[i].size(); j++) {
+                    this->mapSprites.back().push_back({
                         this->renderer,
-                        this->textures.at(row[j]),
+                        this->textures.at(this->map[i][j]),
                         nullptr,
                         this->getTileDest({i, j})
                     });
@@ -68,7 +71,9 @@ namespace game {
             }
         }
 
-        ~Map() {}
+        ~Map() {
+            for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
+        }
 
         void render() {
             for (std::vector<int>& row : this->map) for (int t : row) SDL_RenderCopy(
