@@ -34,8 +34,8 @@ namespace game {
             destRect{initDestRect},
             tileSize{initTileSize} {
             std::fstream
-                mapFile(mapFileName, std::ios_base::in),
-                textureAssociation("../assets/config/texture_association.txt", std::ios_base::in);
+                textureAssociation("../assets/config/texture_association.txt", std::ios_base::in),
+                mapFile(mapFileName, std::ios_base::in);
             std::string buffer;
 
             while (!textureAssociation.eof()) {
