@@ -1,14 +1,13 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "sprite.hpp"
-#include "game.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
 
 namespace game {
-    class Map {
-    private:
+    class Map : public Renderable {
+    protected:
         SDL_Renderer* renderer;
         SDL_Rect* destRect = nullptr;
         IPoint tileSize;
@@ -16,6 +15,18 @@ namespace game {
         std::vector<SDL_Texture*> textures;
         std::vector<std::vector<StaticSprite>> mapSprites;
 
+        // Call this function if you update tile sizes.
+        void updateMapSize() {
+            if (
+                this->destRect->w == -1
+            ) this->destRect->w = this->tileSize.x * this->map.size();
+
+            if (
+                this->destRect->h == -1
+            ) this->destRect->h = this->tileSize.y * this->map.back().size();
+        }
+
+        // Call this function if you update the map's position.
         void updateTiles() {
             for (int i = 0; i < this->mapSprites.size(); i++) {
                 for (int j = 0; j < this->mapSprites[i].size(); j++) {
@@ -27,15 +38,15 @@ namespace game {
         Map(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
-            const IPoint& initTileSize,
-            const std::string& mapFileName
+            const IPoint& initTileSize
         ) :
-            renderer{initRenderer},
-            destRect{initDestRect},
+            Renderable{
+                initRenderer,
+                initDestRect
+            },
             tileSize{initTileSize} {
             std::fstream
-                textureAssociation("../assets/config/texture_association.txt", std::ios_base::in),
-                mapFile(mapFileName, std::ios_base::in);
+                textureAssociation("../assets/config/texture_association.txt", std::ios_base::in);
             std::string buffer;
 
             while (!textureAssociation.eof()) {
@@ -47,6 +58,27 @@ namespace game {
                     )
                 );
             }
+
+            textureAssociation.close();
+        }
+
+        ~Map() {
+            for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
+        }
+
+        void render() {
+            for (std::vector<int>& row : this->map) for (int t : row) SDL_RenderCopy(
+                this->renderer,
+                this->textures.at(t),
+                nullptr,
+                this->destRect
+            );
+        }
+
+        void loadMap(const std::string& mapFileName) {
+            std::fstream
+                mapFile(mapFileName, std::ios_base::in);
+            std::string buffer;
 
             while (!mapFile.eof()) {
                 std::getline(mapFile, buffer);
@@ -69,19 +101,9 @@ namespace game {
                     });
                 }
             }
-        }
 
-        ~Map() {
-            for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
-        }
-
-        void render() {
-            for (std::vector<int>& row : this->map) for (int t : row) SDL_RenderCopy(
-                this->renderer,
-                this->textures.at(t),
-                nullptr,
-                this->destRect
-            );
+            mapFile.close();
+            this->updateMapSize();
         }
 
         void setDestRect(SDL_Rect* newDestRect) {
@@ -95,7 +117,7 @@ namespace game {
             this->updateTiles();
         }
 
-        IPoint getTileIndex(IPoint position) {
+        IPoint getTileIndex(IPoint position) const {
             if (
                 position.x < 0
                 || position.y < 0
@@ -109,7 +131,7 @@ namespace game {
             };
         }
 
-        SDL_Rect* getTileDest(const IPoint& index) {
+        SDL_Rect* getTileDest(const IPoint& index) const {
             SDL_Rect* rect;
             rect->x = this->destRect->x + (this->tileSize.x * index.x);
             rect->y = this->destRect->y + (this->tileSize.y * index.y);
