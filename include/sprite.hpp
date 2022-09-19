@@ -14,7 +14,7 @@ namespace game {
     class Renderable {
     protected:
         SDL_Renderer* renderer;
-        SDL_Rect* destRect;
+        SDL_Rect* destRect = new SDL_Rect();
     public:
         Renderable(
             SDL_Renderer* initRenderer,
@@ -54,7 +54,7 @@ namespace game {
     class StaticSprite : public Renderable {
     protected:
         SDL_Texture* texture;
-        SDL_Rect* sourceRect;
+        SDL_Rect* sourceRect = new SDL_Rect();
     public:
         StaticSprite(
             SDL_Renderer* initRenderer,
@@ -72,7 +72,7 @@ namespace game {
         ~StaticSprite() {}
 
         void render() {
-            if (this->renderer == nullptr) std::cout << "Warning: Detected a failed renderer association. Make sure to specify a renderer.\n";
+            if (this->renderer == nullptr) SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
             SDL_RenderCopy(
                 this->renderer,
                 this->texture,
@@ -113,7 +113,7 @@ namespace game {
         ~Sprite() {}
 
         void render() {
-            if (this->renderer == nullptr) std::cout << "Warning: Detected a failed renderer association. Make sure to specify a renderer.\n";
+            if (this->renderer == nullptr) SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
             SDL_RenderCopyEx(
                 this->renderer,
                 this->texture,

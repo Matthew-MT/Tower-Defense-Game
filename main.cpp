@@ -1,26 +1,38 @@
 #include <SDL2/SDL.h>
 #include "include/game.hpp"
 
+using namespace game;
+
 int main(int argc, char *argv[]) {
-    SDL_Window *win = NULL;
-    SDL_Renderer *renderer = NULL;
-    SDL_Texture *bitmapTex = NULL;
-    SDL_Surface *bitmapSurface = NULL;
-    int posX = 100, posY = 100, width = 320, height = 240;
+    std::cout << "Yeet\n";
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_Log("Hello world");
+
+    SDL_DisplayMode display;
+    SDL_GetDesktopDisplayMode(0, &display);
+    Game game{
+        "Game",
+        (int)std::floor((double)display.w / 2.f) - 40,
+        (int)std::floor((double)display.h / 2.f) - 40,
+        80, 80
+    };
+    // SDL_Window *win = NULL;
+    // SDL_Renderer *renderer = NULL;
+    // SDL_Texture *bitmapTex = NULL;
+    // SDL_Surface *bitmapSurface = NULL;
+    // int posX = 100, posY = 100, width = 320, height = 240;
     SDL_bool loopShouldStop = SDL_FALSE;
 
-    SDL_Init(SDL_INIT_VIDEO);
+    // win = SDL_CreateWindow("Hello World", posX, posY, width, height, 0);
 
-    win = SDL_CreateWindow("Hello World", posX, posY, width, height, 0);
+    // renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
 
-    renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
+    // bitmapSurface = SDL_LoadBMP("assets/images/hello.bmp");
+    // bitmapTex = SDL_CreateTextureFromSurface(renderer, bitmapSurface);
+    // SDL_FreeSurface(bitmapSurface);
 
-    bitmapSurface = SDL_LoadBMP("img/hello.bmp");
-    bitmapTex = SDL_CreateTextureFromSurface(renderer, bitmapSurface);
-    SDL_FreeSurface(bitmapSurface);
-
-    SDL_QueryTexture(bitmapTex, NULL, NULL, &width, &height);
-    SDL_SetWindowSize(win, width / 2, height / 2);
+    // SDL_QueryTexture(bitmapTex, NULL, NULL, &width, &height);
+    // SDL_SetWindowSize(win, width / 2, height / 2);
 
     while (!loopShouldStop) {
         SDL_Event event;
@@ -33,14 +45,16 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, bitmapTex, NULL, NULL);
-        SDL_RenderPresent(renderer);
+        game.renderWindow();
+        // SDL_RenderClear(renderer);
+        // SDL_RenderCopy(renderer, bitmapTex, NULL, NULL);
+        // SDL_RenderPresent(renderer);
     }
 
-    SDL_DestroyTexture(bitmapTex);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(win);
+    game.~Game();
+    // SDL_DestroyTexture(bitmapTex);
+    // SDL_DestroyRenderer(renderer);
+    // SDL_DestroyWindow(win);
 
     SDL_Quit();
     return 0;

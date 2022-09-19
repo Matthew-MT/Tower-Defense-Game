@@ -24,11 +24,10 @@ namespace game {
 
             while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
 
-
             this->window = SDL_CreateWindow(title.c_str(), x, y, w, h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
 
-            SDL_Rect* mapRect;
+            SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
             mapRect->y = 20;
             mapRect->w = -1;
@@ -45,23 +44,27 @@ namespace game {
 
         ~Game() {
             for (SDL_Texture* texture : this->textureList) SDL_DestroyTexture(texture);
-            for (Renderable renderable : this->renderList) delete &renderable;
+            for (Renderable& renderable : this->renderList) delete &renderable;
             SDL_DestroyRenderer(this->renderer);
             SDL_DestroyWindow(this->window);
         }
 
         void renderWindow() {
+            this->tick();
             SDL_RenderClear(this->renderer);
             for (Renderable renderable : this->renderList) renderable.render();
             SDL_RenderPresent(this->renderer);
         }
 
-        template<typename Type = Sprite> Type& spawn(
+        template<typename Type = Renderable> Type& spawn(
             SDL_Texture* initTexture,
             SDL_Rect* initSourceRect,
             SDL_Rect* initDestRect
         ) {
-            if (!std::is_base_of<Sprite, Type>::value) throw "Must request a sprite or derivative.";
+            if (!std::is_base_of<Renderable, Type>::value) {
+                SDL_Log("`Game::spawn` must request a Renderable or derivative.");
+                throw 1;
+            }
             Type renderable{this->renderer, initTexture, initSourceRect, initDestRect};
             this->renderList.push_back(renderable);
             return renderable;
@@ -78,7 +81,9 @@ namespace game {
         }
 
         void tick() {
-            const double scalar = (double)(SDL_GetTicks64() - this->lastTick) / 2.f;
+            const Uint64 nextTick = SDL_GetTicks64();
+            const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
+            this->lastTick = nextTick;
         }
     };
 };

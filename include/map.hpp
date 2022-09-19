@@ -9,7 +9,7 @@ namespace game {
     class Map : public Renderable {
     protected:
         SDL_Renderer* renderer;
-        SDL_Rect* destRect = nullptr;
+        SDL_Rect* destRect = new SDL_Rect();
         IPoint tileSize;
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
@@ -19,11 +19,19 @@ namespace game {
         void updateMapSize() {
             if (
                 this->destRect->w == -1
-            ) this->destRect->w = this->tileSize.x * this->map.size();
+            ) {
+                this->destRect->w
+                    = this->tileSize.x
+                    * this->map.size();
+            }
 
             if (
                 this->destRect->h == -1
-            ) this->destRect->h = this->tileSize.y * this->map.back().size();
+            ) {
+                this->destRect->h
+                    = this->tileSize.y
+                    * this->map.back().size();
+            }
         }
 
         // Call this function if you update the map's position.
@@ -86,12 +94,18 @@ namespace game {
                 for (char c : buffer) {
                     if (c == ',') map.back().push_back(0);
                     else if (c >= '0' && c <= '9') (map.back().back() *= 10) += (int)(c - '0');
-                    else throw "Failed parsing a map file. Check that syntax is correct in the file.";
+                    else {
+                        SDL_Log("`loadMap` failed parsing a map file. Check that syntax is correct in the file.");
+                        throw 1;
+                    }
                 }
             }
 
             const int height = this->map.back().size();
-            for (std::vector<int> column : this->map) if (column.size() != height) throw "Map must be rectangular.";
+            for (std::vector<int> column : this->map) if (column.size() != height) {
+                SDL_Log("`loadMap`: map must be rectangular.");
+                throw 1;
+            }
 
             for (int i = 0; i < this->map.size(); i++) {
                 this->mapSprites.push_back({});
@@ -135,7 +149,7 @@ namespace game {
         }
 
         SDL_Rect* getTileDest(const IPoint& index) const {
-            SDL_Rect* rect;
+            SDL_Rect* rect = new SDL_Rect();
             rect->x = this->destRect->x + (this->tileSize.x * index.x);
             rect->y = this->destRect->y + (this->tileSize.y * index.y);
             rect->w = this->tileSize.x;
