@@ -11,12 +11,50 @@ namespace game {
 
     using IPoint = Point<int>;
 
-    class StaticSprite {
+    class Renderable {
     protected:
         SDL_Renderer* renderer;
+        SDL_Rect* destRect;
+    public:
+        Renderable(
+            SDL_Renderer* initRenderer,
+            SDL_Rect* initDestRect
+        ) :
+            renderer{initRenderer},
+            destRect{initDestRect} {}
+
+        virtual void render() {};
+
+        void setRenderer(SDL_Renderer* renderer) {
+            this->renderer = renderer;
+        }
+
+        void setDestRect(SDL_Rect* newDestRect) {
+            this->destRect = newDestRect;
+        }
+
+        void setPosition(int x, int y) {
+            this->destRect->x = x;
+            this->destRect->y = y;
+        }
+
+        const SDL_Renderer* getRenderer() const {
+            return this->renderer;
+        }
+
+        const SDL_Rect* getDestRect() const {
+            return this->destRect;
+        }
+
+        IPoint getPosition() const {
+            return {this->destRect->x, this->destRect->y};
+        }
+    };
+
+    class StaticSprite : public Renderable {
+    protected:
         SDL_Texture* texture;
-        SDL_Rect* sourceRect = nullptr;
-        SDL_Rect* destRect = nullptr;
+        SDL_Rect* sourceRect;
     public:
         StaticSprite(
             SDL_Renderer* initRenderer,
@@ -24,10 +62,12 @@ namespace game {
             SDL_Rect* initSourceRect,
             SDL_Rect* initDestRect
         ) :
-            renderer{initRenderer},
+            Renderable{
+                initRenderer,
+                initDestRect
+            },
             texture{initTexture},
-            sourceRect{initSourceRect},
-            destRect{initDestRect} {}
+            sourceRect{initSourceRect} {}
 
         ~StaticSprite() {}
 
@@ -41,10 +81,6 @@ namespace game {
             );
         }
 
-        void setRenderer(SDL_Renderer* renderer) {
-            this->renderer = renderer;
-        }
-
         void setTexture(SDL_Texture* texture) {
             this->texture = texture;
         }
@@ -53,25 +89,8 @@ namespace game {
             this->sourceRect = newSourceRect;
         }
 
-        void setDestRect(SDL_Rect* newDestRect) {
-            this->destRect = newDestRect;
-        }
-
-        void setPosition(int x, int y) {
-            this->destRect->x = x;
-            this->destRect->y = y;
-        }
-
-        const SDL_Rect* getSourceRect() {
+        const SDL_Rect* getSourceRect() const {
             return this->sourceRect;
-        }
-
-        const SDL_Rect* getDestRect() {
-            return this->destRect;
-        }
-
-        IPoint getPosition() {
-            return {this->destRect->x, this->destRect->y};
         }
     };
 
@@ -110,7 +129,7 @@ namespace game {
             this->angle = angle;
         }
 
-        double getAngle(double angle) {
+        double getAngle() const {
             return this->angle;
         }
     };

@@ -1,31 +1,58 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include <forward_list>
+#include <unordered_set>
 #include "sprite.hpp"
+#include "map.hpp"
 #include <string>
+#include <vector>
 
 namespace game {
     class Game {
-    private:
+    protected:
         SDL_bool exit = SDL_FALSE;
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
-        std::forward_list<Sprite> renderList;
+        std::unordered_set<SDL_Texture*> textureList;
+        std::vector<Renderable> renderList;
+        std::vector<std::string> mapProgression;
+        Uint64 lastTick = 0;
     public:
         Game(const std::string& title, int x, int y, int w, int h) {
+            std::ifstream
+                mapProgressionFile("../assets/config/map_progression.txt", std::ios_base::in);
+            std::string buffer;
+
+            while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
+
+
             this->window = SDL_CreateWindow(title.c_str(), x, y, w, h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+
+            SDL_Rect* mapRect;
+            mapRect->x = 20;
+            mapRect->y = 20;
+            mapRect->w = -1;
+            mapRect->h = -1;
+
+            Map map{
+                this->renderer,
+                mapRect,
+                {40, 40}
+            };
+            map.loadMap(this->mapProgression.front());
+            this->renderList.push_back(map);
         }
 
         ~Game() {
-            for (Sprite sprite : this->renderList) delete &sprite;
+            for (SDL_Texture* texture : this->textureList) SDL_DestroyTexture(texture);
+            for (Renderable renderable : this->renderList) delete &renderable;
             SDL_DestroyRenderer(this->renderer);
             SDL_DestroyWindow(this->window);
         }
 
-        void render() {
+        void renderWindow() {
             SDL_RenderClear(this->renderer);
-            for (Sprite sprite : this->renderList) sprite.render();
+            for (Renderable renderable : this->renderList) renderable.render();
             SDL_RenderPresent(this->renderer);
         }
 
@@ -35,19 +62,23 @@ namespace game {
             SDL_Rect* initDestRect
         ) {
             if (!std::is_base_of<Sprite, Type>::value) throw "Must request a sprite or derivative.";
-            Type sprite{this->renderer, initTexture, initSourceRect, initDestRect};
-            this->renderList.push_front(sprite);
-            return sprite;
+            Type renderable{this->renderer, initTexture, initSourceRect, initDestRect};
+            this->renderList.push_back(renderable);
+            return renderable;
         }
 
-        Sprite& spawn(Sprite& sprite) {
-            sprite.setRenderer(this->renderer);
-            this->renderList.push_front(sprite);
-            return sprite;
+        Renderable& spawn(Renderable& renderable) {
+            renderable.setRenderer(this->renderer);
+            this->renderList.push_back(renderable);
+            return renderable;
         }
 
-        SDL_Renderer* getRenderer() {
+        const SDL_Renderer* getRenderer() const {
             return this->renderer;
+        }
+
+        void tick() {
+            const double scalar = (double)(SDL_GetTicks64() - this->lastTick) / 2.f;
         }
     };
 };
