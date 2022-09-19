@@ -54,6 +54,9 @@ namespace game {
                 }
             }
 
+            const int height = this->map.back().size();
+            for (std::vector<int> column : this->map) if (column.size() != height) throw "Map must be rectangular.";
+
             for (int i = 0; i < this->map.size(); i++) {
                 std::vector<int>& row = this->map[i];
                 this->mapSprites.push_back({});
