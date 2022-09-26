@@ -22,6 +22,8 @@ namespace game {
         ) :
             renderer{initRenderer},
             destRect{initDestRect} {}
+        
+        ~Renderable() {}
 
         virtual void render() {};
 
@@ -30,6 +32,7 @@ namespace game {
         }
 
         void setDestRect(SDL_Rect* newDestRect) {
+            delete this->destRect;
             this->destRect = newDestRect;
         }
 
@@ -72,7 +75,10 @@ namespace game {
         ~StaticSprite() {}
 
         void render() {
-            if (this->renderer == nullptr) SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
+            if (this->renderer == nullptr) {
+                SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
+                return;
+            }
             SDL_RenderCopy(
                 this->renderer,
                 this->texture,

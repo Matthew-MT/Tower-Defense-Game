@@ -1,21 +1,64 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "sprite.hpp"
+#include <algorithm>
 #include <fstream>
 #include <vector>
 #include <string>
 
 namespace game {
+    double distance(IPoint a, IPoint b) {
+        return std::sqrt(
+            std::pow(a.x - b.x, 2)
+            + std::pow(a.y - b.y, 2)
+        );
+    }
+
+    double distanceCenter(SDL_Rect* a, SDL_Rect* b) {
+        return distance(
+            {
+                a->x + (a->w >> 1),
+                a->y + (a->h >> 1)
+            },
+            {
+                b->x + (b->w >> 1),
+                b->y + (b->h >> 1)
+            }
+        );
+    }
+
+    class Path {
+    protected:
+        Map map;
+        std::vector<IPoint> path;
+    public:
+        Path(const Map& initMap, const std::vector<IPoint>& initPath) : map{initMap}, path{initPath} {}
+        ~Path() {}
+
+        IPoint next(double scalar, IPoint currentPosition, int movementSpeed) {
+            if (movementSpeed < 0) throw "Positive movement speed only.";
+            IPoint index = this->map.getTileIndex(currentPosition);
+            if (index.x == -1 && index.y == -1) throw "Pathfinders must receive a new path when paths are recomputed.";
+            std::vector<IPoint>::iterator i = std::find_if(this->path.begin(), this->path.end(), [&](const IPoint& point) -> bool {
+                return point.x == index.x && point.y == index.y;
+            });
+            if (i == this->path.end()) throw "Pathfinders must receive a new path when paths are recomputed.";
+            std::vector<IPoint>::iterator n = ++i;
+            if (n == this->path.end()) return {-1, -1};
+            double range = (double)movementSpeed * scalar;
+            IPoint target = *n;
+            IPoint slope = {currentPosition.x - target.x, currentPosition.y - target.y};
+        }
+    };
+
     class Map : public Renderable {
     protected:
-        SDL_Renderer* renderer;
-        SDL_Rect* destRect = new SDL_Rect();
         IPoint tileSize;
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
-        std::vector<std::vector<StaticSprite>> mapSprites;
+        std::vector<std::vector<StaticSprite*>> mapSprites;
 
-        // Call this function if you update tile sizes.
+        // Call this function if you update tile sizes or map destRect width and height.
         void updateMapSize() {
             if (
                 this->destRect->w == -1
@@ -23,6 +66,10 @@ namespace game {
                 this->destRect->w
                     = this->tileSize.x
                     * this->map.size();
+            } else {
+                this->tileSize.x
+                    = this->destRect->w
+                    / this->map.size();
             }
 
             if (
@@ -31,6 +78,10 @@ namespace game {
                 this->destRect->h
                     = this->tileSize.y
                     * this->map.back().size();
+            } else {
+                this->tileSize.y
+                    = this->destRect->h
+                    / this->map.back().size();
             }
         }
 
@@ -38,7 +89,7 @@ namespace game {
         void updateTiles() {
             for (int i = 0; i < this->mapSprites.size(); i++) {
                 for (int j = 0; j < this->mapSprites[i].size(); j++) {
-                    this->mapSprites[i][j].setDestRect(this->getTileDest({i, j}));
+                    this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
                 }
             }
         }
@@ -54,17 +105,19 @@ namespace game {
             },
             tileSize{initTileSize} {
             std::fstream
-                textureAssociation("../assets/config/texture_association.txt", std::ios_base::in);
+                textureAssociation("assets/config/texture_association.txt", std::ios_base::in);
             std::string buffer;
 
             while (!textureAssociation.eof()) {
                 std::getline(textureAssociation, buffer);
+                SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
                 this->textures.push_back(
                     SDL_CreateTextureFromSurface(
                         this->renderer,
-                        SDL_LoadBMP(buffer.c_str())
+                        surface
                     )
                 );
+                SDL_FreeSurface(surface);
             }
 
             textureAssociation.close();
@@ -72,25 +125,29 @@ namespace game {
 
         ~Map() {
             for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
+            for (std::vector<StaticSprite*>& col : this->mapSprites) for (StaticSprite* sprite : col) delete sprite;
         }
 
         void render() {
-            for (std::vector<int>& row : this->map) for (int t : row) SDL_RenderCopy(
-                this->renderer,
-                this->textures.at(t),
-                nullptr,
-                this->destRect
-            );
+            for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
+                SDL_RenderCopy(
+                    this->renderer,
+                    this->textures.at(this->map[i][j]),
+                    nullptr,
+                    this->mapSprites[i][j]->getDestRect()
+                );
+            }
         }
 
         void loadMap(const std::string& mapFileName) {
             std::fstream
-                mapFile(mapFileName, std::ios_base::in);
+                mapFile("assets/maps/" + mapFileName, std::ios_base::in);
             std::string buffer;
 
             while (!mapFile.eof()) {
                 std::getline(mapFile, buffer);
                 map.push_back({});
+                map.back().push_back(0);
                 for (char c : buffer) {
                     if (c == ',') map.back().push_back(0);
                     else if (c >= '0' && c <= '9') (map.back().back() *= 10) += (int)(c - '0');
@@ -110,17 +167,18 @@ namespace game {
             for (int i = 0; i < this->map.size(); i++) {
                 this->mapSprites.push_back({});
                 for (int j = 0; j < this->map[i].size(); j++) {
-                    this->mapSprites.back().push_back({
+                    this->mapSprites.back().push_back(new StaticSprite(
                         this->renderer,
                         this->textures.at(this->map[i][j]),
                         nullptr,
                         this->getTileDest({i, j})
-                    });
+                    ));
                 }
             }
 
             mapFile.close();
             this->updateMapSize();
+            this->updateTiles();
         }
 
         void setDestRect(SDL_Rect* newDestRect) {
@@ -134,6 +192,15 @@ namespace game {
             this->updateTiles();
         }
 
+        SDL_Rect* getDestRect() {
+            SDL_Rect* rect = new SDL_Rect();
+            rect->x = this->destRect->x;
+            rect->y = this->destRect->y;
+            rect->w = this->tileSize.x * this->map.size();
+            rect->h = this->tileSize.y * this->map.back().size();
+            return rect;
+        }
+
         IPoint getTileIndex(IPoint position) const {
             if (
                 position.x < 0
@@ -143,9 +210,16 @@ namespace game {
             ) return {-1, -1};
 
             return {
-                (int)std::floor((double)position.x / (double)this->tileSize.x),
-                (int)std::floor((double)position.y / (double)this->tileSize.y)
+                (int)std::floor((double)(position.x - this->destRect->x) / (double)this->tileSize.x),
+                (int)std::floor((double)(position.y - this->destRect->y) / (double)this->tileSize.y)
             };
+        }
+
+        IPoint getTileIndexCenter(SDL_Rect* rect) const {
+            return this->getTileIndex({
+                rect->x + (rect->w >> 1),
+                rect->y + (rect->h >> 1)
+            });
         }
 
         SDL_Rect* getTileDest(const IPoint& index) const {
@@ -155,6 +229,17 @@ namespace game {
             rect->w = this->tileSize.x;
             rect->h = this->tileSize.y;
             return rect;
+        }
+
+        IPoint getTileCenter(const IPoint& index) const {
+            return {
+                this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
+                this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1)
+            };
+        }
+
+        int getTileType(const IPoint& index) const {
+            return this->map[index.x][index.y];
         }
     };
 };

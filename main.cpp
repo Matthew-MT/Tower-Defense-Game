@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
         // SDL_RenderPresent(renderer);
     }
 
+    SDL_Log("Closing game...");
     game.~Game();
     // SDL_DestroyTexture(bitmapTex);
     // SDL_DestroyRenderer(renderer);
