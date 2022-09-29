@@ -36,9 +36,9 @@ namespace game {
             this->destRect = newDestRect;
         }
 
-        void setPosition(int x, int y) {
-            this->destRect->x = x;
-            this->destRect->y = y;
+        void setPosition(IPoint position) {
+            this->destRect->x = position.x;
+            this->destRect->y = position.y;
         }
 
         const SDL_Renderer* getRenderer() const {
@@ -62,8 +62,8 @@ namespace game {
         StaticSprite(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
-            SDL_Rect* initSourceRect,
-            SDL_Rect* initDestRect
+            SDL_Rect* initDestRect,
+            SDL_Rect* initSourceRect = nullptr
         ) :
             Renderable{
                 initRenderer,
@@ -107,13 +107,13 @@ namespace game {
         Sprite(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
-            SDL_Rect* initSourceRect,
-            SDL_Rect* initDestRect
+            SDL_Rect* initDestRect,
+            SDL_Rect* initSourceRect = nullptr
         ) : StaticSprite{
             initRenderer,
             initTexture,
-            initSourceRect,
-            initDestRect
+            initDestRect,
+            initSourceRect
         } {}
 
         ~Sprite() {}

@@ -27,59 +27,6 @@ namespace game {
         );
     }
 
-    class Path {
-    protected:
-        Map map;
-        std::vector<IPoint> path;
-    public:
-        Path(const Map& initMap, const std::vector<IPoint>& initPath) : map{initMap}, path{initPath} {}
-        ~Path() {}
-
-        IPoint next(double scalar, IPoint currentPosition, int movementSpeed) {
-            if (movementSpeed < 0) throw "Positive movement speed only.";
-            IPoint index = this->map.getTileIndex(currentPosition);
-            std::vector<IPoint>::iterator i;
-            if (index.x == -1 && index.y == -1) {
-                std::vector<IPoint>::reverse_iterator r = std::find_if(
-                    this->path.rbegin(),
-                    this->path.rend(),
-                    [&](const IPoint& point) -> bool {
-                        return
-                            point.x <= index.x + 1
-                            && point.x >= index.x - 1
-                            && point.y <= index.x + 1
-                            && point.y >= index.y - 1;
-                    }
-                );
-                if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
-                i = (++r).base();
-            } else {
-                i = std::find_if(
-                    this->path.begin(),
-                    this->path.end(),
-                    [&](const IPoint& point) -> bool {
-                        return point.x == index.x && point.y == index.y;
-                    }
-                );
-                if (i == this->path.end()) throw "Pathfinders must receive a new path when paths are recomputed.";
-                if (++i == this->path.end()) return {-1, -1};
-            }
-            double range = (double)movementSpeed * scalar;
-            IPoint targetPosition = this->map.getTileCenter(*i);
-            IPoint slope = {
-                currentPosition.x - targetPosition.x,
-                currentPosition.y - targetPosition.y
-            };
-            double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
-            slope.x = (int)(slope.x / normalizeScalar);
-            slope.y = (int)(slope.y / normalizeScalar);
-            return {
-                currentPosition.x + slope.x,
-                currentPosition.y + slope.y
-            };
-        }
-    };
-
     class Map : public Renderable {
     protected:
         IPoint tileSize;
@@ -199,7 +146,6 @@ namespace game {
                     this->mapSprites.back().push_back(new StaticSprite(
                         this->renderer,
                         this->textures.at(this->map[i][j]),
-                        nullptr,
                         this->getTileDest({i, j})
                     ));
                 }
@@ -269,6 +215,65 @@ namespace game {
 
         int getTileType(const IPoint& index) const {
             return this->map[index.x][index.y];
+        }
+    };
+
+    class Path {
+    protected:
+        Map map;
+        std::vector<IPoint> path;
+    public:
+        Path(const Map& initMap, const std::vector<IPoint>& initPath) : map{initMap}, path{initPath} {}
+        ~Path() {}
+
+        IPoint next(double scalar, IPoint currentPosition, int movementSpeed) {
+            if (movementSpeed < 0) throw "Positive movement speed only.";
+
+            IPoint index = this->map.getTileIndex(currentPosition);
+            std::vector<IPoint>::iterator i;
+
+            if (index.x == -1 && index.y == -1) {
+                std::vector<IPoint>::reverse_iterator r = std::find_if(
+                    this->path.rbegin(),
+                    this->path.rend(),
+                    [&](const IPoint& point) -> bool {
+                        return
+                            point.x <= index.x + 1
+                            && point.x >= index.x - 1
+                            && point.y <= index.x + 1
+                            && point.y >= index.y - 1;
+                    }
+                );
+
+                if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
+                i = (++r).base();
+            } else {
+                i = std::find_if(
+                    this->path.begin(),
+                    this->path.end(),
+                    [&](const IPoint& point) -> bool {
+                        return point.x == index.x && point.y == index.y;
+                    }
+                );
+
+                if (i == this->path.end()) throw "Pathfinders must receive a new path when paths are recomputed.";
+                if (++i == this->path.end()) return {-1, -1};
+            }
+
+            double range = (double)movementSpeed * scalar;
+            IPoint targetPosition = this->map.getTileCenter(*i);
+            IPoint slope = {
+                currentPosition.x - targetPosition.x,
+                currentPosition.y - targetPosition.y
+            };
+            double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
+
+            slope.x = (int)(slope.x / normalizeScalar);
+            slope.y = (int)(slope.y / normalizeScalar);
+            return {
+                currentPosition.x + slope.x,
+                currentPosition.y + slope.y
+            };
         }
     };
 };

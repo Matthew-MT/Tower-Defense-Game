@@ -26,7 +26,6 @@ namespace game {
 
             this->window = SDL_CreateWindow(title.c_str(), x, y, w, h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
-            SDL_Log(std::to_string((Uint64)this->renderer).c_str());
 
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
@@ -53,7 +52,6 @@ namespace game {
         }
 
         void renderWindow() {
-            SDL_Log("Rendering window...");
             this->tick();
             SDL_RenderClear(this->renderer);
             for (Renderable* renderable : this->renderList) renderable->render();
