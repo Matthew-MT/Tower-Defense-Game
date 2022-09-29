@@ -38,16 +38,45 @@ namespace game {
         IPoint next(double scalar, IPoint currentPosition, int movementSpeed) {
             if (movementSpeed < 0) throw "Positive movement speed only.";
             IPoint index = this->map.getTileIndex(currentPosition);
-            if (index.x == -1 && index.y == -1) throw "Pathfinders must receive a new path when paths are recomputed.";
-            std::vector<IPoint>::iterator i = std::find_if(this->path.begin(), this->path.end(), [&](const IPoint& point) -> bool {
-                return point.x == index.x && point.y == index.y;
-            });
-            if (i == this->path.end()) throw "Pathfinders must receive a new path when paths are recomputed.";
-            std::vector<IPoint>::iterator n = ++i;
-            if (n == this->path.end()) return {-1, -1};
+            std::vector<IPoint>::iterator i;
+            if (index.x == -1 && index.y == -1) {
+                std::vector<IPoint>::reverse_iterator r = std::find_if(
+                    this->path.rbegin(),
+                    this->path.rend(),
+                    [&](const IPoint& point) -> bool {
+                        return
+                            point.x <= index.x + 1
+                            && point.x >= index.x - 1
+                            && point.y <= index.x + 1
+                            && point.y >= index.y - 1;
+                    }
+                );
+                if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
+                i = (++r).base();
+            } else {
+                i = std::find_if(
+                    this->path.begin(),
+                    this->path.end(),
+                    [&](const IPoint& point) -> bool {
+                        return point.x == index.x && point.y == index.y;
+                    }
+                );
+                if (i == this->path.end()) throw "Pathfinders must receive a new path when paths are recomputed.";
+                if (++i == this->path.end()) return {-1, -1};
+            }
             double range = (double)movementSpeed * scalar;
-            IPoint target = *n;
-            IPoint slope = {currentPosition.x - target.x, currentPosition.y - target.y};
+            IPoint targetPosition = this->map.getTileCenter(*i);
+            IPoint slope = {
+                currentPosition.x - targetPosition.x,
+                currentPosition.y - targetPosition.y
+            };
+            double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
+            slope.x = (int)(slope.x / normalizeScalar);
+            slope.y = (int)(slope.y / normalizeScalar);
+            return {
+                currentPosition.x + slope.x,
+                currentPosition.y + slope.y
+            };
         }
     };
 
@@ -192,7 +221,7 @@ namespace game {
             this->updateTiles();
         }
 
-        SDL_Rect* getDestRect() {
+        SDL_Rect* getDestRect() const {
             SDL_Rect* rect = new SDL_Rect();
             rect->x = this->destRect->x;
             rect->y = this->destRect->y;
