@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include "game_state.hpp"
 #include "sprite.hpp"
 #include <algorithm>
 #include <fstream>

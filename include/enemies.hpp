@@ -1,17 +1,20 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include "game_state.hpp"
 #include "sprite.hpp"
 #include "map.hpp"
 
 namespace game {
     class Enemy : public StaticSprite {
     protected:
-        Path* path = nullptr;
+        GameState* gameState;
+        Path* path;
         int movementSpeed;
     public:
         Enemy(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
+            GameState* initGameState,
             Path* initPath,
             int initMovementSpeed,
             SDL_Rect* initDestRect,
@@ -21,14 +24,16 @@ namespace game {
             initTexture,
             initDestRect,
             initSourceRect
-        }, path{initPath}, movementSpeed{initMovementSpeed} {}
+        },
+            gameState{initGameState},
+            path{initPath},
+            movementSpeed{initMovementSpeed} {}
         ~Enemy() {}
 
         void tick(double scalar) {
             IPoint next = this->path->next(scalar, this->getPosition(), this->movementSpeed);
             if (next.x != -1 && next.y != -1) this->setPosition(next);
-            else {
-            }
+            else this->gameState->reduceHealth();
         }
     };
 

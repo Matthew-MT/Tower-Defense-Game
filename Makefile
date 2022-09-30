@@ -1,0 +1,4 @@
+# SHELL=C:\Users\User\Software\Utility\MSYS\usr\bin\bash.exe
+
+main.exe: main.cpp $(wildcard *.hpp)
+	g++ $< -o $? -IC:/Users/User/Software/Utility/MSYS/mingw64/include/SDL2 -Dmain=SDL_main -LC:/Users/User/Software/Utility/MSYS/mingw64/lib -lmingw32 -mwindows -lSDL2main -lSDL2
