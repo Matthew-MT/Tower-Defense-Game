@@ -1,9 +1,15 @@
-CFLAGS := $(sdl2-config --cflags)
-LIBS := $(sdl2-config --libs)
+CFLAGS:=`sdl2-config --cflags`
+LIBS:=`sdl2-config --libs`
 
-all:
-	echo Shell: $(SHELL)
-	echo Flags: $(CFLAGS) && echo Libs: $(LIBS)
+MAIN:=main
 
-main.exe: main.cpp $(wildcard *.hpp) $(wildcard include/*.hpp)
-	g++ $< -o $? -IC:/Users/User/Software/Utility/MSYS/mingw64/include/SDL2 -Dmain=SDL_main -LC:/Users/User/Software/Utility/MSYS/mingw64/lib -lmingw32 -mwindows -lSDL2main -lSDL2
+$(MAIN): main.cpp $(wildcard *.hpp) $(wildcard include/*.hpp)
+	g++ $< -o $@ $(CFLAGS) $(LIBS)
+
+ifeq ($(OS),Windows_NT)
+run:
+	./$(MAIN).exe
+else
+run:
+	./$(MAIN)
+endif

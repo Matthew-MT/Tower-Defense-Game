@@ -121,6 +121,10 @@ namespace game {
                 mapFile("assets/maps/" + mapFileName, std::ios_base::in);
             std::string buffer;
 
+            std::getline(mapFile, buffer);
+            int life = std::stoi(buffer);
+            SDL_Log(std::to_string(life).c_str());
+
             while (!mapFile.eof()) {
                 std::getline(mapFile, buffer);
                 map.push_back({});
