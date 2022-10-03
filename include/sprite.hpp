@@ -14,7 +14,7 @@ namespace game {
     class Renderable {
     protected:
         SDL_Renderer* renderer;
-        SDL_Rect* destRect = new SDL_Rect();
+        SDL_Rect* destRect;
     public:
         Renderable(
             SDL_Renderer* initRenderer,
@@ -64,12 +64,22 @@ namespace game {
             SDL_Texture* initTexture,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect = nullptr
-        ) :
-            Renderable{
-                initRenderer,
-                initDestRect
-            },
+        ) : Renderable{
+            initRenderer,
+            initDestRect
+        },
             texture{initTexture},
+            sourceRect{initSourceRect} {}
+
+        StaticSprite(
+            SDL_Renderer* initRenderer,
+            SDL_Rect* initDestRect,
+            SDL_Rect* initSourceRect = nullptr
+        ) : Renderable{
+            initRenderer,
+            initDestRect
+        },
+            texture{nullptr},
             sourceRect{initSourceRect} {}
 
         ~StaticSprite() {}
@@ -112,6 +122,16 @@ namespace game {
         ) : StaticSprite{
             initRenderer,
             initTexture,
+            initDestRect,
+            initSourceRect
+        } {}
+
+        Sprite(
+            SDL_Renderer* initRenderer,
+            SDL_Rect* initDestRect,
+            SDL_Rect* initSourceRect
+        ) : StaticSprite{
+            initRenderer,
             initDestRect,
             initSourceRect
         } {}

@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include <unordered_set>
 #include "sprite.hpp"
 #include "map.hpp"
@@ -42,6 +43,8 @@ namespace game {
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
             SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
+
+            TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
         }
 
         ~Game() {

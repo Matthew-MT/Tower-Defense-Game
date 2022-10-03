@@ -1,9 +1,8 @@
 CFLAGS:=`sdl2-config --cflags`
-LIBS:=`sdl2-config --libs`
+LIBS:=`sdl2-config --libs` -lSDL2_ttf
 
 MAIN:=main
 EXT:=
-TARGET:=
 SOURCES:=$(MAIN).cpp $(wildcard *.hpp) $(wildcard include/*.hpp)
 
 ifeq ($(OS),Windows_NT)
