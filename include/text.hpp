@@ -22,7 +22,8 @@ namespace game {
             int initFontSize = 24
         ) : StaticSprite{
             initRenderer,
-            initDestRect
+            initDestRect,
+            initSourceRect
         },
             fontFile{initFontFile},
             text{initText},
@@ -30,6 +31,15 @@ namespace game {
             this->font = TTF_OpenFont(this->fontFile.c_str(), this->fontSize);
             this->surface = TTF_RenderText_Solid(this->font, this->text.c_str(), {0x1C, 0x1C, 0x1C, 0});
             this->texture = SDL_CreateTextureFromSurface(this->renderer, this->surface);
+        }
+
+        void render() {
+            SDL_RenderCopy(
+                this->renderer,
+                this->texture,
+                this->sourceRect,
+                this->destRect
+            );
         }
     };
 };
