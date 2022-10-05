@@ -3,6 +3,7 @@
 #include "game_state.hpp"
 #include "sprite.hpp"
 #include <algorithm>
+#include "enums.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
@@ -34,6 +35,9 @@ namespace game {
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
         std::vector<std::vector<StaticSprite*>> mapSprites;
+        std::vector<IPoint>
+            spawns,
+            bases;
 
         // Call this function if you update tile sizes or map destRect width and height.
         void updateMapSize() {
@@ -148,11 +152,15 @@ namespace game {
             for (int i = 0; i < this->map.size(); i++) {
                 this->mapSprites.push_back({});
                 for (int j = 0; j < this->map[i].size(); j++) {
+                    int type = this->map[i][j];
+                    IPoint index{i, j};
                     this->mapSprites.back().push_back(new StaticSprite(
                         this->renderer,
-                        this->textures.at(this->map[i][j]),
-                        this->getTileDest({i, j})
+                        this->textures.at(type),
+                        this->getTileDest(index)
                     ));
+                    if (type == TileType::Spawn) this->spawns.push_back(index);
+                    else if (type == TileType::Base) this->bases.push_back(index);
                 }
             }
 
@@ -220,6 +228,9 @@ namespace game {
 
         int getTileType(const IPoint& index) const {
             return this->map[index.x][index.y];
+        }
+
+        const std::vector<IPoint>& getAllSpawns() {
         }
     };
 

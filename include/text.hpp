@@ -7,30 +7,22 @@ namespace game {
     class Text : public StaticSprite {
     protected:
         TTF_Font* font;
-        SDL_Surface* surface;
-        std::string
-            fontFile,
-            text;
-        int fontSize;
+        std::string text;
     public:
         Text(
             SDL_Renderer* initRenderer,
-            const std::string& initFontFile,
-            const std::string& initText,
+            const std::string& fontFile,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect = nullptr,
-            int initFontSize = 24
+            const std::string& initText = "",
+            int fontSize = 24
         ) : StaticSprite{
             initRenderer,
             initDestRect,
             initSourceRect
-        },
-            fontFile{initFontFile},
-            text{initText},
-            fontSize{initFontSize} {
-            this->font = TTF_OpenFont(this->fontFile.c_str(), this->fontSize);
-            this->surface = TTF_RenderText_Solid(this->font, this->text.c_str(), {0x1C, 0x1C, 0x1C, 0});
-            this->texture = SDL_CreateTextureFromSurface(this->renderer, this->surface);
+        }, text{initText} {
+            this->setFont(fontFile, fontSize);
+            this->setText(this->text);
         }
 
         void render() {
@@ -40,6 +32,29 @@ namespace game {
                 this->sourceRect,
                 this->destRect
             );
+        }
+
+        void setFont(const std::string& fontFile, int fontSize = 24) {
+            this->setFont(TTF_OpenFont(fontFile.c_str(), fontSize));
+        }
+
+        void setFont(TTF_Font* font) {
+            this->font = font;
+        }
+
+        void setText(const std::string& text) {
+            this->text = text;
+            SDL_Surface* surface = TTF_RenderText_Solid(this->font, this->text.c_str(), {0x1C, 0x1C, 0x1C, 0});
+            this->texture = SDL_CreateTextureFromSurface(this->renderer, surface);
+            SDL_FreeSurface(surface);
+        }
+
+        const std::string& getText() const {
+            return this->text;
+        }
+
+        TTF_Font* getFont() {
+            return this->font;
         }
     };
 };

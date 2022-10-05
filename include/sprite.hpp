@@ -57,7 +57,7 @@ namespace game {
     class StaticSprite : public Renderable {
     protected:
         SDL_Texture* texture;
-        SDL_Rect* sourceRect = new SDL_Rect();
+        SDL_Rect* sourceRect;
     public:
         StaticSprite(
             SDL_Renderer* initRenderer,
@@ -112,19 +112,20 @@ namespace game {
 
     class Sprite : public StaticSprite {
     protected:
-        double angle = 0.f;
+        double angle;
     public:
         Sprite(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
             SDL_Rect* initDestRect,
-            SDL_Rect* initSourceRect = nullptr
+            SDL_Rect* initSourceRect = nullptr,
+            double initAngle = 0.f
         ) : StaticSprite{
             initRenderer,
             initTexture,
             initDestRect,
             initSourceRect
-        } {}
+        }, angle{initAngle} {}
 
         Sprite(
             SDL_Renderer* initRenderer,
