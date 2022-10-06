@@ -25,7 +25,7 @@ namespace game {
         
         ~Renderable() {}
 
-        virtual void render() {};
+        virtual void render() {}
 
         void setRenderer(SDL_Renderer* renderer) {
             this->renderer = renderer;
@@ -36,7 +36,7 @@ namespace game {
             this->destRect = newDestRect;
         }
 
-        void setPosition(IPoint position) {
+        void setPosition(const IPoint& position) {
             this->destRect->x = position.x;
             this->destRect->y = position.y;
         }
@@ -102,6 +102,7 @@ namespace game {
         }
 
         void setSourceRect(SDL_Rect* newSourceRect) {
+            delete this->sourceRect;
             this->sourceRect = newSourceRect;
         }
 

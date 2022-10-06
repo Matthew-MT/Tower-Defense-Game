@@ -4,10 +4,18 @@
 namespace game {
     class GameState {
     protected:
-        int maxHealth;
-        int health;
+        int
+            maxHealth,
+            health,
+            cash;
     public:
-        GameState(int initHealth) : maxHealth{initHealth}, health{initHealth} {}
+        GameState(
+            int initHealth,
+            int initCash
+        ) :
+            maxHealth{initHealth},
+            health{initHealth},
+            cash{initCash} {}
         ~GameState() {}
 
         void reduceHealth(int amount = 1) {
@@ -32,6 +40,16 @@ namespace game {
 
         bool isDead() {
             return health <= 0;
+        }
+
+        bool buy(int amount) {
+            if (amount > this->cash) return false;
+            this->cash -= amount;
+            return true;
+        }
+
+        void earn(int amount) {
+            this->cash += amount;
         }
     };
 };

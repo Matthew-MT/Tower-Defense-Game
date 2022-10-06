@@ -1,10 +1,14 @@
 #pragma once
 #include <unordered_map>
+#include <vector>
 
 namespace game {
+
     template<typename Type> class Node {
+    public:
+        using Edges = std::unordered_map<Node*, double>;
     protected:
-        std::unordered_map<Node*, double> edges;
+        Edges edges;
         Type* value;
     public:
         Node(const Type* initValue) : value{initValue} {}
@@ -21,10 +25,19 @@ namespace game {
             this->edges.erase(other);
             if (undirected) other->unlink(this, false);
         }
+
+        Edges::iterator begin() {
+            return this->edges.begin();
+        }
+
+        Edges::iterator end() {
+            return this->edges.end();
+        }
     };
 
-    class Graph {
+    template<typename Type> class Graph {
     protected:
+        std::vector<Node<Type>*> nodes;
     public:
     };
 };
