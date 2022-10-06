@@ -1,16 +1,9 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <iostream>
+#include "utils.hpp"
 
 namespace game {
-    template<typename Type> class Point {
-    public:
-        Type x, y;
-        Point(Type ix, Type iy) : x{ix}, y{iy} {}
-    };
-
-    using IPoint = Point<int>;
-
     class Renderable {
     protected:
         SDL_Renderer* renderer;

@@ -10,9 +10,6 @@
 #include <string>
 
 namespace game {
-    double distance(IPoint a, IPoint b);
-    double distanceCenter(SDL_Rect* a, SDL_Rect* b);
-
     class Map : public Renderable {
     protected:
         IPoint tileSize;

@@ -6,31 +6,12 @@
 #include "sprite.hpp"
 #include <algorithm>
 #include "enums.hpp"
+#include "utils.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
 
 namespace game {
-    double distance(IPoint a, IPoint b) {
-        return std::sqrt(
-            std::pow(a.x - b.x, 2)
-            + std::pow(a.y - b.y, 2)
-        );
-    }
-
-    double distanceCenter(SDL_Rect* a, SDL_Rect* b) {
-        return distance(
-            {
-                a->x + (a->w >> 1),
-                a->y + (a->h >> 1)
-            },
-            {
-                b->x + (b->w >> 1),
-                b->y + (b->h >> 1)
-            }
-        );
-    }
-
     void Map::updateMapSize() {
         if (
             this->destRect->w == -1

@@ -1,11 +1,17 @@
 #pragma once
 #include <unordered_map>
+#include <unordered_set>
+#include "utils.hpp"
 #include <vector>
+#include <limits>
+#include <queue>
+#include <map>
 
 namespace game {
 
     template<typename Type> class Node {
     public:
+        using Edge = std::pair<Node*, double>;
         using Edges = std::unordered_map<Node*, double>;
     protected:
         Edges edges;
@@ -33,11 +39,49 @@ namespace game {
         Edges::iterator end() {
             return this->edges.end();
         }
+
+        double weight(Node* other) {
+            Edges::iterator i = this->edges.find(other);
+            if (i == this->edges.end()) return std::numeric_limits<double>::max();
+            else return i->second;
+        }
     };
 
     template<typename Type> class Graph {
-    protected:
-        std::vector<Node<Type>*> nodes;
     public:
+        using Nodes = std::unordered_set<Node<Type>*>;
+    protected:
+        Nodes nodes;
+    public:
+        Graph() {}
+        ~Graph() {}
+
+        Nodes::iterator begin() {
+            return this->nodes.begin();
+        }
+
+        Nodes::iterator end() {
+            return this->nodes.end();
+        }
+
+        Nodes::insert_return_type insert(Node* node) {
+            return this->nodes.insert(node);
+        }
+
+        Nodes::size_type erase(Node* node) {
+            return this->nodes.erase(node);
+        }
+
+        const std::vector<std::vector<Node*>>& aStar(Node* origin, const std::vector<Node*>& targets) {
+            std::vector<std::vector<Node*>> paths;
+            std::priority_queue<IPoint> openSet;
+            std::map<Node*, double>
+                cameFrom,
+                gScore,
+                fScore;
+
+            gScore[origin] = 0;
+            fScore[origin] = 0;
+        }
     };
 };

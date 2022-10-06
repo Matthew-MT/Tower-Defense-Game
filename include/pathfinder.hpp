@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "pathfinder_h.hpp"
-#include <sprite.hpp>
+#include "sprite.hpp"
 #include "map_h.hpp"
 #include <vector>
 
@@ -62,6 +62,7 @@ namespace game {
     Pathfinder::Pathfinder(Map* initMap) : map{initMap} {}
     Pathfinder::~Pathfinder() {}
 
-    const std::vector<Path*>& Pathfinder::pathfind(const std::vector<IPoint>& origins, const IPoint& target) {}
+    const std::vector<Path*>& Pathfinder::pathfind(Node* origin, const std::vector<Node*>& targets) {}
+    const std::vector<Path*>& Pathfinder::pathfind(const IPoint& origin, const std::vector<IPoint>& targets) {}
     const std::vector<Path*>& Pathfinder::pathfind(const std::vector<IPoint>& origins, const std::vector<IPoint>& targets) {}
 };
