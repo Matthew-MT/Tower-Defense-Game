@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "map_h.hpp"
-#include "pathfinder_h.hpp"
+#include "pathfinder.hpp"
 #include "game_state.hpp"
 #include "sprite.hpp"
 #include <algorithm>
