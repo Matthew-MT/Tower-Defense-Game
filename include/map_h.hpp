@@ -12,9 +12,11 @@
 
 namespace game {
     class Map : public Renderable {
+    public:
+        using TileGraph = Graph<IPoint>;
     protected:
         IPoint tileSize;
-        Graph<IPoint>* graph;
+        TileGraph* graph;
         Pathfinder* pathfinder;
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
@@ -39,8 +41,8 @@ namespace game {
         void render();
         GameState* loadMap(const std::string& mapFileName);
 
-        void placeTurret(const IPoint& index);
-        void sellTurret(const IPoint& index);
+        bool placeTurret(const IPoint& index);
+        bool sellTurret(const IPoint& index);
 
         void setDestRect(SDL_Rect* newDestRect);
         void setPosition(const IPoint& position);

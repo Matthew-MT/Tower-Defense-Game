@@ -136,6 +136,20 @@ namespace game {
 
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
+
+                if (type != TileType::Empty) continue;
+                std::pair<TileGraph::Nodes::iterator, bool> r = this->graph->insert(index);
+                TileGraph::Node* node = *r.first;
+
+                if (i > 0 && this->map[i - 1][j] == TileType::Empty) {
+                    (*this->graph->find({i - 1, j}))->link(node);
+                }
+                if (j > 0 && this->map[i][j - 1] == TileType::Empty) {
+                    (*this->graph->find({i, j - 1}))->link(node);
+                }
+                if (i > 0 && j > 0 && this->map[i - 1][j - 1] == TileType::Empty) {
+                    (*this->graph->find({i - 1, j - 1}))->link(node, 1.41421356);
+                }
             }
         }
 
@@ -145,6 +159,28 @@ namespace game {
 
         return new GameState(health, cash);
     }
+
+    bool Map::placeTurret(const IPoint& index) {
+        if (this->map[index.x][index.y] != TileType::Empty) return false;
+        TileGraph::Node* node = *this->graph->find(index);
+        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
+        this->graph->erase(index);
+        for (const IPoint& spawn : this->spawns) {
+            for (const IPoint& base : this->bases) {
+                if (this->graph->aStar(
+                    *this->graph->find(spawn),
+                    *this->graph->find(spawn),
+                    [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
+                        return distance(*(a->getValue()), *(b->getValue()));
+                    }
+                ).size() == 0) {
+                    
+                }
+            }
+        }
+    }
+
+    bool Map::sellTurret(const IPoint& index) {}
 
     void Map::setDestRect(SDL_Rect* newDestRect) {
         this->destRect = newDestRect;

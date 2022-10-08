@@ -13,6 +13,7 @@ namespace game {
     public:
         using Edge = std::pair<GraphNode<Type>*, double>;
         using Edges = std::unordered_map<GraphNode<Type>*, double>;
+        using Neighbors = std::unordered_set<GraphNode<Type>*>;
     protected:
         Edges edges;
         Type* value;
@@ -49,6 +50,12 @@ namespace game {
             if (undirected) other->unlink(this, false);
         }
 
+        double weight(GraphNode<Type>* other) {
+            Edges::iterator i = this->edges.find(other);
+            if (i == this->edges.end()) return std::numeric_limits<double>::max();
+            else return i->second;
+        }
+
         Edges::iterator begin() {
             return this->edges.begin();
         }
@@ -57,10 +64,10 @@ namespace game {
             return this->edges.end();
         }
 
-        double weight(GraphNode<Type>* other) {
-            Edges::iterator i = this->edges.find(other);
-            if (i == this->edges.end()) return std::numeric_limits<double>::max();
-            else return i->second;
+        Neighbors& getNeighbors() {
+            Neighbors neighbors;
+            for (Edge& edge : this->edges) neighbors.insert(edge.first);
+            return std::move(neighbors);
         }
     };
 
@@ -92,15 +99,16 @@ namespace game {
             });
         }
 
-        Nodes::insert_return_type insert(const Type& value) {
-            return this->nodes.insert(new Node(value));
-        }
-
-        Nodes::insert_return_type insert(Node* node) {
+        std::pair<Nodes::iterator, bool> insert(Node* node) {
             return this->nodes.insert(node);
         }
 
+        std::pair<Nodes::iterator, bool> insert(const Type& value) {
+            return this->insert(new Node(value));
+        }
+
         Nodes::size_type erase(Nodes::iterator i) {
+            delete *i;
             return this->nodes.erase(i);
         }
 
@@ -109,7 +117,11 @@ namespace game {
         }
 
         Nodes::size_type erase(Node* node) {
-            return this->nodes.erase(node);
+            Nodes::size_type
+                sizeBefore = this->nodes.size(),
+                sizeAfter = this->nodes.erase(node);
+            if (sizeBefore > sizeAfter) delete node;
+            return sizeAfter;
         }
 
         void clear() {
