@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include "include/game.hpp"
+#include "include/gui.hpp"
 
 using namespace game;
 
@@ -21,6 +22,7 @@ int main(int argc, char *argv[]) {
     // SDL_Texture *bitmapTex = NULL;
     // SDL_Surface *bitmapSurface = NULL;
     // int posX = 100, posY = 100, width = 320, height = 240;
+
     SDL_bool loopShouldStop = SDL_FALSE;
 
     // win = SDL_CreateWindow("Hello World", posX, posY, width, height, 0);
@@ -37,6 +39,7 @@ int main(int argc, char *argv[]) {
     while (!loopShouldStop) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL2_ProcessEvent(&event);
             switch (event.type) {
                 case SDL_QUIT: {
                     loopShouldStop = SDL_TRUE;
