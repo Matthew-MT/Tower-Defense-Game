@@ -1,13 +1,24 @@
 #pragma once
+#include <SDL2/SDL.h>
+#include <cmath>
 
 namespace game {
     template<typename Type> class Point {
     public:
         Type x, y;
         Point(Type ix, Type iy) : x{ix}, y{iy} {}
+
+        bool operator == (const Point<Type>& other) {
+            return this->x == other.x && this->y == other.y;
+        }
+
+        bool operator != (const Point<Type>& other) {
+            return this->x != other.x || this->y != other.y;
+        }
     };
 
     using IPoint = Point<int>;
+
     double distance(IPoint a, IPoint b) {
         return std::sqrt(
             std::pow(a.x - b.x, 2)

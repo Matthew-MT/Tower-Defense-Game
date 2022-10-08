@@ -133,6 +133,7 @@ namespace game {
                     this->textures.at(type),
                     this->getTileDest(index)
                 ));
+
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
             }
@@ -164,7 +165,7 @@ namespace game {
         return rect;
     }
 
-    IPoint Map::getTileIndex(IPoint position) const {
+    const IPoint& Map::getTileIndex(IPoint position) const {
         if (
             position.x < 0
             || position.y < 0
@@ -178,7 +179,7 @@ namespace game {
         };
     }
 
-    IPoint Map::getTileIndexCenter(SDL_Rect* rect) const {
+    const IPoint& Map::getTileIndexCenter(SDL_Rect* rect) const {
         return this->getTileIndex({
             rect->x + (rect->w >> 1),
             rect->y + (rect->h >> 1)
@@ -194,7 +195,7 @@ namespace game {
         return rect;
     }
 
-    IPoint Map::getTileCenter(const IPoint& index) const {
+    const IPoint& Map::getTileCenter(const IPoint& index) const {
         return {
             this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
             this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1)

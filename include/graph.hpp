@@ -18,8 +18,17 @@ namespace game {
         Type* value;
     public:
         GraphNode(const Type* initValue) : value{initValue} {}
+        GraphNode(Type initValue) : value{&initValue} {}
         ~GraphNode() {
-            for (std::pair<GraphNode<Type>*, double>& node : this->edges) node.first->unlink(this, false);
+            for (Edge& node : this->edges) node.first->unlink(this, false);
+        }
+
+        bool operator == (const GraphNode<Type>& other) {
+            return this->value == other.getValue();
+        }
+
+        bool operator != (const GraphNode<Type>& other) {
+            return this->value != other.getValue();
         }
 
         void setValue(Type* value) {
@@ -73,12 +82,39 @@ namespace game {
             return this->nodes.end();
         }
 
+        Nodes::iterator find(Node* node) {
+            return this->nodes.find(node);
+        }
+
+        Nodes::iterator find(const Type& value) {
+            return std::find_if(this->begin(), this->end(), [&](const Node& node) -> bool {
+                return value == node.getValue();
+            });
+        }
+
+        Nodes::insert_return_type insert(const Type& value) {
+            return this->nodes.insert(new Node(value));
+        }
+
         Nodes::insert_return_type insert(Node* node) {
             return this->nodes.insert(node);
         }
 
+        Nodes::size_type erase(Nodes::iterator i) {
+            return this->nodes.erase(i);
+        }
+
+        Nodes::size_type erase(const Type& value) {
+            return this->erase(this->find(value));
+        }
+
         Nodes::size_type erase(Node* node) {
             return this->nodes.erase(node);
+        }
+
+        void clear() {
+            for (Node* node : this->nodes) delete node;
+            this->nodes.clear();
         }
 
         const std::vector<Node*>& aStar(
@@ -87,7 +123,10 @@ namespace game {
             const std::function<double(Node* a, Node* b)>& heuristic
         ) {
             using queue_type = std::pair<double, Node*>;
-            std::function<bool(const queue_type& a, const queue_type& b)> compare = [&](const queue_type& a, const queue_type& b) -> bool {
+            std::function<bool(const queue_type& a, const queue_type& b)> compare = [&](
+                const queue_type& a,
+                const queue_type& b
+            ) -> bool {
                 return a.first < b.first;
             };
             std::vector<std::vector<Node*>> paths;
@@ -97,6 +136,9 @@ namespace game {
                 decltype(&compare)
             > openSet(compare);
             openSet.push({0, origin});
+            std::unordered_set<Node*>
+                tracking;
+            tracking.insert(origin);
             std::map<Node*, Node*>
                 cameFrom;
             std::map<Node*, double>
@@ -113,9 +155,28 @@ namespace game {
                     std::map<Node*, Node*>::iterator index;
                     while ((index = cameFrom.find(current)) != cameFrom.end()) {
                         current = *index;
+                        path.push_back(current);
+                    }
+                    return std::move(path);
+                }
+
+                openSet.pop();
+                tracking.erase(current);
+                for (const Node::Edge& edge : current) {
+                    double tentative_gScore = gScore[current] + edge.second;
+                    if (!gScore.find(edge.first) || tentative_gScore < gScore[edge.first]) {
+                        cameFrom[edge.first] = current;
+                        gScore[edge.first] = tentative_gScore;
+                        fScore[edge.first] = tentative_gScore + heuristic(edge.first, target);
+                        if (!tracking.find(edge.first)) {
+                            openSet.push(edge.first);
+                            tracking.insert(edge.first);
+                        }
                     }
                 }
             }
+
+            return {};
         }
     };
 };
