@@ -10,7 +10,7 @@ namespace game
 {
     class GUI {
     protected:
-    bool show_demo_window = false;
+    bool show_demo_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     SDL_Window* window;
     SDL_Renderer* renderer;
@@ -43,9 +43,9 @@ namespace game
 
             ImGui::Render();
             SDL_SetRenderDrawColor(this->renderer, (Uint8)(clear_color.x * 255), (Uint8)(clear_color.y * 255), (Uint8)(clear_color.z * 255), (Uint8)(clear_color.w * 255));
-            SDL_RenderClear(this->renderer);
+            //SDL_RenderClear(this->renderer);
             ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
-            SDL_RenderPresent(this->renderer);
+            //SDL_RenderPresent(this->renderer);
 
         }
         ~GUI()

@@ -68,8 +68,8 @@ namespace game {
             this->tick();
             SDL_RenderClear(this->renderer);
             for (Renderable* renderable : this->renderList) renderable->render();
-            SDL_RenderPresent(this->renderer);
             this->gui->render();
+            SDL_RenderPresent(this->renderer);
         }
 
         template<typename Type = Renderable> Type& spawn(
