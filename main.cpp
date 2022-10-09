@@ -11,12 +11,12 @@ int main(int argc, char *argv[]) {
 
     SDL_DisplayMode display;
     SDL_GetDesktopDisplayMode(0, &display);
-    Game game{
+    Game* game = new Game(
         "Game",
         (int)std::floor((double)display.w / 2.f) - 40,
         (int)std::floor((double)display.h / 2.f) - 40,
         80, 80
-    };
+    );
     // SDL_Window *win = NULL;
     // SDL_Renderer *renderer = NULL;
     // SDL_Texture *bitmapTex = NULL;
@@ -48,14 +48,14 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        game.renderWindow();
+        game->renderWindow();
         // SDL_RenderClear(renderer);
         // SDL_RenderCopy(renderer, bitmapTex, NULL, NULL);
         // SDL_RenderPresent(renderer);
     }
 
     SDL_Log("Closing game...");
-    game.~Game();
+    delete game;
     // SDL_DestroyTexture(bitmapTex);
     // SDL_DestroyRenderer(renderer);
     // SDL_DestroyWindow(win);

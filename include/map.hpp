@@ -138,17 +138,20 @@ namespace game {
                 else if (type == TileType::Base) this->bases.push_back(index);
 
                 if (type != TileType::Empty) continue;
-                std::pair<TileGraph::Nodes::iterator, bool> r = this->graph->insert(index);
-                TileGraph::Node* node = *r.first;
+                SDL_Log("Here 0");
+                //std::pair<TileGraph::Nodes::iterator, bool> r = 
+                this->graph->insert(index);
+                SDL_Log("Here 3");
+                // TileGraph::Node* node = *r.first;
 
                 if (i > 0 && this->map[i - 1][j] == TileType::Empty) {
-                    (*this->graph->find({i - 1, j}))->link(node);
+                    // (*(this->graph->find({i - 1, j})))->link(node);
                 }
                 if (j > 0 && this->map[i][j - 1] == TileType::Empty) {
-                    (*this->graph->find({i, j - 1}))->link(node);
+                    // (*(this->graph->find({i, j - 1})))->link(node);
                 }
                 if (i > 0 && j > 0 && this->map[i - 1][j - 1] == TileType::Empty) {
-                    (*this->graph->find({i - 1, j - 1}))->link(node, 1.41421356);
+                    // (*(this->graph->find({i - 1, j - 1})))->link(node, 1.41421356);
                 }
             }
         }
@@ -161,26 +164,29 @@ namespace game {
     }
 
     bool Map::placeTurret(const IPoint& index) {
-        if (this->map[index.x][index.y] != TileType::Empty) return false;
-        TileGraph::Node* node = *this->graph->find(index);
-        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
-        this->graph->erase(index);
-        for (const IPoint& spawn : this->spawns) {
-            for (const IPoint& base : this->bases) {
-                if (this->graph->aStar(
-                    *this->graph->find(spawn),
-                    *this->graph->find(spawn),
-                    [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
-                        return distance(*(a->getValue()), *(b->getValue()));
-                    }
-                ).size() == 0) {
+        // if (this->map[index.x][index.y] != TileType::Empty) return false;
+        // TileGraph::Node* node = *(this->graph->find(index));
+        // TileGraph::Node::Neighbors neighbors = node->getNeighbors();
+        // this->graph->erase(index);
+        // for (IPoint& spawn : this->spawns) {
+        //     for (const IPoint& base : this->bases) {
+        //         if (this->graph->aStar(
+        //             *this->graph->find(spawn),
+        //             *this->graph->find(spawn),
+        //             [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
+        //                 return distance(*(a->getValue()), *(b->getValue()));
+        //             }
+        //         ).size() == 0) {
                     
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
+        return true;
     }
 
-    bool Map::sellTurret(const IPoint& index) {}
+    bool Map::sellTurret(const IPoint& index) {
+        return true;
+    }
 
     void Map::setDestRect(SDL_Rect* newDestRect) {
         this->destRect = newDestRect;
@@ -201,7 +207,7 @@ namespace game {
         return rect;
     }
 
-    const IPoint& Map::getTileIndex(IPoint position) const {
+    IPoint Map::getTileIndex(IPoint position) const {
         if (
             position.x < 0
             || position.y < 0
@@ -215,7 +221,7 @@ namespace game {
         };
     }
 
-    const IPoint& Map::getTileIndexCenter(SDL_Rect* rect) const {
+    IPoint Map::getTileIndexCenter(SDL_Rect* rect) const {
         return this->getTileIndex({
             rect->x + (rect->w >> 1),
             rect->y + (rect->h >> 1)
@@ -231,7 +237,7 @@ namespace game {
         return rect;
     }
 
-    const IPoint& Map::getTileCenter(const IPoint& index) const {
+    IPoint Map::getTileCenter(const IPoint& index) const {
         return {
             this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
             this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1)

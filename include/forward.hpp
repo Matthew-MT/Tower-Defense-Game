@@ -8,8 +8,8 @@ namespace game {
     class Map;
     class Path;
     class Pathfinder;
-    class Node;
-    class Graph;
+    template<typename Type> class Node;
+    template<typename Type> class Graph;
     class Enemy;
     class EnemyHandler;
 };

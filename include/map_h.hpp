@@ -48,10 +48,10 @@ namespace game {
         void setPosition(const IPoint& position);
 
         SDL_Rect* getDestRect() const;
-        const IPoint& getTileIndex(IPoint position) const;
-        const IPoint& getTileIndexCenter(SDL_Rect* rect) const;
+        IPoint getTileIndex(IPoint position) const;
+        IPoint getTileIndexCenter(SDL_Rect* rect) const;
         SDL_Rect* getTileDest(const IPoint& index) const;
-        const IPoint& getTileCenter(const IPoint& index) const;
+        IPoint getTileCenter(const IPoint& index) const;
         int getTileType(const IPoint& index) const;
         const std::vector<IPoint>& getAllSpawns() const;
         const std::vector<IPoint>& getAllBases() const;

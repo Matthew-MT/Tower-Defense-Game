@@ -8,11 +8,11 @@ namespace game {
         Type x, y;
         Point(Type ix, Type iy) : x{ix}, y{iy} {}
 
-        bool operator == (const Point<Type>& other) {
+        bool operator == (const Point<Type>& other) const {
             return this->x == other.x && this->y == other.y;
         }
 
-        bool operator != (const Point<Type>& other) {
+        bool operator != (const Point<Type>& other) const {
             return this->x != other.x || this->y != other.y;
         }
     };

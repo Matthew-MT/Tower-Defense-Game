@@ -53,7 +53,9 @@ namespace game {
 
         ~Game() {
             for (SDL_Texture* texture : this->textureList) SDL_DestroyTexture(texture);
+            this->textureList.clear();
             for (Renderable* renderable : this->renderList) delete renderable;
+            this->renderList.clear();
             SDL_DestroyRenderer(this->renderer);
             SDL_DestroyWindow(this->window);
             delete this->gui;

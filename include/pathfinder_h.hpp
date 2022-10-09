@@ -23,8 +23,8 @@ namespace game {
         Pathfinder(Map* initMap);
         ~Pathfinder();
 
-        const std::vector<Path*>& pathfind(Node* origin, const std::vector<Node*>& targets);
-        const std::vector<Path*>& pathfind(const IPoint& origin, const std::vector<IPoint>& targets);
-        const std::vector<Path*>& pathfind(const std::vector<IPoint>& origins, const std::vector<IPoint>& targets);
+        // const std::vector<Path*>& pathfind(typename Map::TileGraph::Node* origin, const std::vector<typename Map::TileGraph::Node*>& targets);
+        // const std::vector<Path*>& pathfind(const IPoint& origin, const std::vector<IPoint>& targets);
+        // const std::vector<Path*>& pathfind(const std::vector<IPoint>& origins, const std::vector<IPoint>& targets);
     };
 };
