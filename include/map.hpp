@@ -56,7 +56,7 @@ namespace game {
             initDestRect
         },
         tileSize{initTileSize} {
-        this->pathfinder = new Pathfinder(this);
+        this->graph = new TileGraph();
 
         std::fstream
             textureAssociation("assets/config/texture_association.txt", std::ios_base::in);
@@ -138,20 +138,17 @@ namespace game {
                 else if (type == TileType::Base) this->bases.push_back(index);
 
                 if (type != TileType::Empty) continue;
-                SDL_Log("Here 0");
-                //std::pair<TileGraph::Nodes::iterator, bool> r = 
-                this->graph->insert(index);
-                SDL_Log("Here 3");
-                // TileGraph::Node* node = *r.first;
+                std::pair<TileGraph::Nodes::iterator, bool> r = this->graph->insert(index);
+                TileGraph::Node* node = *r.first;
 
                 if (i > 0 && this->map[i - 1][j] == TileType::Empty) {
-                    // (*(this->graph->find({i - 1, j})))->link(node);
+                    (*this->graph->find({i - 1, j}))->link(node);
                 }
                 if (j > 0 && this->map[i][j - 1] == TileType::Empty) {
-                    // (*(this->graph->find({i, j - 1})))->link(node);
+                    (*this->graph->find({i, j - 1}))->link(node);
                 }
                 if (i > 0 && j > 0 && this->map[i - 1][j - 1] == TileType::Empty) {
-                    // (*(this->graph->find({i - 1, j - 1})))->link(node, 1.41421356);
+                    (*this->graph->find({i - 1, j - 1}))->link(node, 1.41421356);
                 }
             }
         }
@@ -164,23 +161,30 @@ namespace game {
     }
 
     bool Map::placeTurret(const IPoint& index) {
-        // if (this->map[index.x][index.y] != TileType::Empty) return false;
-        // TileGraph::Node* node = *(this->graph->find(index));
-        // TileGraph::Node::Neighbors neighbors = node->getNeighbors();
-        // this->graph->erase(index);
-        // for (IPoint& spawn : this->spawns) {
-        //     for (const IPoint& base : this->bases) {
-        //         if (this->graph->aStar(
-        //             *this->graph->find(spawn),
-        //             *this->graph->find(spawn),
-        //             [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
-        //                 return distance(*(a->getValue()), *(b->getValue()));
-        //             }
-        //         ).size() == 0) {
-                    
-        //         }
-        //     }
-        // }
+        if (this->map[index.x][index.y] != TileType::Empty) return false;
+        TileGraph::Node* node = *this->graph->find(index);
+        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
+        this->graph->erase(node);
+        std::vector<std::vector<IPoint>> paths;
+        for (IPoint& spawn : this->spawns) {
+            for (const IPoint& base : this->bases) {
+                std::vector<TileGraph::Node*> foundPath = this->graph->aStar(
+                    *this->graph->find(spawn),
+                    *this->graph->find(spawn),
+                    [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
+                        return distance(*a->getValue(), *b->getValue());
+                    }
+                );
+                if (foundPath.size() == 0) {
+                    this->graph->insert(node);
+                    for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
+                    return false;
+                }
+                std::vector<IPoint> path;
+                for (TileGraph::Node* node : foundPath) path.push_back(*node->getValue());
+                paths.push_back(path);
+            }
+        }
         return true;
     }
 

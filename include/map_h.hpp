@@ -17,7 +17,6 @@ namespace game {
     protected:
         IPoint tileSize;
         TileGraph* graph;
-        Pathfinder* pathfinder;
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
         std::vector<std::vector<StaticSprite*>> mapSprites;

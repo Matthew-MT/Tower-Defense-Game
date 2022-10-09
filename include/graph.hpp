@@ -20,7 +20,7 @@ namespace game {
         Type* value;
     public:
         GraphNode(const Type* initValue) : value{initValue} {}
-        GraphNode(Type initValue) : value{&initValue} {}
+        GraphNode(const Type& initValue) : value{new Type(initValue)} {}
         ~GraphNode() {
             for (const Edge& node : this->edges) node.first->unlink(this, false);
         }
@@ -49,6 +49,10 @@ namespace game {
         void unlink(GraphNode<Type>* other, bool undirected = true) {
             this->edges.erase(other);
             if (undirected) other->unlink(this, false);
+        }
+
+        void unlinkAll() {
+            for (ConstEdge& edge : this->edges) edge.first->unlink(this);
         }
 
         double weight(GraphNode<Type>* other) {
@@ -100,22 +104,23 @@ namespace game {
             });
         }
 
-        //std::pair<typename Nodes::iterator, bool>
-        void insert(Node* node) {
-            SDL_Log("Here 2");
-            //return 
-            this->nodes.insert(node);
+        std::pair<typename Nodes::iterator, bool> insert(Node* node) {
+            return this->nodes.insert(node);
         }
 
-        //std::pair<typename Nodes::iterator, bool>
-        void insert(const Type& value) {
-            SDL_Log("Here 1");
-            //return 
-            this->insert(new Node(value));
+        std::pair<typename Nodes::iterator, bool> insert(const Type* value) {
+            return this->insert(new Node(value));
+        }
+
+        std::pair<typename Nodes::iterator, bool> insert(const Type& value) {
+            return this->insert(new Node(value));
         }
 
         typename Nodes::iterator erase(typename Nodes::iterator i) {
-            delete *i;
+            if (i != this->nodes.end()) {
+                Node* value = *i;
+                if (i == this->find(value)) value->unlinkAll();
+            }
             return this->nodes.erase(i);
         }
 
@@ -127,12 +132,12 @@ namespace game {
             typename Nodes::size_type
                 sizeBefore = this->nodes.size(),
                 sizeAfter = this->nodes.erase(node);
-            if (sizeBefore > sizeAfter) delete node;
+            if (sizeBefore > sizeAfter) node->unlinkAll();
             return sizeAfter;
         }
 
         void clear() {
-            for (Node* node : this->nodes) delete node;
+            for (Node* node : this->nodes) node->unlinkAll();
             this->nodes.clear();
         }
 
@@ -141,59 +146,59 @@ namespace game {
             Node* target,
             const std::function<double(Node* a, Node* b)>& heuristic
         ) {
-            // using queue_type = std::pair<double, Node*>;
-            // std::function<bool(const queue_type& a, const queue_type& b)> compare = [&](
-            //     const queue_type& a,
-            //     const queue_type& b
-            // ) -> bool {
-            //     return a.first < b.first;
-            // };
-            // std::vector<std::vector<Node*>> paths;
-            // std::priority_queue<
-            //     queue_type,
-            //     std::vector<queue_type>,
-            //     decltype(compare)
-            // > openSet{compare};
-            // openSet.push({0, origin});
-            // std::unordered_set<Node*>
-            //     tracking;
-            // tracking.insert(origin);
-            // std::map<Node*, Node*>
-            //     cameFrom;
-            // std::map<Node*, double>
-            //     gScore,
-            //     fScore;
+            using queue_type = std::pair<double, Node*>;
+            std::function<bool(const queue_type& a, const queue_type& b)> compare = [&](
+                const queue_type& a,
+                const queue_type& b
+            ) -> bool {
+                return a.first < b.first;
+            };
+            std::vector<std::vector<Node*>> paths;
+            std::priority_queue<
+                queue_type,
+                std::vector<queue_type>,
+                decltype(compare)
+            > openSet{compare};
+            openSet.push({0, origin});
+            std::unordered_set<Node*>
+                tracking;
+            tracking.insert(origin);
+            std::map<Node*, Node*>
+                cameFrom;
+            std::map<Node*, double>
+                gScore,
+                fScore;
 
-            // gScore[origin] = 0;
-            // fScore[origin] = heuristic(origin, target);
+            gScore[origin] = 0;
+            fScore[origin] = heuristic(origin, target);
 
-            // while (!openSet.empty()) {
-            //     Node* current = openSet.top().second;
-            //     if (current == target) {
-            //         std::vector<Node*> path{current};
-            //         typename std::map<Node*, Node*>::iterator index;
-            //         while ((index = cameFrom.find(current)) != cameFrom.end()) {
-            //             current = (*index).second;
-            //             path.push_back(current);
-            //         }
-            //         return path;
-            //     }
+            while (!openSet.empty()) {
+                Node* current = openSet.top().second;
+                if (current == target) {
+                    std::vector<Node*> path{current};
+                    typename std::map<Node*, Node*>::iterator index;
+                    while ((index = cameFrom.find(current)) != cameFrom.end()) {
+                        current = (*index).second;
+                        path.push_back(current);
+                    }
+                    return path;
+                }
 
-            //     openSet.pop();
-            //     tracking.erase(current);
-            //     for (const typename Node::Edge& edge : *current) {
-            //         double tentative_gScore = gScore[current] + edge.second;
-            //         if (gScore.find(edge.first) == gScore.end() || tentative_gScore < gScore[edge.first]) {
-            //             cameFrom[edge.first] = current;
-            //             gScore[edge.first] = tentative_gScore;
-            //             fScore[edge.first] = tentative_gScore + heuristic(edge.first, target);
-            //             if (tracking.find(edge.first) == tracking.end()) {
-            //                 openSet.push({tentative_gScore, edge.first});
-            //                 tracking.insert(edge.first);
-            //             }
-            //         }
-            //     }
-            // }
+                openSet.pop();
+                tracking.erase(current);
+                for (const typename Node::Edge& edge : *current) {
+                    double tentative_gScore = gScore[current] + edge.second;
+                    if (gScore.find(edge.first) == gScore.end() || tentative_gScore < gScore[edge.first]) {
+                        cameFrom[edge.first] = current;
+                        gScore[edge.first] = tentative_gScore;
+                        fScore[edge.first] = tentative_gScore + heuristic(edge.first, target);
+                        if (tracking.find(edge.first) == tracking.end()) {
+                            openSet.push({tentative_gScore, edge.first});
+                            tracking.insert(edge.first);
+                        }
+                    }
+                }
+            }
 
             return {};
         }

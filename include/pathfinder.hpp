@@ -58,11 +58,4 @@ namespace game {
             currentPosition.y + slope.y
         };
     }
-
-    Pathfinder::Pathfinder(Map* initMap) : map{initMap} {}
-    Pathfinder::~Pathfinder() {}
-
-    // const std::vector<Path*>& Pathfinder::pathfind(typename Map::TileGraph::Node* origin, const std::vector<typename Map::TileGraph::Node*>& targets) {}
-    // const std::vector<Path*>& Pathfinder::pathfind(const IPoint& origin, const std::vector<IPoint>& targets) {}
-    // const std::vector<Path*>& Pathfinder::pathfind(const std::vector<IPoint>& origins, const std::vector<IPoint>& targets) {}
 };

@@ -1,13 +1,12 @@
 #include <SDL2/SDL.h>
 #include "include/game.hpp"
-#include "include/gui.hpp"
+// #include "include/gui.hpp"
 
 using namespace game;
 
 int main(int argc, char *argv[]) {
     std::cout << "Yeet\n";
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_Log("Hello world");
 
     SDL_DisplayMode display;
     SDL_GetDesktopDisplayMode(0, &display);
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
     while (!loopShouldStop) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL2_ProcessEvent(&event);
+            // ImGui_ImplSDL2_ProcessEvent(&event);
             switch (event.type) {
                 case SDL_QUIT: {
                     loopShouldStop = SDL_TRUE;

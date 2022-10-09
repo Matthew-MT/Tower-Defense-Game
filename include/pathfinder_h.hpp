@@ -15,16 +15,4 @@ namespace game {
 
         IPoint next(double scalar, const IPoint& currentPosition, int movementSpeed);
     };
-
-    class Pathfinder {
-    protected:
-        Map* map;
-    public:
-        Pathfinder(Map* initMap);
-        ~Pathfinder();
-
-        // const std::vector<Path*>& pathfind(typename Map::TileGraph::Node* origin, const std::vector<typename Map::TileGraph::Node*>& targets);
-        // const std::vector<Path*>& pathfind(const IPoint& origin, const std::vector<IPoint>& targets);
-        // const std::vector<Path*>& pathfind(const std::vector<IPoint>& origins, const std::vector<IPoint>& targets);
-    };
 };
