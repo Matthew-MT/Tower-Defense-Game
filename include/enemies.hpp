@@ -9,13 +9,15 @@
 #include <vector>
 
 namespace game {
+    EnemyData::EnemyData(int initMovementSpeed, int initHealth) : movementSpeed{initMovementSpeed}, health{initHealth} {}
+
     Enemy::Enemy(
         SDL_Renderer* initRenderer,
         SDL_Texture* initTexture,
         GameState* initGameState,
         Path* initPath,
         EnemyHandler* initHandler,
-        int initMovementSpeed,
+        EnemyData* initData,
         SDL_Rect* initDestRect,
         SDL_Rect* initSourceRect = nullptr
     ) : StaticSprite{
@@ -27,7 +29,8 @@ namespace game {
         gameState{initGameState},
         path{initPath},
         handler{initHandler},
-        movementSpeed{initMovementSpeed} {}
+        movementSpeed{initData->movementSpeed},
+        health{initData->health} {}
 
     Enemy::~Enemy() {}
 
@@ -58,7 +61,9 @@ namespace game {
     ) : Renderable{
         initRenderer,
         initDestRect
-    } {}
+    } {
+        this->spawn();
+    }
 
     EnemyHandler::~EnemyHandler() {}
 
@@ -74,7 +79,8 @@ namespace game {
         return this->enemies.end();
     }
 
-    void EnemyHandler::spawn() {}
+    void EnemyHandler::spawn() {
+    }
 
     void EnemyHandler::despawn(Enemy* enemy) {
         this->enemies.erase(enemy);

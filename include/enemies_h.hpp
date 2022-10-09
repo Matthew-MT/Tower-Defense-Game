@@ -6,12 +6,23 @@
 #include <vector>
 
 namespace game {
+    class EnemyData {
+    public:
+        EnemyData(int initMovementSpeed, int initHealth);
+
+        int
+            movementSpeed,
+            health;
+    };
+
     class Enemy : public StaticSprite {
     protected:
         GameState* gameState;
         Path* path;
         EnemyHandler* handler;
-        int movementSpeed;
+        int
+            movementSpeed,
+            health;
     public:
         Enemy(
             SDL_Renderer* initRenderer,
@@ -19,7 +30,7 @@ namespace game {
             GameState* initGameState,
             Path* initPath,
             EnemyHandler* initHandler,
-            int initMovementSpeed,
+            EnemyData* initData,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect
         );
