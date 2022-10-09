@@ -12,4 +12,7 @@ namespace game {
     template<typename Type> class Graph;
     class Enemy;
     class EnemyHandler;
+    class Turret;
+    class TurretData;
+    class TurretHandler;
 };
