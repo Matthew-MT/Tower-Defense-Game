@@ -46,6 +46,8 @@ namespace game {
             mapRect = map->getDestRect();
             SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
 
+            map->placeTurret({4, 4});
+
             TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
 
             // this->gui = new GUI(this->window, this->renderer);

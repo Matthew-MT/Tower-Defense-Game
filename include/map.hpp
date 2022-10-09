@@ -73,10 +73,9 @@ namespace game {
             initRenderer,
             initDestRect
         },
-        tileSize{initTileSize} {
-        this->graph = new TileGraph();
-        this->enemyHandler = new EnemyHandler(this->renderer, this->destRect);
-
+        tileSize{initTileSize},
+        graph{new TileGraph()},
+        enemyHandler{new EnemyHandler(this->renderer, this->destRect)} {
         std::fstream
             textureAssociation("assets/config/texture_association.txt", std::ios_base::in);
         std::string buffer;
@@ -106,9 +105,13 @@ namespace game {
 
     void Map::render() {
         for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
+            int type = this->map[i][j];
             SDL_RenderCopy(
                 this->renderer,
-                this->textures.at(this->map[i][j]),
+                this->textures.at(
+                    type == TileType::Turret
+                    ? TileType::Empty
+                    : type),
                 nullptr,
                 this->mapSprites[i][j]->getDestRect()
             );
@@ -160,18 +163,56 @@ namespace game {
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
 
-                if (type != TileType::Empty) continue;
+                if (
+                    type != TileType::Empty
+                    && type != TileType::Spawn
+                    && type != TileType::Base
+                ) continue;
                 std::pair<TileGraph::Nodes::iterator, bool> r = this->graph->insert(index);
                 TileGraph::Node* node = *r.first;
 
-                if (i > 0 && this->map[i - 1][j] == TileType::Empty) {
+                if (
+                    i > 0
+                    && (
+                        this->map[i - 1][j] == TileType::Empty
+                        || this->map[i - 1][j] == TileType::Spawn
+                        || this->map[i - 1][j] == TileType::Base
+                    )
+                ) {
                     (*this->graph->find({i - 1, j}))->link(node);
                 }
-                if (j > 0 && this->map[i][j - 1] == TileType::Empty) {
+
+                if (
+                    j > 0
+                    && (
+                        this->map[i][j - 1] == TileType::Empty
+                        || this->map[i][j - 1] == TileType::Spawn
+                        || this->map[i][j - 1] == TileType::Base
+                    )
+                ) {
                     (*this->graph->find({i, j - 1}))->link(node);
                 }
-                if (i > 0 && j > 0 && this->map[i - 1][j - 1] == TileType::Empty) {
+
+                if (
+                    i > 0 && j > 0
+                    && (
+                        this->map[i - 1][j - 1] == TileType::Empty
+                        || this->map[i - 1][j - 1] == TileType::Spawn
+                        || this->map[i - 1][j - 1] == TileType::Base
+                    )
+                ) {
                     (*this->graph->find({i - 1, j - 1}))->link(node, 1.41421356);
+                }
+
+                if (
+                    i > 0 && j < this->map.back().size() - 1
+                    && (
+                        this->map[i - 1][j + 1] == TileType::Empty
+                        || this->map[i - 1][j + 1] == TileType::Spawn
+                        || this->map[i - 1][j + 1] == TileType::Base
+                    )
+                ) {
+                    (*this->graph->find({i - 1, j + 1}))->link(node, 1.41421356);
                 }
             }
         }
@@ -225,7 +266,25 @@ namespace game {
     }
 
     bool Map::sellTurret(const IPoint& index) {
-        if (this->map[index.x][index.y] == TileType::Turret) {}
+        if (this->map[index.x][index.y] != TileType::Turret) return false;
+        typename TileGraph::Nodes::iterator
+            nodeN = this->graph->find({index.x, index.y - 1}),
+            nodeNE = this->graph->find({index.x + 1, index.y - 1}),
+            nodeE = this->graph->find({index.x + 1, index.y}),
+            nodeSE = this->graph->find({index.x + 1, index.y + 1}),
+            nodeS = this->graph->find({index.x, index.y + 1}),
+            nodeSW = this->graph->find({index.x - 1, index.y + 1}),
+            nodeW = this->graph->find({index.x - 1, index.y}),
+            nodeNW = this->graph->find({index.x - 1, index.y - 1});
+        TileGraph::Node* node = *this->graph->insert(index).first;
+        if (nodeN != this->graph->end()) node->link(*nodeN);
+        if (nodeNE != this->graph->end()) node->link(*nodeNE);
+        if (nodeE != this->graph->end()) node->link(*nodeE);
+        if (nodeSE != this->graph->end()) node->link(*nodeSE);
+        if (nodeS != this->graph->end()) node->link(*nodeS);
+        if (nodeSW != this->graph->end()) node->link(*nodeSW);
+        if (nodeW != this->graph->end()) node->link(*nodeW);
+        if (nodeNW != this->graph->end()) node->link(*nodeNW);
         return true;
     }
 

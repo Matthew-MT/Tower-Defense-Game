@@ -52,7 +52,7 @@ namespace game {
         }
 
         void unlinkAll() {
-            for (ConstEdge& edge : this->edges) edge.first->unlink(this);
+            while (this->edges.size() > 0) (*this->edges.begin()).first->unlink(this);
         }
 
         double weight(GraphNode<Type>* other) {
@@ -92,6 +92,10 @@ namespace game {
 
         typename Nodes::iterator end() {
             return this->nodes.end();
+        }
+
+        typename Nodes::size_type size() {
+            return this->nodes.size();
         }
 
         typename Nodes::iterator find(Node* node) {

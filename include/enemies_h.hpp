@@ -48,6 +48,8 @@ namespace game {
 
         ~EnemyHandler();
 
+        void render();
+
         typename Enemies::iterator begin();
         typename Enemies::iterator end();
 

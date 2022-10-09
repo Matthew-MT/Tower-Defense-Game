@@ -62,6 +62,10 @@ namespace game {
 
     EnemyHandler::~EnemyHandler() {}
 
+    void EnemyHandler::render() {
+        for (Enemy* enemy : this->enemies) enemy->render();
+    }
+
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
         return this->enemies.begin();
     }
