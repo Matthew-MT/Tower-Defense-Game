@@ -5,6 +5,7 @@
 #include "sprite.hpp"
 #include "map.hpp"
 #include "gui.hpp"
+#include "turret.hpp"
 #include <string>
 #include <vector>
 
@@ -47,6 +48,11 @@ namespace game {
             SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
 
             map->placeTurret({4, 4});
+
+            TurretHandler* turret = new TurretHandler(
+                this->renderer,
+                map->getDestRect()
+            );
 
             TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
 

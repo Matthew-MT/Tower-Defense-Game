@@ -110,7 +110,7 @@ namespace game {
                 this->renderer,
                 this->textures.at(
                     type == TileType::Turret
-                    ? TileType::Empty
+                    ? TileType::Wall
                     : type),
                 nullptr,
                 this->mapSprites[i][j]->getDestRect()

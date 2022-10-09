@@ -3,6 +3,7 @@
 #include "game_state.hpp"
 #include "sprite.hpp"
 #include "map.hpp"
+#include "forward.hpp"
 
 namespace game{
     class Turret : public Sprite
@@ -99,13 +100,16 @@ namespace game{
         void handleEvent(SDL_Event* event)
         {
             int x, y;
+            SDL_Log("Handling event");
             if(event->type == SDL_MOUSEBUTTONUP)
             {
                 SDL_GetGlobalMouseState(&x, &y);
                 IPoint index = this->map->getTileIndex({x,y});
+                std::cout << index.x << "   " << index.y << std::endl;
                 bool placed = this->map->placeTurret(index);
                 if(placed)
                 {
+                    SDL_Log("Turret was placed");
                     createTurret(Gatling);
                 }
             }
