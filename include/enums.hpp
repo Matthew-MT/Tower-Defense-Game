@@ -8,4 +8,8 @@ namespace game {
         Base = 3,
         Turret = 4
     };
+
+    enum TurretType{
+        Gatling = 0
+    };
 };

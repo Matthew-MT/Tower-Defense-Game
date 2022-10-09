@@ -1,4 +1,4 @@
 placeable.bmp
 wall.bmp
-spawn.bmp
+homebase.bmp
 spawn.bmp

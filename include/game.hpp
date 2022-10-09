@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include "sprite.hpp"
 #include "map.hpp"
-// #include "gui.hpp"
+#include "gui.hpp"
 #include <string>
 #include <vector>
 
@@ -18,7 +18,7 @@ namespace game {
         std::vector<Renderable*> renderList;
         std::vector<std::string> mapProgression;
         Uint64 lastTick = 0;
-        // GUI* gui;
+        GUI* gui;
     public:
         Game(const std::string& title, int x, int y, int w, int h) {
             std::ifstream
@@ -48,7 +48,8 @@ namespace game {
 
             TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
 
-            // this->gui = new GUI(this->window, this->renderer);
+            this->gui = new GUI(this->window, this->renderer);
+            
         }
 
         ~Game() {
@@ -58,7 +59,7 @@ namespace game {
             this->renderList.clear();
             SDL_DestroyRenderer(this->renderer);
             SDL_DestroyWindow(this->window);
-            // delete this->gui;
+            delete this->gui;
         }
 
         void renderWindow() {
@@ -66,7 +67,7 @@ namespace game {
             SDL_RenderClear(this->renderer);
             for (Renderable* renderable : this->renderList) renderable->render();
             SDL_RenderPresent(this->renderer);
-            // this->gui->guiWindow();
+            this->gui->render();
         }
 
         template<typename Type = Renderable> Type& spawn(
@@ -97,6 +98,14 @@ namespace game {
             const Uint64 nextTick = SDL_GetTicks64();
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
             this->lastTick = nextTick;
+        }
+
+        void handleEvent(SDL_Event* event)
+        {
+            for(Renderable* renderable: this->renderList)
+            {
+                renderable->handleEvent(event);
+            }
         }
     };
 };
