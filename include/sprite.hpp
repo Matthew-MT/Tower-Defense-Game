@@ -45,6 +45,8 @@ namespace game {
         IPoint getPosition() const {
             return {this->destRect->x, this->destRect->y};
         }
+
+        virtual void handleEvent(SDL_Event* event) {}
     };
 
     class StaticSprite : public Renderable {
