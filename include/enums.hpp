@@ -5,6 +5,7 @@ namespace game {
         Empty = 0,
         Wall = 1,
         Spawn = 2,
-        Base = 3
+        Base = 3,
+        Turret = 4
     };
 };

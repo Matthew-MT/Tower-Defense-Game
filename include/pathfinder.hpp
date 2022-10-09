@@ -9,6 +9,10 @@ namespace game {
     Path::Path(Map* initMap, const std::vector<IPoint>& initPath) : map{initMap}, path{initPath} {}
     Path::~Path() {}
 
+    bool Path::isIndexInPath(const IPoint& index) {
+        return std::find(this->path.begin(), this->path.end(), index) != this->path.end();
+    }
+
     IPoint Path::next(double scalar, const IPoint& currentPosition, int movementSpeed) {
         if (movementSpeed < 0) throw "Positive movement speed only.";
 

@@ -27,12 +27,18 @@ namespace game {
         ~Enemy();
 
         void tick(double scalar);
+
+        void setPath(Path* path);
+
+        IPoint getCenter();
     };
 
     class EnemyHandler : public Renderable {
+    public:
+        using Enemies = std::unordered_set<Enemy*>;
     protected:
         Map* map;
-        std::unordered_set<Enemy*> enemies;
+        Enemies enemies;
         std::vector<Path*> paths;
     public:
         EnemyHandler(
@@ -41,6 +47,9 @@ namespace game {
         );
 
         ~EnemyHandler();
+
+        typename Enemies::iterator begin();
+        typename Enemies::iterator end();
 
         void spawn();
         void despawn(Enemy* enemy);

@@ -40,6 +40,18 @@ namespace game {
         }
     }
 
+    void Enemy::setPath(Path* path) {
+        delete this->path;
+        this->path = path;
+    }
+
+    IPoint Enemy::getCenter() {
+        return {
+            this->destRect->x + (this->destRect->w >> 1),
+            this->destRect->y + (this->destRect->h >> 1)
+        };
+    }
+
     EnemyHandler::EnemyHandler(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect
@@ -49,6 +61,14 @@ namespace game {
     } {}
 
     EnemyHandler::~EnemyHandler() {}
+
+    typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
+        return this->enemies.begin();
+    }
+
+    typename EnemyHandler::Enemies::iterator EnemyHandler::end() {
+        return this->enemies.end();
+    }
 
     void EnemyHandler::spawn() {}
 

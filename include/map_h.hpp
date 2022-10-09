@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include "forward.hpp"
 #include "game_state.hpp"
+#include "enemies_h.hpp"
 #include "sprite.hpp"
 #include <algorithm>
 #include "enums.hpp"
@@ -17,18 +18,22 @@ namespace game {
     protected:
         IPoint tileSize;
         TileGraph* graph;
+        EnemyHandler* enemyHandler;
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
         std::vector<std::vector<StaticSprite*>> mapSprites;
         std::vector<IPoint>
             spawns,
             bases;
+        std::vector<Path*> paths;
 
         // Call this function if you update tile sizes or map destRect width and height.
         void updateMapSize();
 
         // Call this function if you update the map's position.
         void updateTiles();
+
+        bool efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths);
     public:
         Map(
             SDL_Renderer* initRenderer,

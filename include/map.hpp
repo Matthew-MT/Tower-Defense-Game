@@ -3,6 +3,7 @@
 #include "map_h.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
+#include "enemies.hpp"
 #include "sprite.hpp"
 #include <algorithm>
 #include "enums.hpp"
@@ -46,6 +47,23 @@ namespace game {
         }
     }
 
+    bool Map::efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths) {
+        for (const IPoint& base : this->bases) {
+            std::vector<TileGraph::Node*> foundPath = this->graph->aStar(
+                *this->graph->find(origin),
+                *this->graph->find(base),
+                [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
+                    return distance(*a->getValue(), *b->getValue());
+                }
+            );
+            if (foundPath.size() == 0) return false;
+            std::vector<IPoint> path;
+            for (TileGraph::Node* node : foundPath) path.push_back(*node->getValue());
+            paths.push_back(path);
+        }
+        return true;
+    }
+
     Map::Map(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
@@ -57,6 +75,7 @@ namespace game {
         },
         tileSize{initTileSize} {
         this->graph = new TileGraph();
+        this->enemyHandler = new EnemyHandler(this->renderer, this->destRect);
 
         std::fstream
             textureAssociation("assets/config/texture_association.txt", std::ios_base::in);
@@ -78,8 +97,11 @@ namespace game {
     }
 
     Map::~Map() {
-        for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
         for (std::vector<StaticSprite*>& col : this->mapSprites) for (StaticSprite* sprite : col) delete sprite;
+        for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
+        for (Path* path : this->paths) delete path;
+        delete this->graph;
+        delete this->enemyHandler;
     }
 
     void Map::render() {
@@ -91,6 +113,7 @@ namespace game {
                 this->mapSprites[i][j]->getDestRect()
             );
         }
+        this->enemyHandler->render();
     }
 
     GameState* Map::loadMap(const std::string& mapFileName) {
@@ -162,33 +185,47 @@ namespace game {
 
     bool Map::placeTurret(const IPoint& index) {
         if (this->map[index.x][index.y] != TileType::Empty) return false;
+        this->map[index.x][index.y] = TileType::Turret;
         TileGraph::Node* node = *this->graph->find(index);
         TileGraph::Node::Neighbors neighbors = node->getNeighbors();
         this->graph->erase(node);
         std::vector<std::vector<IPoint>> paths;
         for (IPoint& spawn : this->spawns) {
-            for (const IPoint& base : this->bases) {
-                std::vector<TileGraph::Node*> foundPath = this->graph->aStar(
-                    *this->graph->find(spawn),
-                    *this->graph->find(spawn),
-                    [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
-                        return distance(*a->getValue(), *b->getValue());
-                    }
-                );
-                if (foundPath.size() == 0) {
-                    this->graph->insert(node);
-                    for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
-                    return false;
-                }
-                std::vector<IPoint> path;
-                for (TileGraph::Node* node : foundPath) path.push_back(*node->getValue());
-                paths.push_back(path);
+            bool res = efficientPathfindToMultipleTargets(spawn, paths);
+            if (!res) {
+                this->graph->insert(node);
+                for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
+                this->map[index.x][index.y] = TileType::Empty;
+                return false;
             }
+        }
+        for (Enemy* enemy : *this->enemyHandler) {
+            IPoint origin = this->getTileIndex(enemy->getCenter());
+            for (std::vector<IPoint>& path : paths) if (std::find(path.begin(), path.end(), origin) != path.end()) continue;
+            bool res = efficientPathfindToMultipleTargets(origin, paths);
+            if (!res) {
+                this->graph->insert(node);
+                for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
+                this->map[index.x][index.y] = TileType::Empty;
+                return false;
+            }
+        }
+        for (Path* path : this->paths) delete path;
+        this->paths.clear();
+
+        for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
+
+        for (Enemy* enemy : *this->enemyHandler) {
+            IPoint origin = this->getTileIndex(enemy->getCenter());
+            std::vector<Path*> validPaths;
+            for (Path* path : this->paths) if (path->isIndexInPath(origin)) validPaths.push_back(path);
+            enemy->setPath(validPaths[std::rand() % validPaths.size()]);
         }
         return true;
     }
 
     bool Map::sellTurret(const IPoint& index) {
+        if (this->map[index.x][index.y] == TileType::Turret) {}
         return true;
     }
 
