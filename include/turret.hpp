@@ -99,10 +99,9 @@ namespace game{
         void handleEvent(SDL_Event* event)
         {
             int x, y;
-            Uint32 location;
             if(event->type == SDL_MOUSEBUTTONUP)
             {
-                location = SDL_GetGlobalMouseState(&x, &y);
+                SDL_GetGlobalMouseState(&x, &y);
                 IPoint index = this->map->getTileIndex({x,y});
                 bool placed = this->map->placeTurret(index);
                 if(placed)
