@@ -94,7 +94,7 @@ namespace game{
             if(placed)
             {
                 SDL_Log("Turret was placed");
-                createTurret(0);
+                createTurret(4);
             }
         }
     }
