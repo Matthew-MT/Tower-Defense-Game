@@ -44,6 +44,7 @@ namespace game {
         ~Map();
 
         void render();
+        void tick(double scalar);
         GameState* loadMap(const std::string& mapFileName);
 
         bool placeTurret(const IPoint& index);
@@ -61,5 +62,6 @@ namespace game {
         const std::vector<IPoint>& getAllSpawns() const;
         const std::vector<IPoint>& getAllBases() const;
         IPoint getTileSize() const;
+        const std::vector<Path*>& getPaths() const;
     };
 };

@@ -21,6 +21,7 @@ namespace game {
     Enemy::Enemy(
         SDL_Renderer* initRenderer,
         SDL_Texture* initTexture,
+        Map* initMap,
         GameState* initGameState,
         Path* initPath,
         EnemyHandler* initHandler,
@@ -37,21 +38,30 @@ namespace game {
         path{initPath},
         handler{initHandler},
         movementSpeed{initData->movementSpeed},
-        health{initData->health} {}
+        health{initData->health},
+        map{initMap} {}
 
     Enemy::~Enemy() {}
 
     void Enemy::tick(double scalar) {
-        IPoint next = this->path->next(scalar, this->getPosition(), this->movementSpeed);
-        if (next.x != -1 && next.y != -1) this->setPosition(next);
-        else {
-            this->gameState->reduceHealth();
+        SDL_Log("Enemy tick");
+        SDL_Log(("Current position: x: " + std::to_string(this->getCenter().x) + ", y: " + std::to_string(this->getCenter().y)).c_str());
+        IPoint next = this->path->next(scalar, this->getCenter(), this->movementSpeed);
+        SDL_Log(("Next: x: " + std::to_string(next.x) + ", y: " + std::to_string(next.y)).c_str());
+        SDL_Log("Got here");
+        if (next.x != -1 && next.y != -1) {
+            this->setPosition(next);
+            SDL_Log("Done!");
+        } else {
+            //this->gameState->reduceHealth();
             this->handler->despawn(this);
+            SDL_Log("I died.");
         }
+        SDL_Log(std::to_string(this->health).c_str());
+        SDL_Log("Exiting...");
     }
 
     void Enemy::setPath(Path* path) {
-        delete this->path;
         this->path = path;
     }
 
@@ -65,13 +75,15 @@ namespace game {
     EnemyHandler::EnemyHandler(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
+        Map* initMap,
         GameState* initGameState
     ) :
         Renderable{
             initRenderer,
             initDestRect
         },
-        gameState{initGameState} {
+        gameState{initGameState},
+        map{initMap} {
         std::fstream
             textureAssociation("assets/config/enemy_texture_association.txt", std::ios_base::in);
         std::string buffer;
@@ -84,7 +96,7 @@ namespace game {
                     this->renderer,
                     surface
                 ),
-                10,
+                1,
                 10
             ));
             SDL_FreeSurface(surface);
@@ -100,6 +112,22 @@ namespace game {
         for (Enemy* enemy : this->enemies) enemy->render();
     }
 
+    void EnemyHandler::tick(double scalar) {
+        SDL_Log("EnemyHandler tick");
+        SDL_Log(("Enemies: " + std::to_string(this->enemies.size())).c_str());
+        for (Enemy* enemy : this->enemies) enemy->tick(scalar);
+        SDL_Log("Enemies ticked, getting spawns");
+        std::vector<IPoint> spawns = this->map->getAllSpawns();
+        SDL_Log(("Spawning enemy. Spawns available: " + std::to_string(spawns.size())).c_str());
+        for (const IPoint& spawn : spawns) SDL_Log(("Spawn: x: " + std::to_string(spawn.x) + ", y: " + std::to_string(spawn.y)).c_str());
+        if (std::rand() % 1000 < 20) this->spawn(0, spawns[std::rand() % spawns.size()]);
+        for (Enemy* enemy : this->dying) {
+            this->enemies.erase(enemy);
+            delete enemy;
+        }
+        this->dying.clear();
+    }
+
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
         return this->enemies.begin();
     }
@@ -109,19 +137,14 @@ namespace game {
     }
 
     void EnemyHandler::spawn(int type, IPoint index) {
-        IPoint
-            origin = this->map->getTileCenter(index),
-            tileSize = this->map->getTileSize();
-        SDL_Rect* initDestRect;
-        initDestRect->x = origin.x;
-        initDestRect->y = origin.y;
-        initDestRect->w = tileSize.x;
-        initDestRect->h = tileSize.y;
+        SDL_Rect* initDestRect = this->map->getTileDest(index);
+
         std::vector<Path*> validPaths;
-        for (Path* path : this->paths) if (path->isIndexInPath(index)) validPaths.push_back(path);
+        for (Path* path : this->map->getPaths()) if (path->isIndexInPath(index)) validPaths.push_back(path);
         this->enemies.insert(new Enemy(
             this->renderer,
             this->types.at(type)->texture,
+            this->map,
             this->gameState,
             validPaths[std::rand() % validPaths.size()],
             this,
@@ -131,7 +154,6 @@ namespace game {
     }
 
     void EnemyHandler::despawn(Enemy* enemy) {
-        this->enemies.erase(enemy);
-        delete enemy;
+        this->dying.insert(enemy);
     }
 };

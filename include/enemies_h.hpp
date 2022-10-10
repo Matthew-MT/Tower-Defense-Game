@@ -18,6 +18,7 @@ namespace game {
 
     class Enemy : public StaticSprite {
     protected:
+        Map* map;
         GameState* gameState;
         Path* path;
         EnemyHandler* handler;
@@ -28,6 +29,7 @@ namespace game {
         Enemy(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
+            Map* initMap,
             GameState* initGameState,
             Path* initPath,
             EnemyHandler* initHandler,
@@ -51,19 +53,22 @@ namespace game {
     protected:
         Map* map;
         GameState* gameState;
-        Enemies enemies;
-        std::vector<Path*> paths;
+        Enemies
+            enemies,
+            dying;
         std::vector<EnemyData*> types;
     public:
         EnemyHandler(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
+            Map* initMap,
             GameState* initGameState
         );
 
         ~EnemyHandler();
 
         void render();
+        void tick(double scalar);
 
         typename Enemies::iterator begin();
         typename Enemies::iterator end();

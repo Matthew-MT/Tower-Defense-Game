@@ -42,7 +42,7 @@ namespace game {
                 mapRect,
                 {40, 40}
             );
-            map->loadMap(this->mapProgression.front());
+            GameState* initGameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
             SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
@@ -106,6 +106,7 @@ namespace game {
             const Uint64 nextTick = SDL_GetTicks64();
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
             this->lastTick = nextTick;
+            for (Renderable* renderable : this->renderList) renderable->tick(scalar);
         }
 
         void handleEvent(SDL_Event* event)
