@@ -32,9 +32,6 @@ namespace game{
         Map* map;
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
-        int damage;
-        float reloadTime;
-        SDL_Texture* texture;
         public:
         TurretHandler(
             SDL_Renderer* initRenderer,
@@ -44,8 +41,6 @@ namespace game{
         void render();
 
         void readTurretData(const std::string& turretFileName);
-
-        void storeTurretData(SDL_Texture* t, int d, float r);
 
         void createTurret(int type);
 

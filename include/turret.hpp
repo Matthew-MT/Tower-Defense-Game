@@ -36,7 +36,6 @@ namespace game{
         ) : Renderable{initRenderer, initDestRect}
         {
             readTurretData("turret.txt");
-            storeTurretData(texture, damage, reloadTime);
         }
 
     void TurretHandler::render()
@@ -52,6 +51,9 @@ namespace game{
         std::fstream 
             turretFile("assets/turrets/" + turretFileName, std::ios_base::in);
         std::string buffer;
+        int damage;
+        float reloadTime;
+        SDL_Texture* texture;
 
         std::getline(turretFile, buffer);
         damage = std::stoi(buffer);
@@ -61,11 +63,7 @@ namespace game{
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-    }
-
-    void  TurretHandler::storeTurretData(SDL_Texture* t, int d, float r)
-    {
-        turretTypes.push_back(new TurretData(d, r, t));
+        turretTypes.push_back(new TurretData(damage, reloadTime, texture));
     }
 
     void  TurretHandler::createTurret(int type)
