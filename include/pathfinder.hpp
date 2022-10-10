@@ -13,13 +13,16 @@ namespace game {
         return std::find(this->path.begin(), this->path.end(), index) != this->path.end();
     }
 
-    IPoint Path::next(double scalar, const IPoint& currentPosition, int movementSpeed) {
+    IPoint Path::next(double scalar, const IPoint& currentPosition, int movementSpeed) {        
         if (movementSpeed < 0) throw "Positive movement speed only.";
 
         IPoint index = this->map->getTileIndex(currentPosition);
-        std::vector<IPoint>::iterator i;
+        SDL_Log(("Current index: x: " + std::to_string(index.x) + ", y: " + std::to_string(index.y)).c_str());
 
-        if (index.x == -1 && index.y == -1) {
+        std::vector<IPoint>::iterator i = std::find(this->path.begin(), this->path.end(), index);
+        SDL_Log(("Path index: x: " + std::to_string((*i).x) + ", y: " + std::to_string((*i).y)).c_str());
+
+        if (i == this->path.end()) {
             std::vector<IPoint>::reverse_iterator r = std::find_if(
                 this->path.rbegin(),
                 this->path.rend(),
@@ -34,26 +37,23 @@ namespace game {
 
             if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
             i = (++r).base();
-        } else {
-            i = std::find_if(
-                this->path.begin(),
-                this->path.end(),
-                [&](const IPoint& point) -> bool {
-                    return point.x == index.x && point.y == index.y;
-                }
-            );
-
-            if (i == this->path.end()) throw "Pathfinders must receive a new path when paths are recomputed.";
-            if (++i == this->path.end()) return {-1, -1};
-        }
+        } else if (++i == this->path.end()) return {-1, -1};
+        SDL_Log(("Next index: x: " + std::to_string((*i).x) + ", y: " + std::to_string((*i).y)).c_str());
 
         double range = (double)movementSpeed * scalar;
         IPoint targetPosition = this->map->getTileCenter(*i);
+        SDL_Log(("    Current position: x: " + std::to_string(currentPosition.x) + ", y: " + std::to_string(currentPosition.y)).c_str());
+        SDL_Log(("    Target position:  x: " + std::to_string(targetPosition.x) + ", y: " + std::to_string(targetPosition.y)).c_str());
         IPoint slope = {
-            currentPosition.x - targetPosition.x,
-            currentPosition.y - targetPosition.y
+            targetPosition.x - currentPosition.x,
+            targetPosition.y - currentPosition.y
         };
+        SDL_Log(("    Slope:            x: " + std::to_string(slope.x) + ", y: " + std::to_string(slope.y)).c_str());
+        SDL_Log(("    Square:           x: " + std::to_string(std::pow((double)slope.x, 2)) + ", y: " + std::to_string(std::pow((double)slope.y, 2))).c_str());
+
         double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
+
+        SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
 
         slope.x = (int)(slope.x / normalizeScalar);
         slope.y = (int)(slope.y / normalizeScalar);

@@ -20,6 +20,8 @@ namespace game {
 
         virtual void render() {}
 
+        virtual void tick(double scalar) {}
+
         void setRenderer(SDL_Renderer* renderer) {
             this->renderer = renderer;
         }
@@ -40,6 +42,10 @@ namespace game {
 
         const SDL_Rect* getDestRect() const {
             return this->destRect;
+        }
+
+        IPoint getSize() {
+            return {this->destRect->w, this->destRect->h};
         }
 
         IPoint getPosition() const {

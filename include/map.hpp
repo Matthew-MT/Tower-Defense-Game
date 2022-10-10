@@ -52,7 +52,7 @@ namespace game {
             std::vector<TileGraph::Node*> foundPath = this->graph->aStar(
                 *this->graph->find(origin),
                 *this->graph->find(base),
-                [&](TileGraph::Node* a, TileGraph::Node* b) -> bool {
+                [&](TileGraph::Node* a, TileGraph::Node* b) -> double {
                     return distance(*a->getValue(), *b->getValue());
                 }
             );
@@ -117,6 +117,10 @@ namespace game {
             );
         }
         this->enemyHandler->render();
+    }
+
+    void Map::tick(double scalar) {
+        this->enemyHandler->tick(scalar);
     }
 
     GameState* Map::loadMap(const std::string& mapFileName) {
@@ -221,10 +225,15 @@ namespace game {
         this->updateMapSize();
         this->updateTiles();
 
+        std::vector<std::vector<IPoint>> paths;
+        for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
+        for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
+
         this->gameState = new GameState(health, cash);
         this->enemyHandler = new EnemyHandler(
             this->renderer,
             this->destRect,
+            this,
             this->gameState
         );
         return this->gameState;
@@ -237,8 +246,9 @@ namespace game {
         TileGraph::Node::Neighbors neighbors = node->getNeighbors();
         this->graph->erase(node);
         std::vector<std::vector<IPoint>> paths;
+
         for (IPoint& spawn : this->spawns) {
-            bool res = efficientPathfindToMultipleTargets(spawn, paths);
+            bool res = this->efficientPathfindToMultipleTargets(spawn, paths);
             if (!res) {
                 this->graph->insert(node);
                 for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
@@ -246,10 +256,11 @@ namespace game {
                 return false;
             }
         }
+
         for (Enemy* enemy : *this->enemyHandler) {
             IPoint origin = this->getTileIndex(enemy->getCenter());
             for (std::vector<IPoint>& path : paths) if (std::find(path.begin(), path.end(), origin) != path.end()) continue;
-            bool res = efficientPathfindToMultipleTargets(origin, paths);
+            bool res = this->efficientPathfindToMultipleTargets(origin, paths);
             if (!res) {
                 this->graph->insert(node);
                 for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
@@ -365,5 +376,9 @@ namespace game {
 
     IPoint Map::getTileSize() const {
         return this->tileSize;
+    }
+
+    const std::vector<Path*>& Map::getPaths() const {
+        return this->paths;
     }
 };

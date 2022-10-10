@@ -185,6 +185,7 @@ namespace game {
                         current = (*index).second;
                         path.push_back(current);
                     }
+                    std::reverse(path.begin(), path.end());
                     return path;
                 }
 
