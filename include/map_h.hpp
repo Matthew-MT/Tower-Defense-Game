@@ -17,6 +17,7 @@ namespace game {
         using TileGraph = Graph<IPoint>;
     protected:
         IPoint tileSize;
+        GameState* gameState;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
         std::vector<std::vector<int>> map;
@@ -59,5 +60,6 @@ namespace game {
         int getTileType(const IPoint& index) const;
         const std::vector<IPoint>& getAllSpawns() const;
         const std::vector<IPoint>& getAllBases() const;
+        IPoint getTileSize() const;
     };
 };

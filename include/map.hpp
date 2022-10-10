@@ -74,10 +74,9 @@ namespace game {
             initDestRect
         },
         tileSize{initTileSize},
-        graph{new TileGraph()},
-        enemyHandler{new EnemyHandler(this->renderer, this->destRect)} {
+        graph{new TileGraph()} {
         std::fstream
-            textureAssociation("assets/config/texture_association.txt", std::ios_base::in);
+            textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
         std::string buffer;
 
         while (!textureAssociation.eof()) {
@@ -222,7 +221,13 @@ namespace game {
         this->updateMapSize();
         this->updateTiles();
 
-        return new GameState(health, cash);
+        this->gameState = new GameState(health, cash);
+        this->enemyHandler = new EnemyHandler(
+            this->renderer,
+            this->destRect,
+            this->gameState
+        );
+        return this->gameState;
     }
 
     bool Map::placeTurret(const IPoint& index) {
@@ -355,5 +360,9 @@ namespace game {
 
     const std::vector<IPoint>& Map::getAllBases() const {
         return this->bases;
+    }
+
+    IPoint Map::getTileSize() const {
+        return this->tileSize;
     }
 };

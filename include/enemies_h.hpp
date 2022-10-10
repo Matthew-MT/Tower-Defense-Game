@@ -8,8 +8,9 @@
 namespace game {
     class EnemyData {
     public:
-        EnemyData(int initMovementSpeed, int initHealth);
+        EnemyData(SDL_Texture* initTexture, int initMovementSpeed, int initHealth);
 
+        SDL_Texture* texture;
         int
             movementSpeed,
             health;
@@ -49,12 +50,15 @@ namespace game {
         using Enemies = std::unordered_set<Enemy*>;
     protected:
         Map* map;
+        GameState* gameState;
         Enemies enemies;
         std::vector<Path*> paths;
+        std::vector<EnemyData*> types;
     public:
         EnemyHandler(
             SDL_Renderer* initRenderer,
-            SDL_Rect* initDestRect
+            SDL_Rect* initDestRect,
+            GameState* initGameState
         );
 
         ~EnemyHandler();
@@ -64,7 +68,7 @@ namespace game {
         typename Enemies::iterator begin();
         typename Enemies::iterator end();
 
-        void spawn();
+        void spawn(int type, IPoint origin);
         void despawn(Enemy* enemy);
     };
 };
