@@ -13,7 +13,8 @@ namespace game{
         SDL_Rect* initDestRect,
         SDL_Rect* initSourceRect,
         int initDamage,
-        float initReload
+        float initReload,
+        IPoint initIndex
     ) : Sprite {
         initRenderer, 
         initTexture, 
@@ -21,8 +22,13 @@ namespace game{
         initSourceRect
     },
     damage{initDamage},
-    reloadTime{initReload}{}
+    reloadTime{initReload},
+    index{initIndex}{}
 
+    IPoint Turret::getIndex()
+    {
+        return index;
+    }
     void Turret::currentEnemy(){
 
     }
@@ -32,8 +38,9 @@ namespace game{
 
     TurretHandler::TurretHandler(
         SDL_Renderer* initRenderer,
-        SDL_Rect* initDestRect
-        ) : Renderable{initRenderer, initDestRect}
+        SDL_Rect* initDestRect,
+        Map* initMap
+        ) : Renderable{initRenderer, initDestRect}, map{initMap}
         {
             readTurretData("turret.txt");
         }
@@ -66,33 +73,46 @@ namespace game{
         turretTypes.push_back(new TurretData(damage, reloadTime, texture));
     }
 
-    void  TurretHandler::createTurret(int type)
+    void  TurretHandler::createTurret(int type, const IPoint& index)
     {
         TurretData* data = this->turretTypes[type];
-        this->turrets.insert(new Turret(
+        SDL_Rect* rect = this->map->getTileDest(index);
+        Turret* turret = new Turret(
             this->renderer,
             data->texture,
-            this->destRect,
+            rect,
             nullptr,
             data->damage,
-            data->reload
-        ));
+            data->reload,
+            index
+        );
+        this->turrets.insert(turret);
     }
 
     void  TurretHandler::handleEvent(SDL_Event* event)
     {
         int x, y;
-        SDL_Log("Handling event");
         if(event->type == SDL_MOUSEBUTTONUP)
         {
-            SDL_GetGlobalMouseState(&x, &y);
+            SDL_GetMouseState(&x, &y);
             IPoint index = this->map->getTileIndex({x,y});
-            std::cout << index.x << "   " << index.y << std::endl;
+
             bool placed = this->map->placeTurret(index);
+
             if(placed)
             {
-                SDL_Log("Turret was placed");
-                createTurret(4);
+                createTurret(0, index);
+            }
+            else if(this->map->getTileType(index)==TileType::TurretType)
+            {
+                this->map->sellTurret(index);
+                std::unordered_set<Turret*>::iterator i = std::find_if(this->turrets.begin(),this->turrets.end(),[&](Turret* turret)->bool{
+                    return turret->getIndex()==index;
+                });
+                delete *i;
+
+                this->turrets.erase(i);
+
             }
         }
     }

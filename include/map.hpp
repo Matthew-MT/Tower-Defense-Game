@@ -291,6 +291,7 @@ namespace game {
         if (nodeSW != this->graph->end()) node->link(*nodeSW);
         if (nodeW != this->graph->end()) node->link(*nodeW);
         if (nodeNW != this->graph->end()) node->link(*nodeNW);
+        this->map[index.x][index.y] = TileType::Empty;
         return true;
     }
 

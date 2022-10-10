@@ -12,6 +12,7 @@ namespace game{
         GameState* gamestate;
         int damage;
         float reloadTime;
+        IPoint index;
         public:
         Turret(
             SDL_Renderer* initRenderer,
@@ -19,9 +20,11 @@ namespace game{
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect,
             int initDamage,
-            float initReload
+            float initReload,
+            IPoint initIndex
         );
 
+        IPoint getIndex();
         void currentEnemy();
         ~Turret();
     };
@@ -35,14 +38,15 @@ namespace game{
         public:
         TurretHandler(
             SDL_Renderer* initRenderer,
-            SDL_Rect* initDestRect
+            SDL_Rect* initDestRect,
+            Map* initMap
             ); 
 
         void render();
 
         void readTurretData(const std::string& turretFileName);
 
-        void createTurret(int type);
+        void createTurret(int type, const IPoint& index);
 
         void handleEvent(SDL_Event* event);
     };

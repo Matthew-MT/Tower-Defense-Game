@@ -47,12 +47,14 @@ namespace game {
             mapRect = map->getDestRect();
             SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
 
-            map->placeTurret({4, 4});
-
             TurretHandler* turret = new TurretHandler(
                 this->renderer,
-                map->getDestRect()
+                map->getDestRect(),
+                map
             );
+            SDL_Log(std::to_string(renderList.size()).c_str());
+            this->renderList.push_back(turret);
+            SDL_Log(std::to_string(renderList.size()).c_str());
 
             TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
 
@@ -110,6 +112,7 @@ namespace game {
 
         void handleEvent(SDL_Event* event)
         {
+            SDL_Log(std::to_string(renderList.size()).c_str());
             for(Renderable* renderable: this->renderList)
             {
                 renderable->handleEvent(event);

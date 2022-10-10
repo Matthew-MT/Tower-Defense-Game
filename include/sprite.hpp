@@ -46,7 +46,7 @@ namespace game {
             return {this->destRect->x, this->destRect->y};
         }
 
-        void handleEvent(SDL_Event* event) {}
+        virtual void handleEvent(SDL_Event* event) {}
     };
 
     class StaticSprite : public Renderable {
