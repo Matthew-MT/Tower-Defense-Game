@@ -11,9 +11,9 @@ namespace game{
         SDL_Renderer* initRenderer,
         SDL_Texture* initTexture,
         SDL_Rect* initDestRect,
-        SDL_Rect* initSourceRect = nullptr,
-        int initDamage=0,
-        double initReload=0.0
+        SDL_Rect* initSourceRect,
+        int initDamage,
+        float initReload
     ) : Sprite {
         initRenderer, 
         initTexture, 
