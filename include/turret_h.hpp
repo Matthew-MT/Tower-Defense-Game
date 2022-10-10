@@ -47,7 +47,7 @@ namespace game{
 
         void storeTurretData(SDL_Texture* t, int d, float r);
 
-        void createTurret(TurretType type);
+        void createTurret(int type);
 
         void handleEvent(SDL_Event* event);
     };
