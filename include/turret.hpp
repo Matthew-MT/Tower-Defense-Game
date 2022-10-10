@@ -14,6 +14,7 @@ namespace game{
         SDL_Rect* initSourceRect,
         int initDamage,
         float initReload,
+        int initRange,
         IPoint initIndex
     ) : Sprite {
         initRenderer, 
@@ -23,15 +24,14 @@ namespace game{
     },
     damage{initDamage},
     reloadTime{initReload},
+    range{initRange},
     index{initIndex}{}
 
     IPoint Turret::getIndex()
     {
         return index;
     }
-    void Turret::currentEnemy(){
-
-    }
+    void Turret::currentEnemy() {}
     Turret::~Turret(){}
 
 
@@ -60,6 +60,7 @@ namespace game{
         std::string buffer;
         int damage;
         float reloadTime;
+        int range;
         SDL_Texture* texture;
 
         std::getline(turretFile, buffer);
@@ -67,10 +68,12 @@ namespace game{
         std::getline(turretFile, buffer);
         reloadTime = std::stof(buffer);
         std::getline(turretFile, buffer);
+        range = std::stoi(buffer);
+        std::getline(turretFile, buffer);
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        turretTypes.push_back(new TurretData(damage, reloadTime, texture));
+        turretTypes.push_back(new TurretData(damage, reloadTime, range, texture));
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index)
@@ -84,6 +87,7 @@ namespace game{
             nullptr,
             data->damage,
             data->reload,
+            data->range,
             index
         );
         this->turrets.insert(turret);
@@ -120,11 +124,13 @@ namespace game{
     TurretData::TurretData(
         int initDamage, 
         float initReload, 
+        int initRange,
         SDL_Texture* initTexture
     )
     {
         damage = initDamage;
         reload = initReload;
+        range = initReload;
         texture = initTexture;
     }
 };

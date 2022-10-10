@@ -12,6 +12,7 @@ namespace game{
         GameState* gamestate;
         int damage;
         float reloadTime;
+        int range;
         IPoint index;
         public:
         Turret(
@@ -21,6 +22,7 @@ namespace game{
             SDL_Rect* initSourceRect,
             int initDamage,
             float initReload,
+            int initRange,
             IPoint initIndex
         );
 
@@ -56,10 +58,11 @@ namespace game{
         public:
         int damage;
         float reload;
+        int range;
         SDL_Texture* texture;
         public:
         TurretData(
-            int initDamage, float initReload, SDL_Texture* initTexture
+            int initDamage, float initReload, int initRange, SDL_Texture* initTexture
         );
     };
 };
