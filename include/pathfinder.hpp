@@ -23,14 +23,16 @@ namespace game {
         SDL_Log(("Path index: x: " + std::to_string((*i).x) + ", y: " + std::to_string((*i).y)).c_str());
 
         if (i == this->path.end()) {
+            SDL_Log("Index is at the end!");
             std::vector<IPoint>::reverse_iterator r = std::find_if(
                 this->path.rbegin(),
                 this->path.rend(),
                 [&](const IPoint& point) -> bool {
+                    SDL_Log(("    Path: x: " + std::to_string(point.x) + ", y: " + std::to_string(point.y)).c_str());
                     return
                         point.x <= index.x + 1
                         && point.x >= index.x - 1
-                        && point.y <= index.x + 1
+                        && point.y <= index.y + 1
                         && point.y >= index.y - 1;
                 }
             );

@@ -62,7 +62,7 @@ namespace game {
             this->handler->despawn(this);
             SDL_Log("I died.");
         }
-        SDL_Log(std::to_string(this->health).c_str());
+        SDL_Log(("Health: " + std::to_string(this->health)).c_str());
         SDL_Log("Exiting...");
     }
 
@@ -121,11 +121,13 @@ namespace game {
         SDL_Log("EnemyHandler tick");
         SDL_Log(("Enemies: " + std::to_string(this->enemies.size())).c_str());
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
-        SDL_Log("Enemies ticked, getting spawns");
-        std::vector<IPoint> spawns = this->map->getAllSpawns();
-        SDL_Log(("Spawning enemy. Spawns available: " + std::to_string(spawns.size())).c_str());
-        for (const IPoint& spawn : spawns) SDL_Log(("Spawn: x: " + std::to_string(spawn.x) + ", y: " + std::to_string(spawn.y)).c_str());
-        if (std::rand() % 1000 < 20) this->spawn(0, spawns[std::rand() % spawns.size()]);
+        if (std::rand() % 1000 < 20) {
+            SDL_Log("Enemies ticked, getting spawns");
+            std::vector<IPoint> spawns = this->map->getAllSpawns();
+            SDL_Log(("Spawning enemy. Spawns available: " + std::to_string(spawns.size())).c_str());
+            for (const IPoint& spawn : spawns) SDL_Log(("Spawn: x: " + std::to_string(spawn.x) + ", y: " + std::to_string(spawn.y)).c_str());
+            this->spawn(0, spawns[std::rand() % spawns.size()]);
+        }
         for (Enemy* enemy : this->dying) {
             this->enemies.erase(enemy);
             delete enemy;
