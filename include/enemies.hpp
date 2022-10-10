@@ -44,26 +44,18 @@ namespace game {
     Enemy::~Enemy() {}
 
     void Enemy::tick(double scalar) {
-        SDL_Log("Enemy tick");
-        SDL_Log(("Current position: x: " + std::to_string(this->getCenter().x) + ", y: " + std::to_string(this->getCenter().y)).c_str());
         IPoint
             next = this->path->next(scalar, this->getCenter(), this->movementSpeed),
             size = this->getSize();
-        SDL_Log(("Next: x: " + std::to_string(next.x) + ", y: " + std::to_string(next.y)).c_str());
-        SDL_Log("Got here");
         if (next.x != -1 && next.y != -1) {
             this->setPosition({
                 next.x - (size.x >> 1),
                 next.y - (size.y >> 1)
             });
-            SDL_Log("Done!");
         } else {
             //this->gameState->reduceHealth();
             this->handler->despawn(this);
-            SDL_Log("I died.");
         }
-        SDL_Log(("Health: " + std::to_string(this->health)).c_str());
-        SDL_Log("Exiting...");
     }
 
     void Enemy::setPath(Path* path) {
@@ -118,14 +110,9 @@ namespace game {
     }
 
     void EnemyHandler::tick(double scalar) {
-        SDL_Log("EnemyHandler tick");
-        SDL_Log(("Enemies: " + std::to_string(this->enemies.size())).c_str());
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
         if (std::rand() % 1000 < 20) {
-            SDL_Log("Enemies ticked, getting spawns");
             std::vector<IPoint> spawns = this->map->getAllSpawns();
-            SDL_Log(("Spawning enemy. Spawns available: " + std::to_string(spawns.size())).c_str());
-            for (const IPoint& spawn : spawns) SDL_Log(("Spawn: x: " + std::to_string(spawn.x) + ", y: " + std::to_string(spawn.y)).c_str());
             this->spawn(0, spawns[std::rand() % spawns.size()]);
         }
         for (Enemy* enemy : this->dying) {
