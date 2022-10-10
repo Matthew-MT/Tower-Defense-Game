@@ -45,6 +45,8 @@ namespace game {
 
         double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
 
+        SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
+
         slope.x = (int)(slope.x / normalizeScalar);
         slope.y = (int)(slope.y / normalizeScalar);
         return {

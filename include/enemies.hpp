@@ -111,7 +111,7 @@ namespace game {
 
     void EnemyHandler::tick(double scalar) {
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
-        if (std::rand() % 1000 < 20) {
+        if (std::rand() % 1000 < 4) {
             std::vector<IPoint> spawns = this->map->getAllSpawns();
             this->spawn(0, spawns[std::rand() % spawns.size()]);
         }

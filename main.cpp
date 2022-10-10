@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
     // SDL_SetWindowSize(win, width / 2, height / 2);
 
     while (!loopShouldStop) {
+        SDL_Delay(10);
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
