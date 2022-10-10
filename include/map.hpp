@@ -397,6 +397,7 @@ namespace game {
     }
 
     int Map::getTileType(const IPoint& index) const {
+        if (index.x < 0 || index.x >= this->map.size() || index.y < 0 || index.y >= this->map.back().size()) return TileType::Wall;
         return this->map[index.x][index.y];
     }
 
