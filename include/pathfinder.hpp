@@ -42,14 +42,21 @@ namespace game {
 
         double range = (double)movementSpeed * scalar;
         IPoint targetPosition = this->map->getTileCenter(*i);
+        SDL_Log(("    Current position: x: " + std::to_string(currentPosition.x) + ", y: " + std::to_string(currentPosition.y)).c_str());
+        SDL_Log(("    Target position:  x: " + std::to_string(targetPosition.x) + ", y: " + std::to_string(targetPosition.y)).c_str());
         IPoint slope = {
-            currentPosition.x - targetPosition.x,
-            currentPosition.y - targetPosition.y
+            targetPosition.x - currentPosition.x,
+            targetPosition.y - currentPosition.y
         };
+        SDL_Log(("    Slope:            x: " + std::to_string(slope.x) + ", y: " + std::to_string(slope.y)).c_str());
+        SDL_Log(("    Square:           x: " + std::to_string(std::pow((double)slope.x, 2)) + ", y: " + std::to_string(std::pow((double)slope.y, 2))).c_str());
+
         double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
 
-        slope.x = (int)(slope.x / (normalizeScalar * 4));
-        slope.y = (int)(slope.y / (normalizeScalar * 4));
+        SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
+
+        slope.x = (int)(slope.x / normalizeScalar);
+        slope.y = (int)(slope.y / normalizeScalar);
         return {
             currentPosition.x + slope.x,
             currentPosition.y + slope.y

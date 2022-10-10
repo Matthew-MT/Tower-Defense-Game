@@ -44,6 +44,10 @@ namespace game {
             return this->destRect;
         }
 
+        IPoint getSize() {
+            return {this->destRect->w, this->destRect->h};
+        }
+
         IPoint getPosition() const {
             return {this->destRect->x, this->destRect->y};
         }

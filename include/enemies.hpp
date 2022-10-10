@@ -46,11 +46,16 @@ namespace game {
     void Enemy::tick(double scalar) {
         SDL_Log("Enemy tick");
         SDL_Log(("Current position: x: " + std::to_string(this->getCenter().x) + ", y: " + std::to_string(this->getCenter().y)).c_str());
-        IPoint next = this->path->next(scalar, this->getCenter(), this->movementSpeed);
+        IPoint
+            next = this->path->next(scalar, this->getCenter(), this->movementSpeed),
+            size = this->getSize();
         SDL_Log(("Next: x: " + std::to_string(next.x) + ", y: " + std::to_string(next.y)).c_str());
         SDL_Log("Got here");
         if (next.x != -1 && next.y != -1) {
-            this->setPosition(next);
+            this->setPosition({
+                next.x - (size.x >> 1),
+                next.y - (size.y >> 1)
+            });
             SDL_Log("Done!");
         } else {
             //this->gameState->reduceHealth();
@@ -96,7 +101,7 @@ namespace game {
                     this->renderer,
                     surface
                 ),
-                1,
+                100,
                 10
             ));
             SDL_FreeSurface(surface);
