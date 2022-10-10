@@ -108,7 +108,7 @@ namespace game {
             SDL_RenderCopy(
                 this->renderer,
                 this->textures.at(
-                    type == TileType::Turret
+                    type == TileType::TurretType
                     ? TileType::Wall
                     : type
                 ),
@@ -232,7 +232,7 @@ namespace game {
 
     bool Map::placeTurret(const IPoint& index) {
         if (this->map[index.x][index.y] != TileType::Empty) return false;
-        this->map[index.x][index.y] = TileType::Turret;
+        this->map[index.x][index.y] = TileType::TurretType;
         TileGraph::Node* node = *this->graph->find(index);
         TileGraph::Node::Neighbors neighbors = node->getNeighbors();
         this->graph->erase(node);
@@ -272,7 +272,7 @@ namespace game {
     }
 
     bool Map::sellTurret(const IPoint& index) {
-        if (this->map[index.x][index.y] != TileType::Turret) return false;
+        if (this->map[index.x][index.y] != TileType::TurretType) return false;
         typename TileGraph::Nodes::iterator
             nodeN = this->graph->find({index.x, index.y - 1}),
             nodeNE = this->graph->find({index.x + 1, index.y - 1}),

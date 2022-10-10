@@ -17,9 +17,9 @@ namespace game{
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
             SDL_Rect* initDestRect,
-            SDL_Rect* initSourceRect = nullptr,
-            int initDamage=0,
-            double initReload=0.0
+            SDL_Rect* initSourceRect,
+            int initDamage,
+            float initReload
         );
 
         void currentEnemy();
@@ -47,7 +47,7 @@ namespace game{
 
         void storeTurretData(SDL_Texture* t, int d, float r);
 
-        void createTurret(TurretType type);
+        void createTurret(int type);
 
         void handleEvent(SDL_Event* event);
     };

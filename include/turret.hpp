@@ -11,9 +11,9 @@ namespace game{
         SDL_Renderer* initRenderer,
         SDL_Texture* initTexture,
         SDL_Rect* initDestRect,
-        SDL_Rect* initSourceRect = nullptr,
-        int initDamage=0,
-        double initReload=0.0
+        SDL_Rect* initSourceRect,
+        int initDamage,
+        float initReload
     ) : Sprite {
         initRenderer, 
         initTexture, 
@@ -68,7 +68,7 @@ namespace game{
         turretTypes.push_back(new TurretData(d, r, t));
     }
 
-    void  TurretHandler::createTurret(TurretType type)
+    void  TurretHandler::createTurret(int type)
     {
         TurretData* data = this->turretTypes[type];
         this->turrets.insert(new Turret(
@@ -94,7 +94,7 @@ namespace game{
             if(placed)
             {
                 SDL_Log("Turret was placed");
-                createTurret(Gatling);
+                createTurret(4);
             }
         }
     }

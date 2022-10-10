@@ -6,10 +6,10 @@ namespace game {
         Wall = 1,
         Spawn = 2,
         Base = 3,
-        Turret = 4
+        TurretType = 4
     };
 
-    enum TurretType{
+    /*enum TurretType{
         Gatling = 0
-    };
+    };*/
 };
