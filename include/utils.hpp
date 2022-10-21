@@ -38,4 +38,6 @@ namespace game {
             }
         );
     }
+
+    const double sqrtOf2 = distance({0, 0}, {1, 1});
 };
