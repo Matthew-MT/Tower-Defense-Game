@@ -45,11 +45,15 @@ namespace game {
 
         double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
 
-        // std::cout << "Normal: " << normalizeScalar << "\n";
-        // SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
+        std::cout << "Target: (" << targetPosition.x << ", " << targetPosition.y << ")\n";
+        SDL_Log(("Target: (" + std::to_string(targetPosition.x) + ", " + std::to_string(targetPosition.y) + ")").c_str());
+        std::cout << "Normal: " << normalizeScalar << "\n";
+        SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
 
         slope.x = (int)(slope.x / normalizeScalar);
         slope.y = (int)(slope.y / normalizeScalar);
+        std::cout << "Slope: (" << slope.x << ", " << slope.y << ")\n";
+        SDL_Log(("Slope: (" + std::to_string(slope.x) + ", " + std::to_string(slope.y) + ")").c_str());
         return {
             currentPosition.x + slope.x,
             currentPosition.y + slope.y

@@ -45,13 +45,12 @@ namespace game {
 
     void Enemy::tick(double scalar) {
         IPoint
-            next = this->path->next(scalar, this->getCenter(), this->movementSpeed),
-            size = this->getSize();
+            center = this->getCenter(),
+            next = this->path->next(scalar, center, this->movementSpeed);
+        std::cout << "Previous: (" << center.x << ", " << center.y << "); Next: (" << next.x << ", " << next.y << ")\n";
+        SDL_Log(("Previous: (" + std::to_string(center.x) + ", " + std::to_string(center.y) + "); Next: (" + std::to_string(next.x) + ", " + std::to_string(next.y) + ")").c_str());
         if (next.x != -1 && next.y != -1) {
-            this->setPosition({
-                next.x - (size.x >> 1),
-                next.y - (size.y >> 1)
-            });
+            this->setCenter(next);
         } else {
             //this->gameState->reduceHealth();
             this->handler->despawn(this);
@@ -60,6 +59,14 @@ namespace game {
 
     void Enemy::setPath(Path* path) {
         this->path = path;
+    }
+
+    void Enemy::setCenter(const IPoint& center) {
+        IPoint size = this->getSize();
+        this->setPosition({
+            center.x - (size.x >> 1),
+            center.y - (size.y >> 1)
+        });
     }
 
     IPoint Enemy::getCenter() {

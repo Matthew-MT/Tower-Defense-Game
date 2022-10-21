@@ -44,6 +44,8 @@ namespace game {
 
         void setPath(Path* path);
 
+        void setCenter(const IPoint& center);
+
         IPoint getCenter();
     };
 

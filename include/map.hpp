@@ -246,37 +246,56 @@ namespace game {
         if (index.x < 0 || index.x >= this->map.size() || index.y < 0 || index.y >= this->map.back().size() || this->map[index.x][index.y] != TileType::Empty) return false;
         this->map[index.x][index.y] = TileType::TurretType;
         TileGraph::Node* node = *this->graph->find(index);
-        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
         std::vector<std::vector<IPoint>> paths;
 
         this->graph->erase(node);
 
         TileGraph::Nodes::iterator
-            north = this->graph->find({index.x, index.y - 1}),
-            south = this->graph->find({index.x, index.y + 1}),
-            east = this->graph->find({index.x + 1, index.y}),
-            west = this->graph->find({index.x - 1, index.y});
-        if (north != this->graph->end()) {
-            if (east != this->graph->end()) (*north)->unlink(*east);
-            if (west != this->graph->end()) (*north)->unlink(*west);
+            nodeN = this->graph->find({index.x, index.y - 1}),
+            nodeNE = this->graph->find({index.x + 1, index.y - 1}),
+            nodeE = this->graph->find({index.x + 1, index.y}),
+            nodeSE = this->graph->find({index.x + 1, index.y + 1}),
+            nodeS = this->graph->find({index.x, index.y + 1}),
+            nodeSW = this->graph->find({index.x - 1, index.y + 1}),
+            nodeW = this->graph->find({index.x - 1, index.y}),
+            nodeNW = this->graph->find({index.x - 1, index.y - 1});
+        if (nodeN != this->graph->end()) {
+            // node->unlink(*nodeN);
+            if (nodeE != this->graph->end()) (*nodeN)->unlink(*nodeE);
+            if (nodeW != this->graph->end()) (*nodeN)->unlink(*nodeW);
         }
-        if (south != this->graph->end()) {
-            if (east != this->graph->end()) (*south)->unlink(*east);
-            if (west != this->graph->end()) (*south)->unlink(*west);
+        // if (nodeNE != this->graph->end()) node->unlink(*nodeNE);
+        // if (nodeE != this->graph->end()) node->unlink(*nodeE);
+        // if (nodeSE != this->graph->end()) node->unlink(*nodeSE);
+        if (nodeS != this->graph->end()) {
+            // node->unlink(*nodeS);
+            if (nodeE != this->graph->end()) (*nodeS)->unlink(*nodeE);
+            if (nodeW != this->graph->end()) (*nodeS)->unlink(*nodeW);
         }
+        // if (nodeSW != this->graph->end()) node->unlink(*nodeSW);
+        // if (nodeW != this->graph->end()) node->unlink(*nodeW);
+        // if (nodeNW != this->graph->end()) node->unlink(*nodeNW);
 
         std::function<void()> relink = [&]() -> void {
             this->graph->insert(node);
-            for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
+            TileGraph::Nodes::iterator end = this->graph->end();
 
-            if (north != this->graph->end()) {
-                if (east != this->graph->end()) (*north)->link(*east, sqrtOf2);
-                if (west != this->graph->end()) (*north)->link(*west, sqrtOf2);
+            if (nodeN != end) {
+                node->link(*nodeN);
+                if (nodeE != end && nodeNE != end) (*nodeN)->link(*nodeE, sqrtOf2);
+                if (nodeW != end && nodeNW != end) (*nodeN)->link(*nodeW, sqrtOf2);
             }
-            if (south != this->graph->end()) {
-                if (east != this->graph->end()) (*south)->link(*east, sqrtOf2);
-                if (west != this->graph->end()) (*south)->link(*west, sqrtOf2);
+            if (nodeNE != end && nodeN != end && nodeE != end) node->link(*nodeNE, sqrtOf2);
+            if (nodeE != end) node->link(*nodeE);
+            if (nodeSE != end && nodeS != end && nodeE != end) node->link(*nodeSE, sqrtOf2);
+            if (nodeS != end) {
+                node->link(*nodeS);
+                if (nodeE != end && nodeSE != end) (*nodeS)->link(*nodeE, sqrtOf2);
+                if (nodeW != end && nodeSW != end) (*nodeS)->link(*nodeW, sqrtOf2);
             }
+            if (nodeSW != end && nodeS != end && nodeW != end) node->link(*nodeSW, sqrtOf2);
+            if (nodeW != end) node->link(*nodeW);
+            if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
             this->map[index.x][index.y] = TileType::Empty;
         };
@@ -335,17 +354,17 @@ namespace game {
             if (nodeE != this->graph->end()) (*nodeN)->link(*nodeE, sqrtOf2);
             if (nodeW != this->graph->end()) (*nodeN)->link(*nodeW, sqrtOf2);
         }
-        if (nodeNE != this->graph->end()) node->link(*nodeNE);
+        if (nodeNE != this->graph->end()) node->link(*nodeNE, sqrtOf2);
         if (nodeE != this->graph->end()) node->link(*nodeE);
-        if (nodeSE != this->graph->end()) node->link(*nodeSE);
+        if (nodeSE != this->graph->end()) node->link(*nodeSE, sqrtOf2);
         if (nodeS != this->graph->end()) {
             node->link(*nodeS);
             if (nodeE != this->graph->end()) (*nodeS)->link(*nodeE, sqrtOf2);
             if (nodeW != this->graph->end()) (*nodeS)->link(*nodeW, sqrtOf2);
         }
-        if (nodeSW != this->graph->end()) node->link(*nodeSW);
+        if (nodeSW != this->graph->end()) node->link(*nodeSW, sqrtOf2);
         if (nodeW != this->graph->end()) node->link(*nodeW);
-        if (nodeNW != this->graph->end()) node->link(*nodeNW);
+        if (nodeNW != this->graph->end()) node->link(*nodeNW, sqrtOf2);
         this->map[index.x][index.y] = TileType::Empty;
         return true;
     }
