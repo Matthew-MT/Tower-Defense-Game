@@ -105,8 +105,6 @@ namespace game {
         virtual void tick() {
             const Uint64 nextTick = SDL_GetTicks64();
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
-            // std::cout << "Scalar: " << scalar << "\n";
-            // SDL_Log(("Scalar: " + std::to_string(scalar)).c_str());
             this->lastTick = nextTick;
             for (Renderable* renderable : this->renderList) renderable->tick(scalar);
         }

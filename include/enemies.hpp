@@ -47,8 +47,6 @@ namespace game {
         DPoint
             center = this->getCenter(),
             next = this->path->next(scalar, center, this->movementSpeed);
-        // std::cout << "Previous: (" << center.x << ", " << center.y << "); Next: (" << next.x << ", " << next.y << ")\n";
-        // SDL_Log(("Previous: (" + std::to_string(center.x) + ", " + std::to_string(center.y) + "); Next: (" + std::to_string(next.x) + ", " + std::to_string(next.y) + ")").c_str());
         if (next.x != std::numeric_limits<double>::max() && next.y != std::numeric_limits<double>::max()) {
             this->setCenter(next);
         } else {
@@ -58,7 +56,6 @@ namespace game {
     }
 
     void Enemy::setPath(Path* path) {
-        SDL_Log("Setting path...");
         this->path = path;
     }
 

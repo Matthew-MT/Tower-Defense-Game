@@ -150,7 +150,7 @@ namespace game {
                 const queue_type& a,
                 const queue_type& b
             ) -> bool {
-                return a.first < b.first;
+                return a.first > b.first;
             };
             std::vector<std::vector<Node*>> paths;
             std::priority_queue<
@@ -193,7 +193,7 @@ namespace game {
                         gScore[edge.first] = tentative_gScore;
                         fScore[edge.first] = tentative_gScore + heuristic(edge.first, target);
                         if (tracking.find(edge.first) == tracking.end()) {
-                            openSet.push({tentative_gScore, edge.first});
+                            openSet.push({fScore[edge.first], edge.first});
                             tracking.insert(edge.first);
                         }
                     }

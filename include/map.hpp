@@ -255,15 +255,6 @@ namespace game {
             this,
             this->gameState
         );
-
-        for (TileGraph::Node* node : *this->graph) {
-            TileGraph::Node::Neighbors neighbors = node->getNeighbors();
-            std::string message = "Node: (" + std::to_string(node->getValue().x) + ", " + std::to_string(node->getValue().y) + ")\n -> Linked to:";
-            if (neighbors.size() == 0) message += " None";
-            else for (TileGraph::Node::Edge edge : *node) message += "\n     -> Neighbor: (" + std::to_string(edge.first->getValue().x) + ", " + std::to_string(edge.first->getValue().y) + "); Weight: " + std::to_string(edge.second);
-            SDL_Log(message.c_str());
-        }
-
         return this->gameState;
     }
 
@@ -386,12 +377,7 @@ namespace game {
             nodeSW = this->graph->find({index.x - 1, index.y + 1}),
             nodeW = this->graph->find({index.x - 1, index.y}),
             nodeNW = this->graph->find({index.x - 1, index.y - 1});
-        std::pair<typename TileGraph::Nodes::iterator, bool> res = this->graph->insert(index);
-        if (res.second) SDL_Log("Inserted");
-        else SDL_Log("Not inserted");
-        typename TileGraph::Nodes::iterator i = this->graph->find(index);
-        SDL_Log(("Inserted index: (" + std::to_string((*i)->getValue().x) + ", " + std::to_string((*i)->getValue().y) + ")").c_str());
-        TileGraph::Node* node = *(res.first);
+        TileGraph::Node* node = *(this->graph->insert(index).first);
 
         TileGraph::Nodes::iterator end = this->graph->end();
         if (nodeN != end) {
@@ -410,11 +396,6 @@ namespace game {
         if (nodeSW != end && nodeS != end && nodeW != end) node->link(*nodeSW, sqrtOf2);
         if (nodeW != end) node->link(*nodeW);
         if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
-
-        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
-        std::string m = "Inserted neighbors:";
-        for (TileGraph::Node* neighbor : neighbors) m += "\n -> (" + std::to_string(neighbor->getValue().x) + ", " + std::to_string(neighbor->getValue().y) + ")";
-        SDL_Log(m.c_str());
 
         this->map[index.x][index.y] = TileType::Empty;
 
@@ -439,14 +420,6 @@ namespace game {
             enemy->setPath(validPaths[std::rand() % validPaths.size()]);
         }
 
-        SDL_Log("\n#########################\n#### Begin Graph Log ####\n#########################");
-        for (TileGraph::Node* node : *this->graph) {
-            TileGraph::Node::Neighbors neighbors = node->getNeighbors();
-            std::string message = "Node: (" + std::to_string(node->getValue().x) + ", " + std::to_string(node->getValue().y) + ")\n -> Linked to:";
-            if (neighbors.size() == 0) message += " None";
-            else for (TileGraph::Node::Edge edge : *node) message += "\n     -> Neighbor: (" + std::to_string(edge.first->getValue().x) + ", " + std::to_string(edge.first->getValue().y) + "); Weight: " + std::to_string(edge.second);
-            SDL_Log(message.c_str());
-        }
         return true;
     }
 
