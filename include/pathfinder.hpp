@@ -6,18 +6,32 @@
 #include <vector>
 
 namespace game {
-    Path::Path(Map* initMap, const std::vector<IPoint>& initPath) : map{initMap}, path{initPath} {}
+    Path::Path(Map* initMap, const std::vector<IPoint>& initPath) : map{initMap}, path{initPath} {
+        std::string message = "Path:";
+        for (const IPoint& index : this->path) message += " (" + std::to_string(index.x) + ", " + std::to_string(index.y) + ")";
+        SDL_Log(message.c_str());
+    }
     Path::~Path() {}
 
     bool Path::isIndexInPath(const IPoint& index) {
+        std::string message = "Path:";
+        for (const IPoint& index : this->path) message += " (" + std::to_string(index.x) + ", " + std::to_string(index.y) + ")";
+        SDL_Log(message.c_str());
+        SDL_Log(("Index: (" + std::to_string(index.x) + ", " + std::to_string(index.y) + ")").c_str());
         return std::find(this->path.begin(), this->path.end(), index) != this->path.end();
     }
 
-    IPoint Path::next(double scalar, const IPoint& currentPosition, int movementSpeed) {        
+    DPoint Path::next(double scalar, const DPoint& currentPosition, int movementSpeed) {        
         if (movementSpeed < 0) throw "Positive movement speed only.";
 
-        IPoint index = this->map->getTileIndex(currentPosition);
+        IPoint index = this->map->getTileIndex({
+            (int)currentPosition.x,
+            (int)currentPosition.y
+        });
         std::vector<IPoint>::iterator i = std::find(this->path.begin(), this->path.end(), index);
+        DPoint targetPosition = currentPosition;
+
+        double range = (double)movementSpeed * scalar;
 
         if (i == this->path.end()) {
             std::vector<IPoint>::reverse_iterator r = std::find_if(
@@ -34,26 +48,37 @@ namespace game {
 
             if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
             i = (++r).base();
-        } else if (++i == this->path.end()) return {-1, -1};
-
-        double range = (double)movementSpeed * scalar;
-        IPoint targetPosition = this->map->getTileCenter(*i);
-        IPoint slope = {
-            targetPosition.x - currentPosition.x,
-            targetPosition.y - currentPosition.y
+            targetPosition = this->map->getTileCenter(*i);
+        } else {
+            // std::cout << "Origin: (" << (*i).x << ", " << (*i).y << ")\n";
+            // SDL_Log(("Origin: (" + std::to_string((*i).x) + ", " + std::to_string((*i).y) + ")").c_str());
+            // std::cout << "Considering: (" << (*(i + 1)).x << ", " << (*(i + 1)).y << ")\n";
+            // SDL_Log(("Considering: (" + std::to_string((*(i + 1)).x) + ", " + std::to_string((*(i + 1)).y) + ")").c_str());
+            targetPosition = this->map->getTileCenter(*i);
+            if (i + 1 != this->path.end()) {
+                DPoint consideredPosition = this->map->getTileCenter(*(i + 1));
+                if (
+                    distance(currentPosition, targetPosition) <= range
+                    || distance(currentPosition, consideredPosition) <= distance(consideredPosition, targetPosition)
+                ) targetPosition = consideredPosition;
+            } else return {std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
+        }
+        DPoint slope = {
+            (double)targetPosition.x - currentPosition.x,
+            (double)targetPosition.y - currentPosition.y
         };
 
         double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
 
-        std::cout << "Target: (" << targetPosition.x << ", " << targetPosition.y << ")\n";
-        SDL_Log(("Target: (" + std::to_string(targetPosition.x) + ", " + std::to_string(targetPosition.y) + ")").c_str());
-        std::cout << "Normal: " << normalizeScalar << "\n";
-        SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
+        // std::cout << "Target: (" << targetPosition.x << ", " << targetPosition.y << ")\n";
+        // SDL_Log(("Target: (" + std::to_string(targetPosition.x) + ", " + std::to_string(targetPosition.y) + ")").c_str());
+        // std::cout << "Normal: " << normalizeScalar << "\n";
+        // SDL_Log(("Normal: " + std::to_string(normalizeScalar)).c_str());
 
-        slope.x = (int)(slope.x / normalizeScalar);
-        slope.y = (int)(slope.y / normalizeScalar);
-        std::cout << "Slope: (" << slope.x << ", " << slope.y << ")\n";
-        SDL_Log(("Slope: (" + std::to_string(slope.x) + ", " + std::to_string(slope.y) + ")").c_str());
+        slope.x = slope.x / normalizeScalar;
+        slope.y = slope.y / normalizeScalar;
+        // std::cout << "Slope: (" << slope.x << ", " << slope.y << ")\n";
+        // SDL_Log(("Slope: (" + std::to_string(slope.x) + ", " + std::to_string(slope.y) + ")").c_str());
         return {
             currentPosition.x + slope.x,
             currentPosition.y + slope.y

@@ -13,8 +13,8 @@ namespace game {
         Path(Map* initMap, const std::vector<IPoint>& initPath);
         ~Path();
 
-        bool isIndexInPath(const IPoint& index);
+        virtual bool isIndexInPath(const IPoint& index);
 
-        IPoint next(double scalar, const IPoint& currentPosition, int movementSpeed);
+        virtual DPoint next(double scalar, const DPoint& currentPosition, int movementSpeed);
     };
 };

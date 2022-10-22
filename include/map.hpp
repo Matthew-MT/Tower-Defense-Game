@@ -56,12 +56,12 @@ namespace game {
             std::vector<TileGraph::Node*> foundPath = this->graph->aStar(
                 *o, *b,
                 [&](TileGraph::Node* a, TileGraph::Node* b) -> double {
-                    return distance(*a->getValue(), *b->getValue());
+                    return distance(a->getValue(), b->getValue());
                 }
             );
             if (foundPath.size() == 0) return false;
             std::vector<IPoint> path;
-            for (TileGraph::Node* node : foundPath) path.push_back(*node->getValue());
+            for (TileGraph::Node* node : foundPath) path.push_back(node->getValue());
             paths.push_back(path);
         }
         return true;
@@ -206,6 +206,14 @@ namespace game {
                         this->map[i - 1][j - 1] == TileType::Empty
                         || this->map[i - 1][j - 1] == TileType::Spawn
                         || this->map[i - 1][j - 1] == TileType::Base
+                    ) && (
+                        this->map[i][j - 1] == TileType::Empty
+                        || this->map[i][j - 1] == TileType::Spawn
+                        || this->map[i][j - 1] == TileType::Base
+                    ) && (
+                        this->map[i - 1][j] == TileType::Empty
+                        || this->map[i - 1][j] == TileType::Spawn
+                        || this->map[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j - 1}))->link(node, sqrtOf2);
@@ -217,6 +225,14 @@ namespace game {
                         this->map[i - 1][j + 1] == TileType::Empty
                         || this->map[i - 1][j + 1] == TileType::Spawn
                         || this->map[i - 1][j + 1] == TileType::Base
+                    ) && (
+                        this->map[i][j + 1] == TileType::Empty
+                        || this->map[i][j + 1] == TileType::Spawn
+                        || this->map[i][j + 1] == TileType::Base
+                    ) && (
+                        this->map[i - 1][j] == TileType::Empty
+                        || this->map[i - 1][j] == TileType::Spawn
+                        || this->map[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j + 1}))->link(node, sqrtOf2);
@@ -239,11 +255,26 @@ namespace game {
             this,
             this->gameState
         );
+
+        for (TileGraph::Node* node : *this->graph) {
+            TileGraph::Node::Neighbors neighbors = node->getNeighbors();
+            std::string message = "Node: (" + std::to_string(node->getValue().x) + ", " + std::to_string(node->getValue().y) + ")\n -> Linked to:";
+            if (neighbors.size() == 0) message += " None";
+            else for (TileGraph::Node::Edge edge : *node) message += "\n     -> Neighbor: (" + std::to_string(edge.first->getValue().x) + ", " + std::to_string(edge.first->getValue().y) + "); Weight: " + std::to_string(edge.second);
+            SDL_Log(message.c_str());
+        }
+
         return this->gameState;
     }
 
     bool Map::placeTurret(const IPoint& index) {
-        if (index.x < 0 || index.x >= this->map.size() || index.y < 0 || index.y >= this->map.back().size() || this->map[index.x][index.y] != TileType::Empty) return false;
+        if (
+            index.x < 0
+            || index.x >= this->map.size()
+            || index.y < 0
+            || index.y >= this->map.back().size()
+            || this->map[index.x][index.y] != TileType::Empty
+        ) return false;
         this->map[index.x][index.y] = TileType::TurretType;
         TileGraph::Node* node = *this->graph->find(index);
         std::vector<std::vector<IPoint>> paths;
@@ -300,6 +331,14 @@ namespace game {
             this->map[index.x][index.y] = TileType::Empty;
         };
 
+        for (IPoint& spawn : this->spawns) {
+            bool res = this->efficientPathfindToMultipleTargets(spawn, paths);
+            if (!res) {
+                relink();
+                return false;
+            }
+        }
+
         for (Enemy* enemy : *this->enemyHandler) {
             IPoint origin = this->getTileIndex(enemy->getCenter());
             if (origin == index) {
@@ -308,14 +347,6 @@ namespace game {
             }
             for (std::vector<IPoint>& path : paths) if (std::find(path.begin(), path.end(), origin) != path.end()) continue;
             bool res = this->efficientPathfindToMultipleTargets(origin, paths);
-            if (!res) {
-                relink();
-                return false;
-            }
-        }
-
-        for (IPoint& spawn : this->spawns) {
-            bool res = this->efficientPathfindToMultipleTargets(spawn, paths);
             if (!res) {
                 relink();
                 return false;
@@ -338,7 +369,14 @@ namespace game {
     }
 
     bool Map::sellTurret(const IPoint& index) {
-        if (this->map[index.x][index.y] != TileType::TurretType) return false;
+        if (
+            index.x < 0
+            || index.x >= this->map.size()
+            || index.y < 0
+            || index.y >= this->map.back().size()
+            || this->map[index.x][index.y] != TileType::TurretType
+        ) return false;
+
         typename TileGraph::Nodes::iterator
             nodeN = this->graph->find({index.x, index.y - 1}),
             nodeNE = this->graph->find({index.x + 1, index.y - 1}),
@@ -348,24 +386,67 @@ namespace game {
             nodeSW = this->graph->find({index.x - 1, index.y + 1}),
             nodeW = this->graph->find({index.x - 1, index.y}),
             nodeNW = this->graph->find({index.x - 1, index.y - 1});
-        TileGraph::Node* node = *this->graph->insert(index).first;
-        if (nodeN != this->graph->end()) {
+        std::pair<typename TileGraph::Nodes::iterator, bool> res = this->graph->insert(index);
+        if (res.second) SDL_Log("Inserted");
+        else SDL_Log("Not inserted");
+        typename TileGraph::Nodes::iterator i = this->graph->find(index);
+        SDL_Log(("Inserted index: (" + std::to_string((*i)->getValue().x) + ", " + std::to_string((*i)->getValue().y) + ")").c_str());
+        TileGraph::Node* node = *(res.first);
+
+        TileGraph::Nodes::iterator end = this->graph->end();
+        if (nodeN != end) {
             node->link(*nodeN);
-            if (nodeE != this->graph->end()) (*nodeN)->link(*nodeE, sqrtOf2);
-            if (nodeW != this->graph->end()) (*nodeN)->link(*nodeW, sqrtOf2);
+            if (nodeE != end && nodeNE != end) (*nodeN)->link(*nodeE, sqrtOf2);
+            if (nodeW != end && nodeNW != end) (*nodeN)->link(*nodeW, sqrtOf2);
         }
-        if (nodeNE != this->graph->end()) node->link(*nodeNE, sqrtOf2);
-        if (nodeE != this->graph->end()) node->link(*nodeE);
-        if (nodeSE != this->graph->end()) node->link(*nodeSE, sqrtOf2);
-        if (nodeS != this->graph->end()) {
+        if (nodeNE != end && nodeN != end && nodeE != end) node->link(*nodeNE, sqrtOf2);
+        if (nodeE != end) node->link(*nodeE);
+        if (nodeSE != end && nodeS != end && nodeE != end) node->link(*nodeSE, sqrtOf2);
+        if (nodeS != end) {
             node->link(*nodeS);
-            if (nodeE != this->graph->end()) (*nodeS)->link(*nodeE, sqrtOf2);
-            if (nodeW != this->graph->end()) (*nodeS)->link(*nodeW, sqrtOf2);
+            if (nodeE != end && nodeSE != end) (*nodeS)->link(*nodeE, sqrtOf2);
+            if (nodeW != end && nodeSW != end) (*nodeS)->link(*nodeW, sqrtOf2);
         }
-        if (nodeSW != this->graph->end()) node->link(*nodeSW, sqrtOf2);
-        if (nodeW != this->graph->end()) node->link(*nodeW);
-        if (nodeNW != this->graph->end()) node->link(*nodeNW, sqrtOf2);
+        if (nodeSW != end && nodeS != end && nodeW != end) node->link(*nodeSW, sqrtOf2);
+        if (nodeW != end) node->link(*nodeW);
+        if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
+
+        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
+        std::string m = "Inserted neighbors:";
+        for (TileGraph::Node* neighbor : neighbors) m += "\n -> (" + std::to_string(neighbor->getValue().x) + ", " + std::to_string(neighbor->getValue().y) + ")";
+        SDL_Log(m.c_str());
+
         this->map[index.x][index.y] = TileType::Empty;
+
+        for (Path* path : this->paths) delete path;
+        this->paths.clear();
+
+        std::vector<std::vector<IPoint>> paths;
+        for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
+
+        for (Enemy* enemy : *this->enemyHandler) {
+            IPoint origin = this->getTileIndex(enemy->getCenter());
+            for (std::vector<IPoint>& path : paths) if (std::find(path.begin(), path.end(), origin) != path.end()) continue;
+            bool res = this->efficientPathfindToMultipleTargets(origin, paths);
+        }
+
+        for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
+
+        for (Enemy* enemy : *this->enemyHandler) {
+            IPoint origin = this->getTileIndex(enemy->getCenter());
+            std::vector<Path*> validPaths;
+            for (Path* path : this->paths) if (path->isIndexInPath(origin)) validPaths.push_back(path);
+            enemy->setPath(validPaths[std::rand() % validPaths.size()]);
+        }
+
+        SDL_Log("\n#########################\n#### Begin Graph Log ####\n#########################");
+        for (TileGraph::Node* node : *this->graph) {
+            TileGraph::Node::Neighbors neighbors = node->getNeighbors();
+            std::string message = "Node: (" + std::to_string(node->getValue().x) + ", " + std::to_string(node->getValue().y) + ")\n -> Linked to:";
+            if (neighbors.size() == 0) message += " None";
+            else for (TileGraph::Node::Edge edge : *node) message += "\n     -> Neighbor: (" + std::to_string(edge.first->getValue().x) + ", " + std::to_string(edge.first->getValue().y) + "); Weight: " + std::to_string(edge.second);
+            SDL_Log(message.c_str());
+        }
         return true;
     }
 

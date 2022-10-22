@@ -44,12 +44,12 @@ namespace game {
     Enemy::~Enemy() {}
 
     void Enemy::tick(double scalar) {
-        IPoint
+        DPoint
             center = this->getCenter(),
             next = this->path->next(scalar, center, this->movementSpeed);
-        std::cout << "Previous: (" << center.x << ", " << center.y << "); Next: (" << next.x << ", " << next.y << ")\n";
-        SDL_Log(("Previous: (" + std::to_string(center.x) + ", " + std::to_string(center.y) + "); Next: (" + std::to_string(next.x) + ", " + std::to_string(next.y) + ")").c_str());
-        if (next.x != -1 && next.y != -1) {
+        // std::cout << "Previous: (" << center.x << ", " << center.y << "); Next: (" << next.x << ", " << next.y << ")\n";
+        // SDL_Log(("Previous: (" + std::to_string(center.x) + ", " + std::to_string(center.y) + "); Next: (" + std::to_string(next.x) + ", " + std::to_string(next.y) + ")").c_str());
+        if (next.x != std::numeric_limits<double>::max() && next.y != std::numeric_limits<double>::max()) {
             this->setCenter(next);
         } else {
             //this->gameState->reduceHealth();
@@ -58,21 +58,22 @@ namespace game {
     }
 
     void Enemy::setPath(Path* path) {
+        SDL_Log("Setting path...");
         this->path = path;
     }
 
-    void Enemy::setCenter(const IPoint& center) {
+    void Enemy::setCenter(const DPoint& center) {
         IPoint size = this->getSize();
-        this->setPosition({
-            center.x - (size.x >> 1),
-            center.y - (size.y >> 1)
+        this->setPosition(DPoint{
+            center.x - (double)(size.x >> 1),
+            center.y - (double)(size.y >> 1)
         });
     }
 
-    IPoint Enemy::getCenter() {
+    DPoint Enemy::getCenter() {
         return {
-            this->destRect->x + (this->destRect->w >> 1),
-            this->destRect->y + (this->destRect->h >> 1)
+            this->position.x + (double)(this->destRect->w >> 1),
+            this->position.y + (double)(this->destRect->h >> 1)
         };
     }
 
