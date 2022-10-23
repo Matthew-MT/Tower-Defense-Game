@@ -499,4 +499,8 @@ namespace game {
     const std::vector<Path*>& Map::getPaths() const {
         return this->paths;
     }
+
+    EnemyHandler* Map::getEnemyHandler() {
+        return this->enemyHandler;
+    }
 };

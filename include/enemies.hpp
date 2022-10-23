@@ -67,6 +67,10 @@ namespace game {
         });
     }
 
+    void Enemy::damage(int amount) {
+        this->health -= amount;
+    }
+
     DPoint Enemy::getCenter() {
         return {
             this->position.x + (double)(this->destRect->w >> 1),

@@ -43,8 +43,8 @@ namespace game {
         virtual void tick(double scalar);
 
         virtual void setPath(Path* path);
-
         virtual void setCenter(const DPoint& center);
+        virtual void damage(int amount);
 
         virtual DPoint getCenter();
     };

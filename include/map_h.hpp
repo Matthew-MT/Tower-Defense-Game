@@ -63,5 +63,6 @@ namespace game {
         virtual const std::vector<IPoint>& getAllBases() const;
         virtual IPoint getTileSize() const;
         virtual const std::vector<Path*>& getPaths() const;
+        virtual EnemyHandler* getEnemyHandler();
     };
 };
