@@ -15,7 +15,8 @@ namespace game{
         int initDamage,
         float initReload,
         int initRange,
-        IPoint initIndex
+        IPoint initIndex,
+        TurretHandler* initTurretHandler
     ) : Sprite {
         initRenderer, 
         initTexture, 
@@ -32,6 +33,7 @@ namespace game{
         return index;
     }
     void Turret::currentEnemy() {}
+    void Turret::damageEnemy() {}
     Turret::~Turret(){}
 
 
@@ -88,7 +90,8 @@ namespace game{
             data->damage,
             data->reload,
             data->range,
-            index
+            index,
+            this
         );
         this->turrets.insert(turret);
     }
@@ -119,6 +122,11 @@ namespace game{
 
             }
         }
+    }
+
+    EnemyHandler TurretHandler::getEnemyHandler()
+    {
+        return this->
     }
 
     TurretData::TurretData(

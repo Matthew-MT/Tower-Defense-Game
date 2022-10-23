@@ -23,11 +23,13 @@ namespace game{
             int initDamage,
             float initReload,
             int initRange,
-            IPoint initIndex
+            IPoint initIndex,
+            TurretHandler* initTurretHandler
         );
 
         IPoint getIndex();
         void currentEnemy();
+        void damageEnemy();
         ~Turret();
     };
 
@@ -51,6 +53,8 @@ namespace game{
         void createTurret(int type, const IPoint& index);
 
         void handleEvent(SDL_Event* event);
+
+        EnemyHandler getEnemyHandler();
     };
 
     class TurretData
