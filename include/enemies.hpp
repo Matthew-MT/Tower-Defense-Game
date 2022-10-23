@@ -12,15 +12,16 @@ namespace game {
     EnemyData::EnemyData(
         SDL_Texture* initTexture,
         int initMovementSpeed,
-        int initHealth
+        int initHealth,
+        int initReward
     ) :
         texture{initTexture},
         movementSpeed{initMovementSpeed},
-        health{initHealth} {}
+        health{initHealth},
+        reward{initReward} {}
 
     Enemy::Enemy(
         SDL_Renderer* initRenderer,
-        SDL_Texture* initTexture,
         Map* initMap,
         GameState* initGameState,
         Path* initPath,
@@ -30,16 +31,17 @@ namespace game {
         SDL_Rect* initSourceRect = nullptr
     ) : StaticSprite{
         initRenderer,
-        initTexture,
+        initData->texture,
         initDestRect,
         initSourceRect
     },
         gameState{initGameState},
+        map{initMap},
         path{initPath},
         handler{initHandler},
         movementSpeed{initData->movementSpeed},
         health{initData->health},
-        map{initMap} {}
+        reward{initData->reward} {}
 
     Enemy::~Enemy() {}
 
@@ -50,7 +52,7 @@ namespace game {
         if (next.x != std::numeric_limits<double>::max() && next.y != std::numeric_limits<double>::max()) {
             this->setCenter(next);
         } else {
-            //this->gameState->reduceHealth();
+            this->gameState->reduceHealth();
             this->handler->despawn(this);
         }
     }
@@ -62,19 +64,21 @@ namespace game {
     void Enemy::setCenter(const DPoint& center) {
         IPoint size = this->getSize();
         this->setPosition(DPoint{
-            center.x - (double)(size.x >> 1),
-            center.y - (double)(size.y >> 1)
+            center.x - ((double)size.x / 2.f),
+            center.y - ((double)size.y / 2.f)
         });
     }
 
     void Enemy::damage(int amount) {
         this->health -= amount;
+        this->gameState->earn(this->reward);
+        if (this->health < 0) this->handler->despawn(this);
     }
 
     DPoint Enemy::getCenter() {
         return {
-            this->position.x + (double)(this->destRect->w >> 1),
-            this->position.y + (double)(this->destRect->h >> 1)
+            this->position.x + ((double)this->destRect->w / 2.f),
+            this->position.y + ((double)this->destRect->h / 2.f)
         };
     }
 
@@ -103,7 +107,8 @@ namespace game {
                     surface
                 ),
                 100,
-                10
+                10,
+                1
             ));
             SDL_FreeSurface(surface);
         }
@@ -146,7 +151,6 @@ namespace game {
         for (Path* path : this->map->getPaths()) if (path->isIndexInPath(index)) validPaths.push_back(path);
         this->enemies.insert(new Enemy(
             this->renderer,
-            this->types.at(type)->texture,
             this->map,
             this->gameState,
             validPaths[std::rand() % validPaths.size()],

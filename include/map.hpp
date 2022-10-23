@@ -248,6 +248,7 @@ namespace game {
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
 
+        delete this->gameState;
         this->gameState = new GameState(health, cash);
         this->enemyHandler = new EnemyHandler(
             this->renderer,
@@ -282,21 +283,13 @@ namespace game {
             nodeW = this->graph->find({index.x - 1, index.y}),
             nodeNW = this->graph->find({index.x - 1, index.y - 1});
         if (nodeN != this->graph->end()) {
-            // node->unlink(*nodeN);
             if (nodeE != this->graph->end()) (*nodeN)->unlink(*nodeE);
             if (nodeW != this->graph->end()) (*nodeN)->unlink(*nodeW);
         }
-        // if (nodeNE != this->graph->end()) node->unlink(*nodeNE);
-        // if (nodeE != this->graph->end()) node->unlink(*nodeE);
-        // if (nodeSE != this->graph->end()) node->unlink(*nodeSE);
         if (nodeS != this->graph->end()) {
-            // node->unlink(*nodeS);
             if (nodeE != this->graph->end()) (*nodeS)->unlink(*nodeE);
             if (nodeW != this->graph->end()) (*nodeS)->unlink(*nodeW);
         }
-        // if (nodeSW != this->graph->end()) node->unlink(*nodeSW);
-        // if (nodeW != this->graph->end()) node->unlink(*nodeW);
-        // if (nodeNW != this->graph->end()) node->unlink(*nodeNW);
 
         std::function<void()> relink = [&]() -> void {
             this->graph->insert(node);

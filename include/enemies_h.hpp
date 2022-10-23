@@ -8,12 +8,13 @@
 namespace game {
     class EnemyData {
     public:
-        EnemyData(SDL_Texture* initTexture, int initMovementSpeed, int initHealth);
+        EnemyData(SDL_Texture* initTexture, int initMovementSpeed, int initHealth, int initReward);
 
         SDL_Texture* texture;
         int
             movementSpeed,
-            health;
+            health,
+            reward;
     };
 
     class Enemy : public StaticSprite {
@@ -24,11 +25,11 @@ namespace game {
         EnemyHandler* handler;
         int
             movementSpeed,
-            health;
+            health,
+            reward;
     public:
         Enemy(
             SDL_Renderer* initRenderer,
-            SDL_Texture* initTexture,
             Map* initMap,
             GameState* initGameState,
             Path* initPath,
