@@ -8,6 +8,7 @@
 #include "turret.hpp"
 #include <string>
 #include <vector>
+#include "sound.hpp"
 
 namespace game {
     class Game {
@@ -58,6 +59,8 @@ namespace game {
 
             this->gui = new GUI(this->window, this->renderer);
             
+            Sound* mySound = new Sound("assets/sound/mixkit-retro-game-notification-212.wav");
+            mySound -> playSound();
         }
 
         ~Game() {

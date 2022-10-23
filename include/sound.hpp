@@ -15,5 +15,8 @@ namespace game{
         Mix_Chunk* getSound() {
             return this->sound;
         }
+        void playSound(){
+            Mix_PlayChannel(-1, this->sound, -1);
+        }
     };
 };
