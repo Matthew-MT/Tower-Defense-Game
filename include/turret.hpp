@@ -5,6 +5,7 @@
 #include "map.hpp"
 #include "forward.hpp"
 #include "turret_h.hpp"
+#include "sound.hpp"
 
 namespace game{
     Turret::Turret(
