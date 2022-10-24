@@ -36,7 +36,7 @@ namespace game {
             this->destRect->y = position.y;
         }
 
-        virtual const SDL_Renderer* getRenderer() const {
+        virtual SDL_Renderer* getRenderer() {
             return this->renderer;
         }
 

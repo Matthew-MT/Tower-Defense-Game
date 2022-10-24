@@ -15,27 +15,21 @@
 namespace game {
     void Map::updateMapSize() {
         if (
-            this->destRect->w == -1
+            this->destRect->w != -1
         ) {
-            this->destRect->w
-                = this->tileSize.x
-                * this->map.size();
-        } else {
             this->tileSize.x
                 = this->destRect->w
                 / this->map.size();
         }
 
         if (
-            this->destRect->h == -1
+            this->destRect->h != -1
         ) {
-            this->destRect->h
-                = this->tileSize.y
-                * this->map.back().size();
-        } else {
             this->tileSize.y
-                = this->destRect->h
-                / this->map.back().size();
+                = (
+                    this->destRect->h
+                    - this->headerHeight
+                ) / this->map.back().size();
         }
     }
 
@@ -70,14 +64,16 @@ namespace game {
     Map::Map(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
-        const IPoint& initTileSize
+        const IPoint& initTileSize,
+        int initHeaderHeight
     ) :
         Renderable{
             initRenderer,
             initDestRect
         },
         tileSize{initTileSize},
-        graph{new TileGraph()} {
+        graph{new TileGraph()},
+        headerHeight{initHeaderHeight} {
         std::fstream
             textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
         std::string buffer;
@@ -249,10 +245,21 @@ namespace game {
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
 
         delete this->gameState;
-        this->gameState = new GameState(health, cash);
+        this->gameState = new GameState(
+            this->renderer,
+            createRect(
+                this->getPosition(),
+                IPoint{
+                    this->getSize().x,
+                    40
+                }
+            ),
+            health,
+            cash
+        );
         this->enemyHandler = new EnemyHandler(
             this->renderer,
-            this->destRect,
+            this->getDestRect(),
             this,
             this->gameState
         );
@@ -431,21 +438,22 @@ namespace game {
         rect->x = this->destRect->x;
         rect->y = this->destRect->y;
         rect->w = this->tileSize.x * this->map.size();
-        rect->h = this->tileSize.y * this->map.back().size();
+        rect->h = (this->tileSize.y * this->map.back().size()) + this->headerHeight;
         return rect;
     }
 
     IPoint Map::getTileIndex(IPoint position) const {
+        SDL_Rect* rect = this->getDestRect();
         if (
-            position.x < 0
-            || position.y < 0
-            || position.x > this->map.size() * this->tileSize.x
-            || position.y > this->map.front().size() * this->tileSize.y
+            position.x < rect->x
+            || position.y < rect->y + this->headerHeight
+            || position.x > rect->x + (this->map.size() * this->tileSize.x)
+            || position.y > rect->y + (this->map.front().size() * this->tileSize.y) + this->headerHeight
         ) return {-1, -1};
 
         return {
             (int)std::floor((double)(position.x - this->destRect->x) / (double)this->tileSize.x),
-            (int)std::floor((double)(position.y - this->destRect->y) / (double)this->tileSize.y)
+            (int)std::floor((double)(position.y - (this->destRect->y + this->headerHeight)) / (double)this->tileSize.y)
         };
     }
 
@@ -459,7 +467,7 @@ namespace game {
     SDL_Rect* Map::getTileDest(const IPoint& index) const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x + (this->tileSize.x * index.x);
-        rect->y = this->destRect->y + (this->tileSize.y * index.y);
+        rect->y = this->destRect->y + (this->tileSize.y * index.y) + this->headerHeight;
         rect->w = this->tileSize.x;
         rect->h = this->tileSize.y;
         return rect;
@@ -468,7 +476,7 @@ namespace game {
     IPoint Map::getTileCenter(const IPoint& index) const {
         return {
             this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
-            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1)
+            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1) + this->headerHeight
         };
     }
 
@@ -491,6 +499,10 @@ namespace game {
 
     const std::vector<Path*>& Map::getPaths() const {
         return this->paths;
+    }
+
+    GameState* Map::getGameState() {
+        return this->gameState;
     }
 
     EnemyHandler* Map::getEnemyHandler() {

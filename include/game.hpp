@@ -114,7 +114,7 @@ namespace game {
             return renderable;
         }
 
-        virtual const SDL_Renderer* getRenderer() const {
+        virtual SDL_Renderer* getRenderer() {
             return this->renderer;
         }
 
@@ -126,7 +126,7 @@ namespace game {
         }
 
         virtual void handleEvent(SDL_Event* event) {
-            for(Renderable* renderable : this->renderList) {
+            for (Renderable* renderable : this->renderList) {
                 renderable->handleEvent(event);
             }
         }

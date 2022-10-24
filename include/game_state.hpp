@@ -1,55 +1,56 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include "game_state_h.hpp"
 
 namespace game {
-    class GameState {
-    protected:
-        int
-            maxHealth,
-            health,
-            cash;
-    public:
-        GameState(
-            int initHealth,
-            int initCash
-        ) :
-            maxHealth{initHealth},
-            health{initHealth},
-            cash{initCash} {}
-        ~GameState() {}
+    GameState::GameState(
+        SDL_Renderer* initRenderer,
+        SDL_Rect* initDestRect,
+        int initHealth,
+        int initCash
+    ) :
+        StaticSprite{
+            initRenderer,
+            initDestRect
+        },
+        maxHealth{initHealth},
+        health{initHealth},
+        cash{initCash} {}
+    GameState::~GameState() {}
 
-        void reduceHealth(int amount = 1) {
-            this->health -= amount;
-        }
+    void GameState::render() {}
 
-        void increaseHealth(int amount = 1) {
-            this->health += amount;
-        }
+    void GameState::reduceHealth(int amount) {
+        this->health -= amount;
+    }
 
-        void resetHealth() {
-            this->health = this->maxHealth;
-        }
+    void GameState::increaseHealth(int amount) {
+        this->health += amount;
+    }
 
-        void zeroHealth() {
-            this->health = 0;
-        }
+    void GameState::resetHealth() {
+        this->health = this->maxHealth;
+    }
 
-        int getHealth() {
-            return this->health;
-        }
+    void GameState::zeroHealth() {
+        this->health = 0;
+    }
 
-        bool isDead() {
-            return health <= 0;
-        }
+    int GameState::getHealth() {
+        return this->health;
+    }
 
-        bool buy(int amount) {
-            if (amount > this->cash) return false;
-            this->cash -= amount;
-            return true;
-        }
+    bool GameState::isDead() {
+        return health <= 0;
+    }
 
-        void earn(int amount) {
-            this->cash += amount;
-        }
-    };
+    bool GameState::buy(int amount) {
+        if (amount > this->cash) return false;
+        this->cash -= amount;
+        return true;
+    }
+
+    void GameState::earn(int amount) {
+        this->cash += amount;
+    }
 };
