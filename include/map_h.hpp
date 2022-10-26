@@ -17,7 +17,7 @@ namespace game {
         using TileGraph = Graph<IPoint>;
     protected:
         IPoint tileSize;
-        GameState* gameState;
+        GameState* gameState = nullptr;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
         std::vector<std::vector<int>> map;

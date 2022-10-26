@@ -162,6 +162,7 @@ namespace game {
                     this->textures.at(type),
                     this->getTileDest(index)
                 ));
+                this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
 
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
@@ -244,7 +245,10 @@ namespace game {
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
 
-        delete this->gameState;
+        if (this->gameState != nullptr) {
+            delete this->gameState;
+            this->gameState = nullptr;
+        }
         this->gameState = new GameState(
             this->renderer,
             createRect(

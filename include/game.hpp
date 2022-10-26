@@ -34,7 +34,7 @@ namespace game {
 
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
-            mapRect->y = 40;
+            mapRect->y = 20;
             mapRect->w = -1;
             mapRect->h = -1;
 
