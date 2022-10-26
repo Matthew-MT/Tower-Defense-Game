@@ -7,6 +7,7 @@
 #include "sprite.hpp"
 #include "map_h.hpp"
 #include <vector>
+#include "sound.hpp"
 
 namespace game {
     EnemyData::EnemyData(
