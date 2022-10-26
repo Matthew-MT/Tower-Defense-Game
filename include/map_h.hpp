@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "forward.hpp"
-#include "game_state.hpp"
+#include "game_state_h.hpp"
 #include "enemies_h.hpp"
 #include "sprite.hpp"
 #include <algorithm>
@@ -17,7 +17,7 @@ namespace game {
         using TileGraph = Graph<IPoint>;
     protected:
         IPoint tileSize;
-        GameState* gameState;
+        GameState* gameState = nullptr;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
         std::vector<std::vector<int>> map;
@@ -27,6 +27,7 @@ namespace game {
             spawns,
             bases;
         std::vector<Path*> paths;
+        int headerHeight;
 
         // Call this function if you update tile sizes or map destRect width and height.
         virtual void updateMapSize();
@@ -39,7 +40,8 @@ namespace game {
         Map(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
-            const IPoint& initTileSize
+            const IPoint& initTileSize,
+            int initHeaderHeight = 40
         );
         ~Map();
 
@@ -63,6 +65,7 @@ namespace game {
         virtual const std::vector<IPoint>& getAllBases() const;
         virtual IPoint getTileSize() const;
         virtual const std::vector<Path*>& getPaths() const;
+        virtual GameState* getGameState();
         virtual EnemyHandler* getEnemyHandler();
     };
 };

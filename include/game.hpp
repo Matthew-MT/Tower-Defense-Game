@@ -3,9 +3,10 @@
 #include <SDL2/SDL_ttf.h>
 #include <unordered_set>
 #include "sprite.hpp"
+#include "turret.hpp"
+#include "text.hpp"
 #include "map.hpp"
 #include "gui.hpp"
-#include "turret.hpp"
 #include <string>
 #include <vector>
 #include "sound.hpp"
@@ -46,7 +47,12 @@ namespace game {
             GameState* initGameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
-            SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
+
+            IPoint winSize = {
+                mapRect->w + 40,
+                mapRect->h + 40
+            };
+            SDL_SetWindowSize(this->window, winSize.x, winSize.y);
 
             TurretHandler* turret = new TurretHandler(
                 this->renderer,
@@ -56,6 +62,17 @@ namespace game {
             this->renderList.push_back(turret);
 
             TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
+
+            Text* cash = new Text(
+                this->renderer,
+                font,
+                {
+                    winSize.x - 40,
+                    20
+                },
+                nullptr,
+                "Cash: 0"
+            );
 
             this->gui = new GUI(this->window, this->renderer);
             
@@ -101,7 +118,7 @@ namespace game {
             return renderable;
         }
 
-        virtual const SDL_Renderer* getRenderer() const {
+        virtual SDL_Renderer* getRenderer() {
             return this->renderer;
         }
 
@@ -113,7 +130,7 @@ namespace game {
         }
 
         virtual void handleEvent(SDL_Event* event) {
-            for(Renderable* renderable : this->renderList) {
+            for (Renderable* renderable : this->renderList) {
                 renderable->handleEvent(event);
             }
         }

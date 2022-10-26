@@ -50,4 +50,13 @@ namespace game {
     }
 
     const double sqrtOf2 = distance(IPoint{0, 0}, IPoint{1, 1});
+
+    template<typename Position, typename Size> SDL_Rect* createRect(const Point<Position>& position, const Point<Size>& size) {
+        SDL_Rect* rect = new SDL_Rect();
+        rect->x = (int)position.x;
+        rect->y = (int)position.y;
+        rect->w = (int)size.x;
+        rect->h = (int)size.y;
+        return rect;
+    }
 };
