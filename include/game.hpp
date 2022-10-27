@@ -13,9 +13,10 @@
 namespace game {
     class Game {
     protected:
-        SDL_bool exit = SDL_FALSE;
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
+        TTF_Font* font;
+        SDL_bool exit = SDL_FALSE;
         std::unordered_set<SDL_Texture*> textureList;
         std::vector<Renderable*> renderList;
         std::vector<std::string> mapProgression;
@@ -32,6 +33,8 @@ namespace game {
             this->window = SDL_CreateWindow(title.c_str(), x, y, w, h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
 
+            this->font = TTF_OpenFont("assets/fonts/arial.ttf", 20);
+
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
             mapRect->y = 20;
@@ -40,8 +43,10 @@ namespace game {
 
             Map* map = new Map(
                 this->renderer,
+                this->font,
                 mapRect,
-                {40, 40}
+                {40, 40},
+                "Tower Defense"
             );
             GameState* initGameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
@@ -59,19 +64,6 @@ namespace game {
                 map
             );
             this->renderList.push_back(turret);
-
-            TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
-
-            Text* cash = new Text(
-                this->renderer,
-                font,
-                {
-                    winSize.x - 40,
-                    20
-                },
-                nullptr,
-                "Cash: 0"
-            );
 
             this->gui = new GUI(this->window, this->renderer);
         }

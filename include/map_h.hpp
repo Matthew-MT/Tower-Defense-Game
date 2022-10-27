@@ -16,7 +16,7 @@ namespace game {
     public:
         using TileGraph = Graph<IPoint>;
     protected:
-        IPoint tileSize;
+        TTF_Font* font;
         GameState* gameState = nullptr;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
@@ -27,6 +27,8 @@ namespace game {
             spawns,
             bases;
         std::vector<Path*> paths;
+        std::string title;
+        IPoint tileSize;
         int headerHeight;
 
         // Call this function if you update tile sizes or map destRect width and height.
@@ -39,8 +41,10 @@ namespace game {
     public:
         Map(
             SDL_Renderer* initRenderer,
+            TTF_Font* initFont,
             SDL_Rect* initDestRect,
             const IPoint& initTileSize,
+            const std::string& initTitle,
             int initHeaderHeight = 40
         );
         ~Map();
@@ -56,6 +60,7 @@ namespace game {
         virtual void setPosition(const IPoint& position);
 
         virtual SDL_Rect* getDestRect() const;
+        virtual IPoint getSize() const;
         virtual IPoint getTileIndex(IPoint position) const;
         virtual IPoint getTileIndexCenter(SDL_Rect* rect) const;
         virtual SDL_Rect* getTileDest(const IPoint& index) const;
