@@ -18,6 +18,7 @@ namespace game {
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
         TTF_Font* font;
+        GameState* gameState;
         SDL_bool exit = SDL_FALSE;
         std::unordered_set<SDL_Texture*> textureList;
         std::vector<Renderable*> renderList;
@@ -50,7 +51,7 @@ namespace game {
                 {40, 40},
                 "Tower Defense"
             );
-            GameState* initGameState = map->loadMap(this->mapProgression.front());
+            this->gameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
 
@@ -71,6 +72,8 @@ namespace game {
 
             Music* myMusic = new Music("assets/sound/Industrial Revolution.mp3");
             myMusic -> playMusic();
+
+            delete mapRect;
         }
 
         ~Game() {
