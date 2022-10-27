@@ -102,6 +102,8 @@ namespace game{
 
             if(placed)
             {
+                Sound* turretSpawnSound = new Sound("assets/sound/mixkit-retro-game-notification-212.wav");
+                turretSpawnSound -> playSound();
                 createTurret(0, index);
             }
             else if(this->map->getTileType(index)==TileType::TurretType)

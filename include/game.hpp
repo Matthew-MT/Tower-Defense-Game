@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "sound.hpp"
+#include "music.hpp"
 
 namespace game {
     class Game {
@@ -75,9 +76,9 @@ namespace game {
             );
 
             this->gui = new GUI(this->window, this->renderer);
-            
-            Sound* mySound = new Sound("assets/sound/mixkit-retro-game-notification-212.wav");
-            mySound -> playSound();
+
+            Music* myMusic = new Music("assets/sound/Industrial Revolution.mp3");
+            myMusic -> playMusic();
         }
 
         ~Game() {
