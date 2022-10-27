@@ -16,7 +16,7 @@ namespace game{
             return this->sound;
         }
         void playSound(){
-            Mix_PlayChannel(-1, this->sound, -1);
+            Mix_PlayChannel(-1, this->sound, 0);
         }
     };
 };
