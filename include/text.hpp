@@ -7,6 +7,7 @@ namespace game {
     class Text : public StaticSprite {
     protected:
         TTF_Font* font;
+        IPoint size = {1, 1};
         std::string text;
     public:
         Text(
@@ -32,7 +33,7 @@ namespace game {
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect = nullptr,
             const std::string& initText = "",
-            int fontSize = 24
+            int fontSize = 20
         ) :
             Text{
                 initRenderer,
@@ -73,37 +74,32 @@ namespace game {
                 initText
             } {}
 
-        void render() {
-            SDL_RenderCopy(
-                this->renderer,
-                this->texture,
-                this->sourceRect,
-                this->destRect
-            );
-        }
-
-        void setFont(TTF_Font* font) {
-            this->font = font;
-        }
-
-        void setFont(const std::string& fontFile, int fontSize = 24) {
-            this->setFont(TTF_OpenFont(fontFile.c_str(), fontSize));
-        }
-
         void setText(const std::string& text) {
             this->text = text;
             SDL_Surface* surface = TTF_RenderText_Solid(this->font, this->text.c_str(), {0x1C, 0x1C, 0x1C, 0});
             this->texture = SDL_CreateTextureFromSurface(this->renderer, surface);
             SDL_FreeSurface(surface);
+            SDL_QueryTexture(this->texture, nullptr, nullptr, &(this->size.x), &(this->size.y));
+            this->setPosition(getCenter(this->destRect));
+        }
+
+        void setFont(TTF_Font* font) {
+            this->font = font;
+            this->setText(this->text);
+        }
+
+        TTF_Font* setFont(const std::string& fontFile, int fontSize = 20) {
+            TTF_Font* old = this->font;
+            this->setFont(TTF_OpenFont(fontFile.c_str(), fontSize));
+            return old;
         }
 
         virtual void setPosition(const IPoint& position) {
-            int w, h;
-            SDL_QueryTexture(this->texture, nullptr, nullptr, &w, &h);
-            this->destRect->x = position.x - (w >> 1);
-            this->destRect->y = position.y - (h >> 1);
-            this->destRect->w = w;
-            this->destRect->h = h;
+            this->setDestRect(fromCenter(position, this->size));
+        }
+
+        virtual void setPosition(const DPoint& position) {
+            this->setPosition((IPoint)position);
         }
 
         const std::string& getText() const {

@@ -63,16 +63,20 @@ namespace game {
 
     Map::Map(
         SDL_Renderer* initRenderer,
+        TTF_Font* initFont,
         SDL_Rect* initDestRect,
         const IPoint& initTileSize,
+        const std::string& initTitle,
         int initHeaderHeight
     ) :
         Renderable{
             initRenderer,
             initDestRect
         },
-        tileSize{initTileSize},
+        font{initFont},
         graph{new TileGraph()},
+        tileSize{initTileSize},
+        title{initTitle},
         headerHeight{initHeaderHeight} {
         std::fstream
             textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
@@ -116,6 +120,7 @@ namespace game {
             );
         }
         this->enemyHandler->render();
+        this->gameState->render();
     }
 
     void Map::tick(double scalar) {
@@ -162,7 +167,6 @@ namespace game {
                     this->textures.at(type),
                     this->getTileDest(index)
                 ));
-                this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
 
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
@@ -251,15 +255,17 @@ namespace game {
         }
         this->gameState = new GameState(
             this->renderer,
+            this->font,
             createRect(
                 this->getPosition(),
                 IPoint{
                     this->getSize().x,
-                    40
+                    this->headerHeight
                 }
             ),
-            health,
-            cash
+            this->title,
+            cash,
+            health
         );
         this->enemyHandler = new EnemyHandler(
             this->renderer,
@@ -446,6 +452,13 @@ namespace game {
         return rect;
     }
 
+    IPoint Map::getSize() const {
+        return {
+            this->tileSize.x * (int)this->map.size(),
+            (this->tileSize.y * (int)this->map.back().size()) + this->headerHeight
+        };
+    }
+
     IPoint Map::getTileIndex(IPoint position) const {
         SDL_Rect* rect = this->getDestRect();
         if (
@@ -462,10 +475,7 @@ namespace game {
     }
 
     IPoint Map::getTileIndexCenter(SDL_Rect* rect) const {
-        return this->getTileIndex({
-            rect->x + (rect->w >> 1),
-            rect->y + (rect->h >> 1)
-        });
+        return this->getTileIndex(getCenter(rect));
     }
 
     SDL_Rect* Map::getTileDest(const IPoint& index) const {
