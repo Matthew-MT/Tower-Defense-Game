@@ -78,6 +78,7 @@ namespace game {
         tileSize{initTileSize},
         title{initTitle},
         headerHeight{initHeaderHeight} {
+
         std::fstream
             textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
         std::string buffer;
@@ -95,6 +96,8 @@ namespace game {
         }
 
         textureAssociation.close();
+
+        this->deathBackground = this->textures[TileType::Wall];
     }
 
     Map::~Map() {
@@ -106,20 +109,30 @@ namespace game {
     }
 
     void Map::render() {
-        for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
-            int type = this->map[i][j];
+        if (!this->dead) {
+            for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
+                int type = this->map[i][j];
+                SDL_RenderCopy(
+                    this->renderer,
+                    this->textures.at(
+                        type == TileType::TurretType
+                        ? TileType::Wall
+                        : type
+                    ),
+                    nullptr,
+                    this->mapSprites[i][j]->getDestRect()
+                );
+            }
+            this->enemyHandler->render();
+        } else {
+            this->deathText->render();
             SDL_RenderCopy(
                 this->renderer,
-                this->textures.at(
-                    type == TileType::TurretType
-                    ? TileType::Wall
-                    : type
-                ),
+                this->deathBackground,
                 nullptr,
-                this->mapSprites[i][j]->getDestRect()
+                this->destRect
             );
         }
-        this->enemyHandler->render();
         this->gameState->render();
     }
 
@@ -128,6 +141,11 @@ namespace game {
     }
 
     GameState* Map::loadMap(const std::string& mapFileName) {
+        this->dead = false;
+        this->map.clear();
+        for (std::vector<StaticSprite*>& column : this->mapSprites) for (StaticSprite* sprite : column) delete sprite;
+        this->mapSprites.clear();
+
         std::fstream
             mapFile("assets/maps/" + mapFileName, std::ios_base::in);
         std::string buffer;
@@ -274,6 +292,10 @@ namespace game {
             this->gameState
         );
         return this->gameState;
+    }
+
+    void Map::displayDeathScreen() {
+        this->dead = true;
     }
 
     bool Map::placeTurret(const IPoint& index) {
@@ -449,12 +471,14 @@ namespace game {
         rect->x = this->destRect->x;
         rect->y = this->destRect->y;
         rect->w = this->tileSize.x * this->map.size();
-        rect->h = (this->tileSize.y * this->map.back().size()) + this->headerHeight;
+        if (this->map.empty()) rect->h = this->headerHeight;
+        else rect->h = (this->tileSize.y * this->map.back().size()) + this->headerHeight;
         return rect;
     }
 
     IPoint Map::getSize() const {
-        return {
+        if (this->map.empty()) return {0, this->headerHeight};
+        else return {
             this->tileSize.x * (int)this->map.size(),
             (this->tileSize.y * (int)this->map.back().size()) + this->headerHeight
         };

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include "enums.hpp"
 #include "graph.hpp"
+#include "text.hpp"
 #include <fstream>
 #include <vector>
 #include <string>
@@ -17,6 +18,8 @@ namespace game {
         using TileGraph = Graph<IPoint>;
     protected:
         TTF_Font* font;
+        SDL_Texture* deathBackground;
+        Text* deathText;
         GameState* gameState = nullptr;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
@@ -30,6 +33,7 @@ namespace game {
         std::string title;
         IPoint tileSize;
         int headerHeight;
+        bool dead = false;
 
         // Call this function if you update tile sizes or map destRect width and height.
         virtual void updateMapSize();
@@ -52,6 +56,7 @@ namespace game {
         virtual void render();
         virtual void tick(double scalar);
         virtual GameState* loadMap(const std::string& mapFileName);
+        virtual void displayDeathScreen();
 
         virtual bool placeTurret(const IPoint& index);
         virtual bool sellTurret(const IPoint& index);

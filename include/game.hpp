@@ -123,6 +123,7 @@ namespace game {
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
             this->lastTick = nextTick;
             for (Renderable* renderable : this->renderList) renderable->tick(scalar);
+            if (this->gameState->isDead()) {}
         }
 
         virtual void handleEvent(SDL_Event* event) {
