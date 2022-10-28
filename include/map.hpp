@@ -434,6 +434,7 @@ namespace game {
     }
 
     void Map::setDestRect(SDL_Rect* newDestRect) {
+        delete this->destRect;
         this->destRect = newDestRect;
         this->updateTiles();
     }
@@ -466,8 +467,12 @@ namespace game {
             || position.y < rect->y + this->headerHeight
             || position.x > rect->x + (this->map.size() * this->tileSize.x)
             || position.y > rect->y + (this->map.front().size() * this->tileSize.y) + this->headerHeight
-        ) return {-1, -1};
+        ) {
+            delete rect;
+            return {-1, -1};
+        }
 
+        delete rect;
         return {
             (int)std::floor((double)(position.x - this->destRect->x) / (double)this->tileSize.x),
             (int)std::floor((double)(position.y - (this->destRect->y + this->headerHeight)) / (double)this->tileSize.y)

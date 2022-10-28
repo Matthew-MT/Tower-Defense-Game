@@ -57,9 +57,10 @@ namespace game{
         int damage;
         float reload;
         SDL_Texture* texture;
+        Sound* turretSpawnSound;
         public:
         TurretData(
-            int initDamage, float initReload, SDL_Texture* initTexture
+            int initDamage, float initReload, SDL_Texture* initTexture, Sound* initTurretSpawnSound
         );
     };
 };

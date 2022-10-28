@@ -71,12 +71,15 @@ namespace game{
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        turretTypes.push_back(new TurretData(damage, reloadTime, texture));
+        std::getline(turretFile, buffer);
+        Sound* turretSpawnSound = new Sound("assets/sound/" + buffer);
+        turretTypes.push_back(new TurretData(damage, reloadTime, texture, turretSpawnSound));
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index)
     {
         TurretData* data = this->turretTypes[type];
+        data->turretSpawnSound->playSound();
         SDL_Rect* rect = this->map->getTileDest(index);
         Turret* turret = new Turret(
             this->renderer,
@@ -102,8 +105,6 @@ namespace game{
 
             if(placed)
             {
-                Sound* turretSpawnSound = new Sound("assets/sound/mixkit-retro-game-notification-212.wav");
-                turretSpawnSound -> playSound();
                 createTurret(0, index);
             }
             else if(this->map->getTileType(index)==TileType::TurretType)
@@ -123,11 +124,13 @@ namespace game{
     TurretData::TurretData(
         int initDamage, 
         float initReload, 
-        SDL_Texture* initTexture
+        SDL_Texture* initTexture,
+        Sound* initTurretSpawnSound
     )
     {
         damage = initDamage;
         reload = initReload;
         texture = initTexture;
+        turretSpawnSound = initTurretSpawnSound;
     }
 };
