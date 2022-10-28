@@ -70,7 +70,7 @@ namespace game {
             delete this->gui;
         }
 
-        void renderWindow() {
+        virtual void renderWindow() {
             this->tick();
             SDL_RenderClear(this->renderer);
             for (Renderable* renderable : this->renderList) renderable->render();
@@ -92,27 +92,25 @@ namespace game {
             return renderable;
         }
 
-        Renderable* spawn(Renderable* renderable) {
+        virtual Renderable* spawn(Renderable* renderable) {
             renderable->setRenderer(this->renderer);
             this->renderList.push_back(renderable);
             return renderable;
         }
 
-        const SDL_Renderer* getRenderer() const {
+        virtual const SDL_Renderer* getRenderer() const {
             return this->renderer;
         }
 
-        void tick() {
+        virtual void tick() {
             const Uint64 nextTick = SDL_GetTicks64();
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
             this->lastTick = nextTick;
             for (Renderable* renderable : this->renderList) renderable->tick(scalar);
         }
 
-        void handleEvent(SDL_Event* event)
-        {
-            for(Renderable* renderable: this->renderList)
-            {
+        virtual void handleEvent(SDL_Event* event) {
+            for(Renderable* renderable : this->renderList) {
                 renderable->handleEvent(event);
             }
         }

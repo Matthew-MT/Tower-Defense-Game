@@ -5,6 +5,9 @@
 #include "map.hpp"
 #include "forward.hpp"
 #include "turret_h.hpp"
+#include "utils.hpp"
+#include <cstring>
+
 
 namespace game{
     Turret::Turret(
@@ -13,29 +16,118 @@ namespace game{
         SDL_Rect* initDestRect,
         SDL_Rect* initSourceRect,
         int initDamage,
-        float initReload,
+        double initReload,
         int initRange,
         IPoint initIndex,
-        TurretHandler* initTurretHandler
+        TurretHandler* initTurretHandler,
+        double initAngle
     ) : Sprite {
         initRenderer, 
         initTexture, 
         initDestRect,
-        initSourceRect
+        initSourceRect,
+        initAngle
     },
     damage{initDamage},
     reloadTime{initReload},
     range{initRange},
-    index{initIndex}{}
+    index{initIndex},
+    turretHandler{initTurretHandler}
+    {}
 
     IPoint Turret::getIndex()
     {
         return index;
     }
-    void Turret::currentEnemy() {}
-    void Turret::damageEnemy() {}
+
+    void Turret::findTarget()
+    {
+        for(Enemy* enemy : *this->turretHandler->getEnemyHandler())
+        {
+            DPoint enemyPosition = enemy->getCenter();
+            DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
+            double enemyDistance = distance(turretPosition,enemyPosition);
+
+            SDL_Log(std::to_string(range).c_str());
+
+            if(range>=enemyDistance)
+            {
+                this->targetedEnemy = enemy;
+                //rotateTurret(enemyPosition, turretPosition);
+                SDL_Log("Enemy targeted");
+                break;
+            }
+        }
+    }
+
+    void Turret::checkTarget(double scalar) {
+        if(remainingReload>0)
+        {
+            this->remainingReload-=scalar;
+        }
+
+        
+        if(this->targetedEnemy != nullptr)
+        {
+            DPoint enemyPosition = targetedEnemy->getCenter();
+            DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
+            double enemyDistance = distance(turretPosition,enemyPosition);
+            if(range>=enemyDistance)
+            {
+                this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
+                if(remainingReload<=0)
+                {
+                    this->targetedEnemy->damage(this->damage);
+                    SDL_Log("Enemy damaged");
+                    this->remainingReload = reloadTime;
+                }
+            }
+            else{
+                targetedEnemy = nullptr;
+            }
+        }
+        else   
+            this->findTarget();
+    }
     Turret::~Turret(){}
 
+    void Turret::tick(double scalar)
+    {
+        checkTarget(scalar);
+    }
+
+    void Turret::rotateTurret(DPoint enemy, DPoint turret)
+    {
+        double eX, eY, tX, tY;
+        eX = enemy.x;
+        eY = enemy.y;
+        tX = turret.x;
+        tY = turret.y;
+
+        double fX, fY;
+        fX = tX - eX;
+        fY = tY - eY;
+        double angleRad = atan2(fX,fY);
+        if(angleRad < 0) { 
+            angleRad = (2 * M_PI) - angleRad; }
+        
+
+        const double conversion = 180.0/M_PI;
+        double angleDeg = angleRad * conversion;
+        if(eX<tX)
+        {
+            angleDeg = -1 * angleDeg;
+        }
+        setAngle(angleDeg);
+    }
+
+    DPoint Turret::getCenter()
+    {
+        return {
+            this->position.x + (double)(this->destRect->w >> 1),
+            this->position.y + (double)(this->destRect->h >> 1)
+        };
+    }
 
 
     TurretHandler::TurretHandler(
@@ -71,6 +163,9 @@ namespace game{
         reloadTime = std::stof(buffer);
         std::getline(turretFile, buffer);
         range = std::stoi(buffer);
+
+        SDL_Log((buffer).c_str());
+
         std::getline(turretFile, buffer);
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
@@ -91,7 +186,8 @@ namespace game{
             data->reload,
             data->range,
             index,
-            this
+            this,
+            0.0
         );
         this->turrets.insert(turret);
     }
@@ -124,21 +220,33 @@ namespace game{
         }
     }
 
-    EnemyHandler TurretHandler::getEnemyHandler()
+    void TurretHandler::tick(double scalar)
     {
-        return this->
+        for(Turret* turret : this->turrets) 
+            turret->tick(scalar);
     }
+
+    EnemyHandler* TurretHandler::getEnemyHandler()
+    {
+        return this->map->getEnemyHandler();
+    }
+
+    Map* TurretHandler::getMap()
+    {
+        return this->map;
+    }
+
 
     TurretData::TurretData(
         int initDamage, 
-        float initReload, 
+        double initReload, 
         int initRange,
         SDL_Texture* initTexture
     )
     {
         damage = initDamage;
         reload = initReload;
-        range = initReload;
+        range = initRange;
         texture = initTexture;
     }
 };

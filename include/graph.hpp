@@ -17,10 +17,9 @@ namespace game {
         using Neighbors = std::unordered_set<GraphNode<Type>*>;
     protected:
         Edges edges;
-        Type* value;
+        Type value;
     public:
-        GraphNode(const Type* initValue) : value{initValue} {}
-        GraphNode(const Type& initValue) : value{new Type(initValue)} {}
+        GraphNode(const Type& initValue) : value{initValue} {}
         ~GraphNode() {
             for (const Edge& node : this->edges) node.first->unlink(this, false);
         }
@@ -33,11 +32,11 @@ namespace game {
             return this->value != other.getValue();
         }
 
-        void setValue(Type* value) {
+        void setValue(const Type& value) {
             this->value = value;
         }
 
-        Type* getValue() {
+        Type getValue() {
             return this->value;
         }
 
@@ -104,16 +103,12 @@ namespace game {
 
         typename Nodes::iterator find(const Type& value) {
             return std::find_if(this->begin(), this->end(), [&](Node* node) -> bool {
-                return value == *(node->getValue());
+                return value == node->getValue();
             });
         }
 
         std::pair<typename Nodes::iterator, bool> insert(Node* node) {
             return this->nodes.insert(node);
-        }
-
-        std::pair<typename Nodes::iterator, bool> insert(const Type* value) {
-            return this->insert(new Node(value));
         }
 
         std::pair<typename Nodes::iterator, bool> insert(const Type& value) {
@@ -155,7 +150,7 @@ namespace game {
                 const queue_type& a,
                 const queue_type& b
             ) -> bool {
-                return a.first < b.first;
+                return a.first > b.first;
             };
             std::vector<std::vector<Node*>> paths;
             std::priority_queue<
@@ -198,7 +193,7 @@ namespace game {
                         gScore[edge.first] = tentative_gScore;
                         fScore[edge.first] = tentative_gScore + heuristic(edge.first, target);
                         if (tracking.find(edge.first) == tracking.end()) {
-                            openSet.push({tentative_gScore, edge.first});
+                            openSet.push({fScore[edge.first], edge.first});
                             tracking.insert(edge.first);
                         }
                     }

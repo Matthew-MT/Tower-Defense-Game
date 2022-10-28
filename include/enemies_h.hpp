@@ -40,11 +40,13 @@ namespace game {
 
         ~Enemy();
 
-        void tick(double scalar);
+        virtual void tick(double scalar);
 
-        void setPath(Path* path);
+        virtual void setPath(Path* path);
+        virtual void setCenter(const DPoint& center);
+        virtual void damage(int amount);
 
-        IPoint getCenter();
+        virtual DPoint getCenter();
     };
 
     class EnemyHandler : public Renderable {
@@ -67,13 +69,13 @@ namespace game {
 
         ~EnemyHandler();
 
-        void render();
-        void tick(double scalar);
+        virtual void render();
+        virtual void tick(double scalar);
 
-        typename Enemies::iterator begin();
-        typename Enemies::iterator end();
+        virtual typename Enemies::iterator begin();
+        virtual typename Enemies::iterator end();
 
-        void spawn(int type, IPoint origin);
-        void despawn(Enemy* enemy);
+        virtual void spawn(int type, IPoint origin);
+        virtual void despawn(Enemy* enemy);
     };
 };

@@ -44,14 +44,11 @@ namespace game {
     Enemy::~Enemy() {}
 
     void Enemy::tick(double scalar) {
-        IPoint
-            next = this->path->next(scalar, this->getCenter(), this->movementSpeed),
-            size = this->getSize();
-        if (next.x != -1 && next.y != -1) {
-            this->setPosition({
-                next.x - (size.x >> 1),
-                next.y - (size.y >> 1)
-            });
+        DPoint
+            center = this->getCenter(),
+            next = this->path->next(scalar, center, this->movementSpeed);
+        if (next.x != std::numeric_limits<double>::max() && next.y != std::numeric_limits<double>::max()) {
+            this->setCenter(next);
         } else {
             //this->gameState->reduceHealth();
             this->handler->despawn(this);
@@ -62,10 +59,22 @@ namespace game {
         this->path = path;
     }
 
-    IPoint Enemy::getCenter() {
+    void Enemy::setCenter(const DPoint& center) {
+        IPoint size = this->getSize();
+        this->setPosition(DPoint{
+            center.x - (double)(size.x >> 1),
+            center.y - (double)(size.y >> 1)
+        });
+    }
+
+    void Enemy::damage(int amount) {
+        this->health -= amount;
+    }
+
+    DPoint Enemy::getCenter() {
         return {
-            this->destRect->x + (this->destRect->w >> 1),
-            this->destRect->y + (this->destRect->h >> 1)
+            this->position.x + (double)(this->destRect->w >> 1),
+            this->position.y + (double)(this->destRect->h >> 1)
         };
     }
 

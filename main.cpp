@@ -5,7 +5,6 @@
 using namespace game;
 
 int main(int argc, char *argv[]) {
-    std::cout << "Yeet\n";
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_DisplayMode display;
@@ -36,7 +35,6 @@ int main(int argc, char *argv[]) {
     // SDL_SetWindowSize(win, width / 2, height / 2);
 
     while (!loopShouldStop) {
-        SDL_Delay(10);
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
@@ -50,6 +48,7 @@ int main(int argc, char *argv[]) {
         }
 
         game->renderWindow();
+        SDL_Delay(10);
         // SDL_RenderClear(renderer);
         // SDL_RenderCopy(renderer, bitmapTex, NULL, NULL);
         // SDL_RenderPresent(renderer);

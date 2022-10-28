@@ -29,12 +29,12 @@ namespace game {
         std::vector<Path*> paths;
 
         // Call this function if you update tile sizes or map destRect width and height.
-        void updateMapSize();
+        virtual void updateMapSize();
 
         // Call this function if you update the map's position.
-        void updateTiles();
+        virtual void updateTiles();
 
-        bool efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths);
+        virtual bool efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths);
     public:
         Map(
             SDL_Renderer* initRenderer,
@@ -43,25 +43,26 @@ namespace game {
         );
         ~Map();
 
-        void render();
-        void tick(double scalar);
-        GameState* loadMap(const std::string& mapFileName);
+        virtual void render();
+        virtual void tick(double scalar);
+        virtual GameState* loadMap(const std::string& mapFileName);
 
-        bool placeTurret(const IPoint& index);
-        bool sellTurret(const IPoint& index);
+        virtual bool placeTurret(const IPoint& index);
+        virtual bool sellTurret(const IPoint& index);
 
-        void setDestRect(SDL_Rect* newDestRect);
-        void setPosition(const IPoint& position);
+        virtual void setDestRect(SDL_Rect* newDestRect);
+        virtual void setPosition(const IPoint& position);
 
-        SDL_Rect* getDestRect() const;
-        IPoint getTileIndex(IPoint position) const;
-        IPoint getTileIndexCenter(SDL_Rect* rect) const;
-        SDL_Rect* getTileDest(const IPoint& index) const;
-        IPoint getTileCenter(const IPoint& index) const;
-        int getTileType(const IPoint& index) const;
-        const std::vector<IPoint>& getAllSpawns() const;
-        const std::vector<IPoint>& getAllBases() const;
-        IPoint getTileSize() const;
-        const std::vector<Path*>& getPaths() const;
+        virtual SDL_Rect* getDestRect() const;
+        virtual IPoint getTileIndex(IPoint position) const;
+        virtual IPoint getTileIndexCenter(SDL_Rect* rect) const;
+        virtual SDL_Rect* getTileDest(const IPoint& index) const;
+        virtual IPoint getTileCenter(const IPoint& index) const;
+        virtual int getTileType(const IPoint& index) const;
+        virtual const std::vector<IPoint>& getAllSpawns() const;
+        virtual const std::vector<IPoint>& getAllBases() const;
+        virtual IPoint getTileSize() const;
+        virtual const std::vector<Path*>& getPaths() const;
+        virtual EnemyHandler* getEnemyHandler();
     };
 };

@@ -22,33 +22,33 @@ namespace game {
 
         virtual void tick(double scalar) {}
 
-        void setRenderer(SDL_Renderer* renderer) {
+        virtual void setRenderer(SDL_Renderer* renderer) {
             this->renderer = renderer;
         }
 
-        void setDestRect(SDL_Rect* newDestRect) {
+        virtual void setDestRect(SDL_Rect* newDestRect) {
             delete this->destRect;
             this->destRect = newDestRect;
         }
 
-        void setPosition(const IPoint& position) {
+        virtual void setPosition(const IPoint& position) {
             this->destRect->x = position.x;
             this->destRect->y = position.y;
         }
 
-        const SDL_Renderer* getRenderer() const {
+        virtual const SDL_Renderer* getRenderer() const {
             return this->renderer;
         }
 
-        const SDL_Rect* getDestRect() const {
+        virtual const SDL_Rect* getDestRect() const {
             return this->destRect;
         }
 
-        IPoint getSize() {
+        virtual IPoint getSize() {
             return {this->destRect->w, this->destRect->h};
         }
 
-        IPoint getPosition() const {
+        virtual IPoint getPosition() const {
             return {this->destRect->x, this->destRect->y};
         }
 
@@ -59,6 +59,7 @@ namespace game {
     protected:
         SDL_Texture* texture;
         SDL_Rect* sourceRect;
+        DPoint position = {0.f, 0.f};
     public:
         StaticSprite(
             SDL_Renderer* initRenderer,
@@ -70,7 +71,12 @@ namespace game {
             initDestRect
         },
             texture{initTexture},
-            sourceRect{initSourceRect} {}
+            sourceRect{initSourceRect} {
+            if (this->destRect != nullptr) this->position = {
+                (double)this->destRect->x,
+                (double)this->destRect->y
+            };
+        }
 
         StaticSprite(
             SDL_Renderer* initRenderer,
@@ -81,11 +87,16 @@ namespace game {
             initDestRect
         },
             texture{nullptr},
-            sourceRect{initSourceRect} {}
+            sourceRect{initSourceRect} {
+            if (this->destRect != nullptr) this->position = {
+                (double)this->destRect->x,
+                (double)this->destRect->y
+            };
+        }
 
         ~StaticSprite() {}
 
-        void render() {
+        virtual void render() {
             if (this->renderer == nullptr) {
                 SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
                 return;
@@ -98,16 +109,34 @@ namespace game {
             );
         }
 
-        void setTexture(SDL_Texture* texture) {
+        virtual void setPosition(const IPoint& position) {
+            this->position.x = (double)position.x;
+            this->position.y = (double)position.y;
+            this->Renderable::setPosition(position);
+        }
+
+        virtual void setPosition(const DPoint& position) {
+            this->position = position;
+            this->Renderable::setPosition({
+                (int)position.x,
+                (int)position.y
+            });
+        }
+
+        virtual void setTexture(SDL_Texture* texture) {
             this->texture = texture;
         }
 
-        void setSourceRect(SDL_Rect* newSourceRect) {
+        virtual void setSourceRect(SDL_Rect* newSourceRect) {
             delete this->sourceRect;
             this->sourceRect = newSourceRect;
         }
 
-        const SDL_Rect* getSourceRect() const {
+        virtual DPoint getDoublePosition() {
+            return this->position;
+        }
+
+        virtual const SDL_Rect* getSourceRect() const {
             return this->sourceRect;
         }
     };
@@ -141,7 +170,7 @@ namespace game {
 
         ~Sprite() {}
 
-        void render() {
+        virtual void render() {
             if (this->renderer == nullptr) SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
             SDL_RenderCopyEx(
                 this->renderer,
@@ -154,11 +183,11 @@ namespace game {
             );
         }
 
-        void setAngle(double angle) {
+        virtual void setAngle(double angle) {
             this->angle = angle;
         }
 
-        double getAngle() const {
+        virtual double getAngle() const {
             return this->angle;
         }
     };

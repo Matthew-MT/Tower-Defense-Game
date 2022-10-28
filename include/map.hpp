@@ -56,12 +56,12 @@ namespace game {
             std::vector<TileGraph::Node*> foundPath = this->graph->aStar(
                 *o, *b,
                 [&](TileGraph::Node* a, TileGraph::Node* b) -> double {
-                    return distance(*a->getValue(), *b->getValue());
+                    return distance(a->getValue(), b->getValue());
                 }
             );
             if (foundPath.size() == 0) return false;
             std::vector<IPoint> path;
-            for (TileGraph::Node* node : foundPath) path.push_back(*node->getValue());
+            for (TileGraph::Node* node : foundPath) path.push_back(node->getValue());
             paths.push_back(path);
         }
         return true;
@@ -206,9 +206,17 @@ namespace game {
                         this->map[i - 1][j - 1] == TileType::Empty
                         || this->map[i - 1][j - 1] == TileType::Spawn
                         || this->map[i - 1][j - 1] == TileType::Base
+                    ) && (
+                        this->map[i][j - 1] == TileType::Empty
+                        || this->map[i][j - 1] == TileType::Spawn
+                        || this->map[i][j - 1] == TileType::Base
+                    ) && (
+                        this->map[i - 1][j] == TileType::Empty
+                        || this->map[i - 1][j] == TileType::Spawn
+                        || this->map[i - 1][j] == TileType::Base
                     )
                 ) {
-                    (*this->graph->find({i - 1, j - 1}))->link(node, 1.41421356);
+                    (*this->graph->find({i - 1, j - 1}))->link(node, sqrtOf2);
                 }
 
                 if (
@@ -217,9 +225,17 @@ namespace game {
                         this->map[i - 1][j + 1] == TileType::Empty
                         || this->map[i - 1][j + 1] == TileType::Spawn
                         || this->map[i - 1][j + 1] == TileType::Base
+                    ) && (
+                        this->map[i][j + 1] == TileType::Empty
+                        || this->map[i][j + 1] == TileType::Spawn
+                        || this->map[i][j + 1] == TileType::Base
+                    ) && (
+                        this->map[i - 1][j] == TileType::Empty
+                        || this->map[i - 1][j] == TileType::Spawn
+                        || this->map[i - 1][j] == TileType::Base
                     )
                 ) {
-                    (*this->graph->find({i - 1, j + 1}))->link(node, 1.41421356);
+                    (*this->graph->find({i - 1, j + 1}))->link(node, sqrtOf2);
                 }
             }
         }
@@ -243,32 +259,73 @@ namespace game {
     }
 
     bool Map::placeTurret(const IPoint& index) {
-        if (index.x < 0 || index.x >= this->map.size() || index.y < 0 || index.y >= this->map.back().size() || this->map[index.x][index.y] != TileType::Empty) return false;
+        if (
+            index.x < 0
+            || index.x >= this->map.size()
+            || index.y < 0
+            || index.y >= this->map.back().size()
+            || this->map[index.x][index.y] != TileType::Empty
+        ) return false;
         this->map[index.x][index.y] = TileType::TurretType;
         TileGraph::Node* node = *this->graph->find(index);
-        TileGraph::Node::Neighbors neighbors = node->getNeighbors();
-        this->graph->erase(node);
-        TileGraph::Nodes::iterator
-            north = this->graph->find({index.x, index.y - 1}),
-            south = this->graph->find({index.x, index.y + 1}),
-            east = this->graph->find({index.x + 1, index.y}),
-            west = this->graph->find({index.x - 1, index.y});
-        if (north != this->graph->end() && east != this->graph->end()) (*north)->unlink(*east);
-        if (north != this->graph->end() && west != this->graph->end()) (*north)->unlink(*west);
-        if (south != this->graph->end() && east != this->graph->end()) (*south)->unlink(*east);
-        if (south != this->graph->end() && west != this->graph->end()) (*south)->unlink(*west);
         std::vector<std::vector<IPoint>> paths;
+
+        this->graph->erase(node);
+
+        TileGraph::Nodes::iterator
+            nodeN = this->graph->find({index.x, index.y - 1}),
+            nodeNE = this->graph->find({index.x + 1, index.y - 1}),
+            nodeE = this->graph->find({index.x + 1, index.y}),
+            nodeSE = this->graph->find({index.x + 1, index.y + 1}),
+            nodeS = this->graph->find({index.x, index.y + 1}),
+            nodeSW = this->graph->find({index.x - 1, index.y + 1}),
+            nodeW = this->graph->find({index.x - 1, index.y}),
+            nodeNW = this->graph->find({index.x - 1, index.y - 1});
+        if (nodeN != this->graph->end()) {
+            // node->unlink(*nodeN);
+            if (nodeE != this->graph->end()) (*nodeN)->unlink(*nodeE);
+            if (nodeW != this->graph->end()) (*nodeN)->unlink(*nodeW);
+        }
+        // if (nodeNE != this->graph->end()) node->unlink(*nodeNE);
+        // if (nodeE != this->graph->end()) node->unlink(*nodeE);
+        // if (nodeSE != this->graph->end()) node->unlink(*nodeSE);
+        if (nodeS != this->graph->end()) {
+            // node->unlink(*nodeS);
+            if (nodeE != this->graph->end()) (*nodeS)->unlink(*nodeE);
+            if (nodeW != this->graph->end()) (*nodeS)->unlink(*nodeW);
+        }
+        // if (nodeSW != this->graph->end()) node->unlink(*nodeSW);
+        // if (nodeW != this->graph->end()) node->unlink(*nodeW);
+        // if (nodeNW != this->graph->end()) node->unlink(*nodeNW);
+
+        std::function<void()> relink = [&]() -> void {
+            this->graph->insert(node);
+            TileGraph::Nodes::iterator end = this->graph->end();
+
+            if (nodeN != end) {
+                node->link(*nodeN);
+                if (nodeE != end && nodeNE != end) (*nodeN)->link(*nodeE, sqrtOf2);
+                if (nodeW != end && nodeNW != end) (*nodeN)->link(*nodeW, sqrtOf2);
+            }
+            if (nodeNE != end && nodeN != end && nodeE != end) node->link(*nodeNE, sqrtOf2);
+            if (nodeE != end) node->link(*nodeE);
+            if (nodeSE != end && nodeS != end && nodeE != end) node->link(*nodeSE, sqrtOf2);
+            if (nodeS != end) {
+                node->link(*nodeS);
+                if (nodeE != end && nodeSE != end) (*nodeS)->link(*nodeE, sqrtOf2);
+                if (nodeW != end && nodeSW != end) (*nodeS)->link(*nodeW, sqrtOf2);
+            }
+            if (nodeSW != end && nodeS != end && nodeW != end) node->link(*nodeSW, sqrtOf2);
+            if (nodeW != end) node->link(*nodeW);
+            if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
+
+            this->map[index.x][index.y] = TileType::Empty;
+        };
 
         for (IPoint& spawn : this->spawns) {
             bool res = this->efficientPathfindToMultipleTargets(spawn, paths);
             if (!res) {
-                this->graph->insert(node);
-                for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
-                if (north != this->graph->end() && east != this->graph->end()) (*north)->link(*east);
-                if (north != this->graph->end() && west != this->graph->end()) (*north)->link(*west);
-                if (south != this->graph->end() && east != this->graph->end()) (*south)->link(*east);
-                if (south != this->graph->end() && west != this->graph->end()) (*south)->link(*west);
-                this->map[index.x][index.y] = TileType::Empty;
+                relink();
                 return false;
             }
         }
@@ -276,28 +333,17 @@ namespace game {
         for (Enemy* enemy : *this->enemyHandler) {
             IPoint origin = this->getTileIndex(enemy->getCenter());
             if (origin == index) {
-                this->graph->insert(node);
-                for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
-                if (north != this->graph->end() && east != this->graph->end()) (*north)->link(*east);
-                if (north != this->graph->end() && west != this->graph->end()) (*north)->link(*west);
-                if (south != this->graph->end() && east != this->graph->end()) (*south)->link(*east);
-                if (south != this->graph->end() && west != this->graph->end()) (*south)->link(*west);
-                this->map[index.x][index.y] = TileType::Empty;
+                relink();
                 return false;
             }
             for (std::vector<IPoint>& path : paths) if (std::find(path.begin(), path.end(), origin) != path.end()) continue;
             bool res = this->efficientPathfindToMultipleTargets(origin, paths);
             if (!res) {
-                this->graph->insert(node);
-                for (TileGraph::Node* neighbor : neighbors) node->link(neighbor);
-                if (north != this->graph->end() && east != this->graph->end()) (*north)->link(*east);
-                if (north != this->graph->end() && west != this->graph->end()) (*north)->link(*west);
-                if (south != this->graph->end() && east != this->graph->end()) (*south)->link(*east);
-                if (south != this->graph->end() && west != this->graph->end()) (*south)->link(*west);
-                this->map[index.x][index.y] = TileType::Empty;
+                relink();
                 return false;
             }
         }
+
         for (Path* path : this->paths) delete path;
         this->paths.clear();
 
@@ -309,11 +355,19 @@ namespace game {
             for (Path* path : this->paths) if (path->isIndexInPath(origin)) validPaths.push_back(path);
             enemy->setPath(validPaths[std::rand() % validPaths.size()]);
         }
+
         return true;
     }
 
     bool Map::sellTurret(const IPoint& index) {
-        if (this->map[index.x][index.y] != TileType::TurretType) return false;
+        if (
+            index.x < 0
+            || index.x >= this->map.size()
+            || index.y < 0
+            || index.y >= this->map.back().size()
+            || this->map[index.x][index.y] != TileType::TurretType
+        ) return false;
+
         typename TileGraph::Nodes::iterator
             nodeN = this->graph->find({index.x, index.y - 1}),
             nodeNE = this->graph->find({index.x + 1, index.y - 1}),
@@ -323,20 +377,49 @@ namespace game {
             nodeSW = this->graph->find({index.x - 1, index.y + 1}),
             nodeW = this->graph->find({index.x - 1, index.y}),
             nodeNW = this->graph->find({index.x - 1, index.y - 1});
-        TileGraph::Node* node = *this->graph->insert(index).first;
-        if (nodeN != this->graph->end()) node->link(*nodeN);
-        if (nodeNE != this->graph->end()) node->link(*nodeNE);
-        if (nodeE != this->graph->end()) node->link(*nodeE);
-        if (nodeSE != this->graph->end()) node->link(*nodeSE);
-        if (nodeS != this->graph->end()) node->link(*nodeS);
-        if (nodeSW != this->graph->end()) node->link(*nodeSW);
-        if (nodeW != this->graph->end()) node->link(*nodeW);
-        if (nodeNW != this->graph->end()) node->link(*nodeNW);
-        if (nodeN != this->graph->end() && nodeE != this->graph->end()) (*nodeN)->link(*nodeE);
-        if (nodeN != this->graph->end() && nodeW != this->graph->end()) (*nodeN)->link(*nodeW);
-        if (nodeS != this->graph->end() && nodeE != this->graph->end()) (*nodeS)->link(*nodeE);
-        if (nodeS != this->graph->end() && nodeW != this->graph->end()) (*nodeS)->link(*nodeW);
+        TileGraph::Node* node = *(this->graph->insert(index).first);
+
+        TileGraph::Nodes::iterator end = this->graph->end();
+        if (nodeN != end) {
+            node->link(*nodeN);
+            if (nodeE != end && nodeNE != end) (*nodeN)->link(*nodeE, sqrtOf2);
+            if (nodeW != end && nodeNW != end) (*nodeN)->link(*nodeW, sqrtOf2);
+        }
+        if (nodeNE != end && nodeN != end && nodeE != end) node->link(*nodeNE, sqrtOf2);
+        if (nodeE != end) node->link(*nodeE);
+        if (nodeSE != end && nodeS != end && nodeE != end) node->link(*nodeSE, sqrtOf2);
+        if (nodeS != end) {
+            node->link(*nodeS);
+            if (nodeE != end && nodeSE != end) (*nodeS)->link(*nodeE, sqrtOf2);
+            if (nodeW != end && nodeSW != end) (*nodeS)->link(*nodeW, sqrtOf2);
+        }
+        if (nodeSW != end && nodeS != end && nodeW != end) node->link(*nodeSW, sqrtOf2);
+        if (nodeW != end) node->link(*nodeW);
+        if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
+
         this->map[index.x][index.y] = TileType::Empty;
+
+        for (Path* path : this->paths) delete path;
+        this->paths.clear();
+
+        std::vector<std::vector<IPoint>> paths;
+        for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
+
+        for (Enemy* enemy : *this->enemyHandler) {
+            IPoint origin = this->getTileIndex(enemy->getCenter());
+            for (std::vector<IPoint>& path : paths) if (std::find(path.begin(), path.end(), origin) != path.end()) continue;
+            bool res = this->efficientPathfindToMultipleTargets(origin, paths);
+        }
+
+        for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
+
+        for (Enemy* enemy : *this->enemyHandler) {
+            IPoint origin = this->getTileIndex(enemy->getCenter());
+            std::vector<Path*> validPaths;
+            for (Path* path : this->paths) if (path->isIndexInPath(origin)) validPaths.push_back(path);
+            enemy->setPath(validPaths[std::rand() % validPaths.size()]);
+        }
+
         return true;
     }
 
@@ -415,5 +498,9 @@ namespace game {
 
     const std::vector<Path*>& Map::getPaths() const {
         return this->paths;
+    }
+
+    EnemyHandler* Map::getEnemyHandler() {
+        return this->enemyHandler;
     }
 };

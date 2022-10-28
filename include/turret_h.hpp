@@ -11,9 +11,13 @@ namespace game{
         protected:
         GameState* gamestate;
         int damage;
-        float reloadTime;
+        double reloadTime;
         int range;
         IPoint index;
+        TurretHandler* turretHandler;
+        Enemy* targetedEnemy = nullptr;
+        double remainingReload=0;
+        double angle;
         public:
         Turret(
             SDL_Renderer* initRenderer,
@@ -21,15 +25,23 @@ namespace game{
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect,
             int initDamage,
-            float initReload,
+            double initReload,
             int initRange,
             IPoint initIndex,
-            TurretHandler* initTurretHandler
+            TurretHandler* initTurretHandler,
+            double initAngle
         );
 
         IPoint getIndex();
-        void currentEnemy();
-        void damageEnemy();
+
+        
+        void checkTarget(double scalar);
+        void findTarget();
+
+        void tick(double scalar);
+        void rotateTurret(DPoint enemy, DPoint turret);
+        DPoint getCenter();
+
         ~Turret();
     };
 
@@ -54,19 +66,23 @@ namespace game{
 
         void handleEvent(SDL_Event* event);
 
-        EnemyHandler getEnemyHandler();
+        void tick(double scalar);
+
+        EnemyHandler* getEnemyHandler();
+
+        Map* getMap();
     };
 
     class TurretData
     {
         public:
         int damage;
-        float reload;
+        double reload;
         int range;
         SDL_Texture* texture;
         public:
         TurretData(
-            int initDamage, float initReload, int initRange, SDL_Texture* initTexture
+            int initDamage, double initReload, int initRange, SDL_Texture* initTexture
         );
     };
 };
