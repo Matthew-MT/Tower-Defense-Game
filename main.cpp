@@ -7,7 +7,7 @@ using namespace game;
 int main(int argc, char *argv[]) {
     SDL_Init(SDL_INIT_VIDEO);
 
-    Mix_OpenAudio(22500, MIX_DEFAULT_FORMAT, 2, 4096);
+    Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 
     TTF_Init();
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
