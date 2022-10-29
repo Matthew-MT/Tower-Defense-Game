@@ -18,7 +18,9 @@ namespace game {
         
         ~Renderable() {}
 
-        virtual void render() {}
+        virtual void render() {
+            SDL_Log("We should not get here.");
+        }
 
         virtual void tick(double scalar) {}
 
