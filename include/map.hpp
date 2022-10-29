@@ -112,6 +112,7 @@ namespace game {
         if (!this->dead) {
             for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
                 int type = this->map[i][j];
+                SDL_Log("Rendering a tile...");
                 SDL_RenderCopy(
                     this->renderer,
                     this->textures.at(
