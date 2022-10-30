@@ -8,6 +8,8 @@ SOURCES:=$(MAIN).cpp $(wildcard *.hpp) $(wildcard include/*.hpp)
 
 ifeq ($(OS),Windows_NT)
 	EXT=.exe
+else
+	EXT=.out
 endif
 
 $(MAIN)$(EXT): $(SOURCES)

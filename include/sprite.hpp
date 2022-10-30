@@ -19,7 +19,9 @@ namespace game {
         
         ~Renderable() {}
 
-        virtual void render() {}
+        virtual void render() {
+            SDL_Log("We should not get here.");
+        }
 
         virtual void tick(double scalar) {}
 
@@ -102,6 +104,7 @@ namespace game {
                 SDL_Log("Warning: Detected a failed renderer association. Make sure to specify a renderer.");
                 return;
             }
+            SDL_Log("Rendering title...");
             SDL_RenderCopy(
                 this->renderer,
                 this->texture,

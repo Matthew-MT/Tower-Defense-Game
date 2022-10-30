@@ -22,5 +22,8 @@ namespace game{
         void playMusic(){
             Mix_PlayMusic(this->music, -1);
         }
+        void haltMusic() {
+            Mix_HaltMusic();
+        }
     };
 };
