@@ -53,6 +53,7 @@ namespace game{
             if(range>=enemyDistance)
             {
                 this->targetedEnemy = enemy;
+                this->targetedEnemy->track(this);
                 //rotateTurret(enemyPosition, turretPosition);
                 break;
             }
