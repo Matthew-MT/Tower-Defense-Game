@@ -4,6 +4,7 @@
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "map.hpp"
+#include <vector>
 
 namespace game{
     class Turret : public Sprite
