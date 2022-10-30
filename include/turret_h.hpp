@@ -1,9 +1,9 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "game_state.hpp"
+#include "forward.hpp"
 #include "sprite.hpp"
 #include "map.hpp"
-#include "forward.hpp"
 
 namespace game{
     class Turret : public Sprite

@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include "forward.hpp"
 #include <unordered_set>
+#include "forward.hpp"
 #include "sprite.hpp"
 #include <vector>
 
@@ -23,6 +23,7 @@ namespace game {
         GameState* gameState;
         Path* path;
         EnemyHandler* handler;
+        std::vector<Turret*> targetedBy;
         int
             movementSpeed,
             health,
@@ -46,6 +47,7 @@ namespace game {
         virtual void setPath(Path* path);
         virtual void setCenter(const DPoint& center);
         virtual void damage(int amount);
+        virtual void track(void* turret);
 
         virtual DPoint getCenter();
     };
