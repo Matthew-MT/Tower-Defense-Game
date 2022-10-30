@@ -59,20 +59,16 @@ namespace game {
         ) :
             title{initTitle},
             windowRect{initWindowRect} {
-            SDL_Log("Opening game");
             std::ifstream
                 mapProgressionFile("assets/config/map_progression.txt", std::ios_base::in);
             std::string buffer;
-            SDL_Log("Opened files");
 
             while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
-            SDL_Log("Loaded files");
 
             this->font = TTF_OpenFont("assets/fonts/arial.ttf", 20);
 
             this->window = SDL_CreateWindow(this->title.c_str(), this->windowRect->x, this->windowRect->y, this->windowRect->w, this->windowRect->h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
-            SDL_Log("Here 0");
 
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
@@ -87,12 +83,10 @@ namespace game {
                 {40, 40},
                 "Tower Defense"
             );
-            SDL_Log("Here 1");
 
             this->gameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
-            SDL_Log("Here 2");
 
             IPoint winSize = {
                 mapRect->w + 40,
@@ -100,25 +94,20 @@ namespace game {
             };
 
             SDL_SetWindowSize(this->window, winSize.x, winSize.y);
-            SDL_Log("Here 3");
 
             TurretHandler* turret = new TurretHandler(
                 this->renderer,
                 map->getDestRect(),
                 map
             );
-            SDL_Log("Here 4");
 
             this->renderList.push_back(turret);
-            SDL_Log("Here 5");
 
             this->music = new Music("assets/sound/Industrial Revolution.mp3");
             this->music->playMusic();
-            SDL_Log("Here 6");
 
             delete mapRect;
             // this->tickThread = SDL_CreateThread(this->tickThreadFn, "tick", this);
-            SDL_Log("Here 7");
         }
 
         ~Game() {
@@ -154,7 +143,7 @@ namespace game {
                         }
                     }
                 }
-                SDL_Delay(100);
+                SDL_Delay(10);
             }
             int status;
             // SDL_WaitThread(this->renderThread, &status);
@@ -194,7 +183,6 @@ namespace game {
         }
 
         virtual void tick() {
-            SDL_Log("Rendering.");
             const Uint64 nextTick = SDL_GetTicks64();
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
             this->lastTick = nextTick;

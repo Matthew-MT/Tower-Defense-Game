@@ -49,13 +49,10 @@ namespace game{
             DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
             double enemyDistance = distance(turretPosition,enemyPosition);
 
-            SDL_Log(std::to_string(range).c_str());
-
             if(range>=enemyDistance)
             {
                 this->targetedEnemy = enemy;
                 //rotateTurret(enemyPosition, turretPosition);
-                SDL_Log("Enemy targeted");
                 break;
             }
         }
@@ -79,7 +76,6 @@ namespace game{
                 if(remainingReload<=0)
                 {
                     this->targetedEnemy->damage(this->damage);
-                    SDL_Log("Enemy damaged");
                     this->remainingReload = reloadTime;
                 }
             }
@@ -137,9 +133,7 @@ namespace game{
         Map* initMap
         ) : Renderable{initRenderer, initDestRect}, map{initMap}
         {
-            SDL_Log("Begin turretHandler constructor");
             readTurretData("turret.txt");
-            SDL_Log("Read turret data");
         }
 
     void TurretHandler::render()
@@ -152,7 +146,6 @@ namespace game{
 
     void  TurretHandler::readTurretData(const std::string& turretFileName)
     {
-        SDL_Log("Begin read turret data");
         std::fstream 
             turretFile("assets/turrets/" + turretFileName, std::ios_base::in);
         std::string buffer;
@@ -161,15 +154,12 @@ namespace game{
         int range;
         SDL_Texture* texture;
 
-        SDL_Log("Variables init");
         std::getline(turretFile, buffer);
         damage = std::stoi(buffer);
         std::getline(turretFile, buffer);
         reloadTime = std::stof(buffer);
         std::getline(turretFile, buffer);
         range = std::stoi(buffer);
-
-        SDL_Log((buffer).c_str());
 
         std::getline(turretFile, buffer);
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
@@ -178,7 +168,6 @@ namespace game{
         std::getline(turretFile, buffer);
         Sound* turretSpawnSound = new Sound("assets/sound/" + buffer);
         turretTypes.push_back(new TurretData(damage, reloadTime, range, texture, turretSpawnSound));
-        SDL_Log("End turret read data");
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index)

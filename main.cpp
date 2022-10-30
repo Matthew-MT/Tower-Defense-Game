@@ -5,17 +5,12 @@
 using namespace game;
 
 int main(int argc, char *argv[]) {
-    SDL_Log("Begin");
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_Log("Init");
     Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
-    SDL_Log("Audio");
     TTF_Init();
-    SDL_Log("Text");
 
     SDL_DisplayMode display;
     SDL_GetDesktopDisplayMode(0, &display);
-    SDL_Log("Got display");
     Game* game = new Game(
         "Game",
         createRect(
