@@ -7,7 +7,6 @@
 #include "turret_h.hpp"
 #include "utils.hpp"
 #include <cstring>
-
 #include "sound.hpp"
 
 namespace game{
@@ -21,7 +20,8 @@ namespace game{
         int initRange,
         IPoint initIndex,
         TurretHandler* initTurretHandler,
-        double initAngle
+        double initAngle,
+        Sound* initSpawnSound
     ) : Sprite {
         initRenderer, 
         initTexture, 
@@ -33,7 +33,8 @@ namespace game{
     reloadTime{initReload},
     range{initRange},
     index{initIndex},
-    turretHandler{initTurretHandler}
+    turretHandler{initTurretHandler},
+    spawnSound{initSpawnSound}
     {}
 
     IPoint Turret::getIndex()
@@ -191,7 +192,8 @@ namespace game{
             data->range,
             index,
             this,
-            0.0
+            0.0,
+            data->turretSpawnSound
         );
         this->turrets.insert(turret);
     }
@@ -245,7 +247,7 @@ namespace game{
         int initDamage, 
         double initReload, 
         int initRange,
-        SDL_Texture* initTexture,
+        SDL_Texture* initTexture, 
         Sound* initTurretSpawnSound
     )
     {

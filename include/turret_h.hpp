@@ -18,6 +18,7 @@ namespace game{
         Enemy* targetedEnemy = nullptr;
         double remainingReload=0;
         double angle;
+        Sound* spawnSound;
         public:
         Turret(
             SDL_Renderer* initRenderer,
@@ -29,7 +30,8 @@ namespace game{
             int initRange,
             IPoint initIndex,
             TurretHandler* initTurretHandler,
-            double initAngle
+            double initAngle,
+            Sound* initSpawnSound
         );
 
         IPoint getIndex();
