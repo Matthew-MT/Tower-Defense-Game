@@ -138,7 +138,9 @@ namespace game{
         Map* initMap
         ) : Renderable{initRenderer, initDestRect}, map{initMap}
         {
+            SDL_Log("Begin turretHandler constructor");
             readTurretData("turret.txt");
+            SDL_Log("Read turret data");
         }
 
     void TurretHandler::render()
@@ -151,6 +153,7 @@ namespace game{
 
     void  TurretHandler::readTurretData(const std::string& turretFileName)
     {
+        SDL_Log("Begin read turret data");
         std::fstream 
             turretFile("assets/turrets/" + turretFileName, std::ios_base::in);
         std::string buffer;
@@ -159,6 +162,7 @@ namespace game{
         int range;
         SDL_Texture* texture;
 
+        SDL_Log("Variables init");
         std::getline(turretFile, buffer);
         damage = std::stoi(buffer);
         std::getline(turretFile, buffer);
@@ -175,6 +179,7 @@ namespace game{
         std::getline(turretFile, buffer);
         Sound* turretSpawnSound = new Sound("assets/sound/" + buffer);
         turretTypes.push_back(new TurretData(damage, reloadTime, range, texture, turretSpawnSound));
+        SDL_Log("End turret read data");
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index)
