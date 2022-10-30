@@ -8,15 +8,23 @@
 
 namespace game
 {
-    class GUI {
+    class GUI : public Renderable {
     protected:
     bool show_demo_window = true;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     SDL_Window* window;
     SDL_Renderer* renderer;
     public:
-        GUI(SDL_Window* initWindow, SDL_Renderer* initRenderer): window{initWindow}, renderer{initRenderer}
-        {
+        GUI(
+            SDL_Window* initWindow,
+            SDL_Renderer* initRenderer
+        ) :
+            Renderable{
+                initRenderer,
+                nullptr
+            },
+            window{initWindow},
+            renderer{initRenderer} {
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
             ImGuiIO& io=ImGui::GetIO(); (void)io;
