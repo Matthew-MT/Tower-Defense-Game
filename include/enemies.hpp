@@ -114,7 +114,7 @@ namespace game {
                     surface
                 ),
                 100,
-                10,
+                100,
                 1
             ));
             SDL_FreeSurface(surface);
