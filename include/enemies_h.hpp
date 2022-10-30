@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <unordered_set>
+#include "turret_h.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
 #include <vector>
@@ -47,7 +48,7 @@ namespace game {
         virtual void setPath(Path* path);
         virtual void setCenter(const DPoint& center);
         virtual void damage(int amount);
-        virtual void track(void* turret);
+        virtual void track(Turret* turret);
 
         virtual DPoint getCenter();
     };

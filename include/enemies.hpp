@@ -4,7 +4,6 @@
 #include "pathfinder_h.hpp"
 #include "game_state.hpp"
 #include <unordered_set>
-#include "turret_h.hpp"
 #include "sprite.hpp"
 #include "map_h.hpp"
 #include "sound.hpp"
@@ -46,7 +45,7 @@ namespace game {
         reward{initData->reward} {}
 
     Enemy::~Enemy() {
-        for (Turret* turret : this->targetedBy) turret->stopTracking(this);
+        for (Turret* turret : this->targetedBy) turret->stopTracking();
     }
 
     void Enemy::tick(double scalar) {
@@ -79,8 +78,8 @@ namespace game {
         if (this->health <= 0) this->handler->despawn(this);
     }
 
-    void Enemy::track(void* turret) {
-        this->targetedBy.push_back((Turret*)turret);
+    void Enemy::track(Turret* turret) {
+        this->targetedBy.push_back(turret);
     }
 
     DPoint Enemy::getCenter() {
