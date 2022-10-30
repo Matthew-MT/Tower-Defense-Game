@@ -242,16 +242,10 @@ namespace game{
 
 
     TurretData::TurretData(
-        int initDamage, 
-<<<<<<< HEAD
-        float initReload, 
-        int initRange,
-        SDL_Texture* initTexture,
-=======
+        int initDamage,
         double initReload, 
         int initRange,
-        SDL_Texture* initTexture, 
->>>>>>> 234c98c33b72cdba48584ee3b232f21e74a8109a
+        SDL_Texture* initTexture,
         Sound* initTurretSpawnSound
     )
     {
