@@ -17,4 +17,5 @@ namespace game {
     class TurretHandler;
     class Sound;
     class Music;
+    class MapMenu;
 };

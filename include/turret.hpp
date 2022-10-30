@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "game_state.hpp"
 #include "sprite.hpp"
 #include "map.hpp"
@@ -171,7 +172,7 @@ namespace game{
         range = std::stoi(buffer);
 
         std::getline(turretFile, buffer);
-        SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
+        SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
         std::getline(turretFile, buffer);

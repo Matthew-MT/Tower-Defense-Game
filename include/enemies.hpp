@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "enemies_h.hpp"
 #include "pathfinder_h.hpp"
 #include "game_state.hpp"
@@ -102,22 +103,34 @@ namespace game {
         gameState{initGameState},
         map{initMap} {
         std::fstream
-            textureAssociation("assets/config/enemy_texture_association.txt", std::ios_base::in);
+            textureAssociation("assets/config/enemy_data_association.txt", std::ios_base::in);
         std::string buffer;
 
         while (!textureAssociation.eof()) {
             std::getline(textureAssociation, buffer);
-            SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
-            this->types.push_back(new EnemyData(
-                SDL_CreateTextureFromSurface(
-                    this->renderer,
-                    surface
-                ),
-                100,
-                100,
-                1
-            ));
-            SDL_FreeSurface(surface);
+            std::fstream
+                enemyData("assets/enemies/" + buffer, std::ios_base::in);
+
+            while (!enemyData.eof()) {
+                std::getline(enemyData, buffer);
+                SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
+                std::getline(enemyData, buffer);
+                int movementSpeed = std::stoi(buffer);
+                std::getline(enemyData, buffer);
+                int health = std::stoi(buffer);
+                std::getline(enemyData, buffer);
+                int reward = std::stoi(buffer);
+                this->types.push_back(new EnemyData(
+                    SDL_CreateTextureFromSurface(
+                        this->renderer,
+                        surface
+                    ),
+                    movementSpeed,
+                    health,
+                    reward
+                ));
+                SDL_FreeSurface(surface);
+            }
         }
 
         textureAssociation.close();

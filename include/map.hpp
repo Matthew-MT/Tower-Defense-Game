@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "map_h.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
@@ -85,7 +86,7 @@ namespace game {
 
         while (!textureAssociation.eof()) {
             std::getline(textureAssociation, buffer);
-            SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
+            SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
             this->textures.push_back(
                 SDL_CreateTextureFromSurface(
                     this->renderer,
