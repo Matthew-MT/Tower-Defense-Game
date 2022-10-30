@@ -47,13 +47,11 @@ namespace game {
     }
 
     template<typename Position, typename Size> SDL_Rect* fromCenter(const Point<Position>& position, const Point<Size>& size) {
-        SDL_Log(("Position:   (" + std::to_string(position.x) + ", " + std::to_string(position.y) + "); (" + std::to_string(size.x) + ", " + std::to_string(size.y) + ")").c_str());
         SDL_Rect* rect = new SDL_Rect();
         rect->x = (int)position.x - (int)(size.x >> 1);
         rect->y = (int)position.y - (int)(size.y >> 1);
         rect->w = size.x;
         rect->h = size.y;
-        SDL_Log(("Calculated: (" + std::to_string(rect->x) + ", " + std::to_string(rect->y) + "); (" + std::to_string(rect->w) + ", " + std::to_string(rect->h) + ")").c_str());
         return rect;
     }
 
