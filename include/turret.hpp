@@ -80,13 +80,20 @@ namespace game{
                     this->remainingReload = reloadTime;
                 }
             }
-            else{
-                targetedEnemy = nullptr;
+            else
+            {
+                stopTracking();
             }
         }
         else   
             this->findTarget();
     }
+
+    void Turret::stopTracking()
+    {
+        targetedEnemy = nullptr;
+    }
+
     Turret::~Turret(){}
 
     void Turret::tick(double scalar)
