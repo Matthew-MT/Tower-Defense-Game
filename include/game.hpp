@@ -90,7 +90,7 @@ namespace game {
 
             IPoint winSize = {
                 mapRect->w + 40,
-                mapRect->h + 40
+                mapRect->h + 80
             };
 
             SDL_SetWindowSize(this->window, winSize.x, winSize.y);
