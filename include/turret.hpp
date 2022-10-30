@@ -55,8 +55,6 @@ namespace game{
             if(range>=enemyDistance)
             {
                 this->targetedEnemy = enemy;
-                //rotateTurret(enemyPosition, turretPosition);
-                SDL_Log("Enemy targeted");
                 break;
             }
         }
@@ -80,7 +78,6 @@ namespace game{
                 if(remainingReload<=0)
                 {
                     this->targetedEnemy->damage(this->damage);
-                    SDL_Log("Enemy damaged");
                     this->remainingReload = reloadTime;
                 }
             }
@@ -138,9 +135,7 @@ namespace game{
         Map* initMap
         ) : Renderable{initRenderer, initDestRect}, map{initMap}
         {
-            SDL_Log("Begin turretHandler constructor");
             readTurretData("turret.txt");
-            SDL_Log("Read turret data");
         }
 
     void TurretHandler::render()
