@@ -171,13 +171,9 @@ namespace game{
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-<<<<<<< HEAD
-        turretTypes.push_back(new TurretData(damage, reloadTime, range, texture));
-=======
         std::getline(turretFile, buffer);
         Sound* turretSpawnSound = new Sound("assets/sound/" + buffer);
-        turretTypes.push_back(new TurretData(damage, reloadTime, texture, turretSpawnSound));
->>>>>>> 0888c397cec66101ca2d2824f0b8783378373465
+        turretTypes.push_back(new TurretData(damage, reloadTime, range, texture, turretSpawnSound));
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index)
@@ -247,15 +243,10 @@ namespace game{
 
     TurretData::TurretData(
         int initDamage, 
-<<<<<<< HEAD
         double initReload, 
         int initRange,
-        SDL_Texture* initTexture
-=======
-        float initReload, 
-        SDL_Texture* initTexture,
+        SDL_Texture* initTexture, 
         Sound* initTurretSpawnSound
->>>>>>> 0888c397cec66101ca2d2824f0b8783378373465
     )
     {
         damage = initDamage;
