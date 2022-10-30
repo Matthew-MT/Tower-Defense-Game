@@ -242,7 +242,7 @@ namespace game{
 
 
     TurretData::TurretData(
-        int initDamage,
+        int initDamage, 
         double initReload, 
         int initRange,
         SDL_Texture* initTexture,
