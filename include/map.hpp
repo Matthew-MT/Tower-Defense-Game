@@ -112,8 +112,6 @@ namespace game {
         if (!this->dead) {
             for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
                 int type = this->map[i][j];
-                SDL_Log(("Tiletype: " + std::to_string(type)).c_str());
-                SDL_Log(("Textures: " + std::to_string(this->textures.size())).c_str());
                 SDL_RenderCopy(
                     this->renderer,
                     this->textures.at(
