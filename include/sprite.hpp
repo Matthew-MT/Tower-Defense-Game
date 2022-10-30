@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <iostream>
+#include <cmath>
 #include "utils.hpp"
 
 namespace game {
@@ -38,7 +39,7 @@ namespace game {
             this->destRect->y = position.y;
         }
 
-        virtual SDL_Renderer* getRenderer() {
+        virtual const SDL_Renderer* getRenderer() const {
             return this->renderer;
         }
 
@@ -112,14 +113,9 @@ namespace game {
             );
         }
 
-        virtual void setDestRect(SDL_Rect* newDestRect) {
-            this->position.x = (double)newDestRect->x;
-            this->position.y = (double)newDestRect->y;
-            this->Renderable::setDestRect(newDestRect);
-        }
-
         virtual void setPosition(const IPoint& position) {
-            this->position = (DPoint)position;
+            this->position.x = (double)position.x;
+            this->position.y = (double)position.y;
             this->Renderable::setPosition(position);
         }
 
