@@ -39,6 +39,7 @@ namespace game{
         
         void checkTarget(double scalar);
         void findTarget();
+        void stopTracking();
 
         void tick(double scalar);
         void rotateTurret(DPoint enemy, DPoint turret);
