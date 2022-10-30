@@ -3,18 +3,23 @@
 #include <SDL2/SDL_ttf.h>
 #include <unordered_set>
 #include "sprite.hpp"
+#include "turret.hpp"
+#include "text.hpp"
 #include "map.hpp"
 #include "gui.hpp"
-#include "turret.hpp"
 #include <string>
 #include <vector>
+#include "sound.hpp"
+#include "music.hpp"
 
 namespace game {
     class Game {
     protected:
-        SDL_bool exit = SDL_FALSE;
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
+        TTF_Font* font;
+        GameState* gameState;
+        SDL_bool exit = SDL_FALSE;
         std::unordered_set<SDL_Texture*> textureList;
         std::vector<Renderable*> renderList;
         std::vector<std::string> mapProgression;
@@ -31,6 +36,8 @@ namespace game {
             this->window = SDL_CreateWindow(title.c_str(), x, y, w, h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
 
+            this->font = TTF_OpenFont("assets/fonts/arial.ttf", 20);
+
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
             mapRect->y = 20;
@@ -39,13 +46,20 @@ namespace game {
 
             Map* map = new Map(
                 this->renderer,
+                this->font,
                 mapRect,
-                {40, 40}
+                {40, 40},
+                "Tower Defense"
             );
-            GameState* initGameState = map->loadMap(this->mapProgression.front());
+            this->gameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
-            SDL_SetWindowSize(this->window, mapRect->w + 40, mapRect->h + 40);
+
+            IPoint winSize = {
+                mapRect->w + 40,
+                mapRect->h + 40
+            };
+            SDL_SetWindowSize(this->window, winSize.x, winSize.y);
 
             TurretHandler* turret = new TurretHandler(
                 this->renderer,
@@ -54,10 +68,12 @@ namespace game {
             );
             this->renderList.push_back(turret);
 
-            TTF_Font* font = TTF_OpenFont("assets/fonts/SansSerifCollection.ttf", 24);
-
             this->gui = new GUI(this->window, this->renderer);
-            
+
+            Music* myMusic = new Music("assets/sound/Industrial Revolution.mp3");
+            myMusic -> playMusic();
+
+            delete mapRect;
         }
 
         ~Game() {
@@ -98,7 +114,7 @@ namespace game {
             return renderable;
         }
 
-        virtual const SDL_Renderer* getRenderer() const {
+        virtual SDL_Renderer* getRenderer() {
             return this->renderer;
         }
 
@@ -110,7 +126,7 @@ namespace game {
         }
 
         virtual void handleEvent(SDL_Event* event) {
-            for(Renderable* renderable : this->renderList) {
+            for (Renderable* renderable : this->renderList) {
                 renderable->handleEvent(event);
             }
         }

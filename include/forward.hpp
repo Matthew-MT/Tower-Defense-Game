@@ -15,4 +15,6 @@ namespace game {
     class Turret;
     class TurretData;
     class TurretHandler;
+    class Sound;
+    class Music;
 };

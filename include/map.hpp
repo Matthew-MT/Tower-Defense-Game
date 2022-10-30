@@ -15,27 +15,21 @@
 namespace game {
     void Map::updateMapSize() {
         if (
-            this->destRect->w == -1
+            this->destRect->w != -1
         ) {
-            this->destRect->w
-                = this->tileSize.x
-                * this->map.size();
-        } else {
             this->tileSize.x
                 = this->destRect->w
                 / this->map.size();
         }
 
         if (
-            this->destRect->h == -1
+            this->destRect->h != -1
         ) {
-            this->destRect->h
-                = this->tileSize.y
-                * this->map.back().size();
-        } else {
             this->tileSize.y
-                = this->destRect->h
-                / this->map.back().size();
+                = (
+                    this->destRect->h
+                    - this->headerHeight
+                ) / this->map.back().size();
         }
     }
 
@@ -69,15 +63,21 @@ namespace game {
 
     Map::Map(
         SDL_Renderer* initRenderer,
+        TTF_Font* initFont,
         SDL_Rect* initDestRect,
-        const IPoint& initTileSize
+        const IPoint& initTileSize,
+        const std::string& initTitle,
+        int initHeaderHeight
     ) :
         Renderable{
             initRenderer,
             initDestRect
         },
+        font{initFont},
+        graph{new TileGraph()},
         tileSize{initTileSize},
-        graph{new TileGraph()} {
+        title{initTitle},
+        headerHeight{initHeaderHeight} {
         std::fstream
             textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
         std::string buffer;
@@ -120,6 +120,7 @@ namespace game {
             );
         }
         this->enemyHandler->render();
+        this->gameState->render();
     }
 
     void Map::tick(double scalar) {
@@ -248,10 +249,27 @@ namespace game {
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
 
-        this->gameState = new GameState(health, cash);
+        if (this->gameState != nullptr) {
+            delete this->gameState;
+            this->gameState = nullptr;
+        }
+        this->gameState = new GameState(
+            this->renderer,
+            this->font,
+            createRect(
+                this->getPosition(),
+                IPoint{
+                    this->getSize().x,
+                    this->headerHeight
+                }
+            ),
+            this->title,
+            cash,
+            health
+        );
         this->enemyHandler = new EnemyHandler(
             this->renderer,
-            this->destRect,
+            this->getDestRect(),
             this,
             this->gameState
         );
@@ -282,21 +300,13 @@ namespace game {
             nodeW = this->graph->find({index.x - 1, index.y}),
             nodeNW = this->graph->find({index.x - 1, index.y - 1});
         if (nodeN != this->graph->end()) {
-            // node->unlink(*nodeN);
             if (nodeE != this->graph->end()) (*nodeN)->unlink(*nodeE);
             if (nodeW != this->graph->end()) (*nodeN)->unlink(*nodeW);
         }
-        // if (nodeNE != this->graph->end()) node->unlink(*nodeNE);
-        // if (nodeE != this->graph->end()) node->unlink(*nodeE);
-        // if (nodeSE != this->graph->end()) node->unlink(*nodeSE);
         if (nodeS != this->graph->end()) {
-            // node->unlink(*nodeS);
             if (nodeE != this->graph->end()) (*nodeS)->unlink(*nodeE);
             if (nodeW != this->graph->end()) (*nodeS)->unlink(*nodeW);
         }
-        // if (nodeSW != this->graph->end()) node->unlink(*nodeSW);
-        // if (nodeW != this->graph->end()) node->unlink(*nodeW);
-        // if (nodeNW != this->graph->end()) node->unlink(*nodeNW);
 
         std::function<void()> relink = [&]() -> void {
             this->graph->insert(node);
@@ -424,6 +434,7 @@ namespace game {
     }
 
     void Map::setDestRect(SDL_Rect* newDestRect) {
+        delete this->destRect;
         this->destRect = newDestRect;
         this->updateTiles();
     }
@@ -438,35 +449,44 @@ namespace game {
         rect->x = this->destRect->x;
         rect->y = this->destRect->y;
         rect->w = this->tileSize.x * this->map.size();
-        rect->h = this->tileSize.y * this->map.back().size();
+        rect->h = (this->tileSize.y * this->map.back().size()) + this->headerHeight;
         return rect;
     }
 
-    IPoint Map::getTileIndex(IPoint position) const {
-        if (
-            position.x < 0
-            || position.y < 0
-            || position.x > this->map.size() * this->tileSize.x
-            || position.y > this->map.front().size() * this->tileSize.y
-        ) return {-1, -1};
+    IPoint Map::getSize() const {
+        return {
+            this->tileSize.x * (int)this->map.size(),
+            (this->tileSize.y * (int)this->map.back().size()) + this->headerHeight
+        };
+    }
 
+    IPoint Map::getTileIndex(IPoint position) const {
+        SDL_Rect* rect = this->getDestRect();
+        if (
+            position.x < rect->x
+            || position.y < rect->y + this->headerHeight
+            || position.x > rect->x + (this->map.size() * this->tileSize.x)
+            || position.y > rect->y + (this->map.front().size() * this->tileSize.y) + this->headerHeight
+        ) {
+            delete rect;
+            return {-1, -1};
+        }
+
+        delete rect;
         return {
             (int)std::floor((double)(position.x - this->destRect->x) / (double)this->tileSize.x),
-            (int)std::floor((double)(position.y - this->destRect->y) / (double)this->tileSize.y)
+            (int)std::floor((double)(position.y - (this->destRect->y + this->headerHeight)) / (double)this->tileSize.y)
         };
     }
 
     IPoint Map::getTileIndexCenter(SDL_Rect* rect) const {
-        return this->getTileIndex({
-            rect->x + (rect->w >> 1),
-            rect->y + (rect->h >> 1)
-        });
+        return this->getTileIndex(getCenter(rect));
     }
 
     SDL_Rect* Map::getTileDest(const IPoint& index) const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x + (this->tileSize.x * index.x);
-        rect->y = this->destRect->y + (this->tileSize.y * index.y);
+        rect->y = this->destRect->y + (this->tileSize.y * index.y) + this->headerHeight;
         rect->w = this->tileSize.x;
         rect->h = this->tileSize.y;
         return rect;
@@ -475,7 +495,7 @@ namespace game {
     IPoint Map::getTileCenter(const IPoint& index) const {
         return {
             this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
-            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1)
+            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1) + this->headerHeight
         };
     }
 
@@ -498,6 +518,10 @@ namespace game {
 
     const std::vector<Path*>& Map::getPaths() const {
         return this->paths;
+    }
+
+    GameState* Map::getGameState() {
+        return this->gameState;
     }
 
     EnemyHandler* Map::getEnemyHandler() {
