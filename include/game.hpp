@@ -17,9 +17,9 @@ namespace game {
     protected:
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
-        SDL_Thread
-            * renderThread = nullptr,
-            * tickThread = nullptr;
+        // SDL_Thread
+        //     * renderThread = nullptr,
+        //     * tickThread = nullptr;
         TTF_Font* font;
         GameState* gameState;
         Music* music;
@@ -30,28 +30,28 @@ namespace game {
         std::vector<Renderable*> renderList;
         std::vector<std::string> mapProgression;
         Uint64 lastTick = 0;
-        GUI* gui;
+        // GUI* gui;
         std::string title;
         SDL_Rect* windowRect;
 
-        static int renderThreadFn(void* thisArg) {
-            Game* game = (Game*)thisArg;
-            while (!game->exited()) {
-                game->renderWindow();
-                SDL_Delay(100);
-            }
-            game->ready = SDL_FALSE;
-            return 0;
-        }
+        // static int renderThreadFn(void* thisArg) {
+        //     Game* game = (Game*)thisArg;
+        //     while (!game->exited()) {
+        //         game->renderWindow();
+        //         SDL_Delay(100);
+        //     }
+        //     game->ready = SDL_FALSE;
+        //     return 0;
+        // }
 
-        static int tickThreadFn(void* thisArg) {
-            Game* game = (Game*)thisArg;
-            while (!game->exited()) {
-                game->tick();
-                SDL_Delay(100);
-            }
-            return 0;
-        }
+        // static int tickThreadFn(void* thisArg) {
+        //     Game* game = (Game*)thisArg;
+        //     while (!game->exited()) {
+        //         game->tick();
+        //         SDL_Delay(100);
+        //     }
+        //     return 0;
+        // }
     public:
         Game(
             const std::string& initTitle,
@@ -59,16 +59,20 @@ namespace game {
         ) :
             title{initTitle},
             windowRect{initWindowRect} {
+            SDL_Log("Opening game");
             std::ifstream
                 mapProgressionFile("assets/config/map_progression.txt", std::ios_base::in);
             std::string buffer;
+            SDL_Log("Opened files");
 
             while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
+            SDL_Log("Loaded files");
 
             this->font = TTF_OpenFont("assets/fonts/arial.ttf", 20);
 
             this->window = SDL_CreateWindow(this->title.c_str(), this->windowRect->x, this->windowRect->y, this->windowRect->w, this->windowRect->h, 0);
             this->renderer = SDL_CreateRenderer(this->window, -1, SDL_RENDERER_ACCELERATED);
+            SDL_Log("Here 0");
 
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
@@ -83,10 +87,12 @@ namespace game {
                 {40, 40},
                 "Tower Defense"
             );
+            SDL_Log("Here 1");
 
             this->gameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
+            SDL_Log("Here 2");
 
             IPoint winSize = {
                 mapRect->w + 40,
@@ -94,20 +100,25 @@ namespace game {
             };
 
             SDL_SetWindowSize(this->window, winSize.x, winSize.y);
+            SDL_Log("Here 3");
 
             TurretHandler* turret = new TurretHandler(
                 this->renderer,
                 map->getDestRect(),
                 map
             );
+            SDL_Log("Here 4");
 
             this->renderList.push_back(turret);
+            SDL_Log("Here 5");
 
             this->music = new Music("assets/sound/Industrial Revolution.mp3");
             this->music->playMusic();
+            SDL_Log("Here 6");
 
             delete mapRect;
-            this->tickThread = SDL_CreateThread(this->tickThreadFn, "tick", this);
+            // this->tickThread = SDL_CreateThread(this->tickThreadFn, "tick", this);
+            SDL_Log("Here 7");
         }
 
         ~Game() {
@@ -115,8 +126,8 @@ namespace game {
             delete this->music;
             this->exit = SDL_TRUE;
             int status;
-            if (this->renderThread != nullptr) SDL_WaitThread(this->renderThread, &status);
-            if (this->tickThread != nullptr) SDL_WaitThread(this->tickThread, &status);
+            // if (this->renderThread != nullptr) SDL_WaitThread(this->renderThread, &status);
+            // if (this->tickThread != nullptr) SDL_WaitThread(this->tickThread, &status);
             for (SDL_Texture* texture : this->textureList) SDL_DestroyTexture(texture);
             this->textureList.clear();
             for (Renderable* renderable : this->renderList) delete renderable;
@@ -126,9 +137,10 @@ namespace game {
         }
 
         virtual void run() {
-            this->renderThread = SDL_CreateThread(this->renderThreadFn, "render", this);
+            // this->renderThread = SDL_CreateThread(this->renderThreadFn, "render", this);
             SDL_Event event;
             while (!this->exited()) {
+                this->renderWindow();
                 while (SDL_PollEvent(&event)) {
                     switch (event.type) {
                         case SDL_QUIT: {
@@ -145,15 +157,16 @@ namespace game {
                 SDL_Delay(100);
             }
             int status;
-            SDL_WaitThread(this->renderThread, &status);
-            this->renderThread = nullptr;
-            SDL_Log(("Render thread exited with status " + std::to_string(status) + ".").c_str());
-            SDL_WaitThread(this->tickThread, &status);
-            this->tickThread = nullptr;
-            SDL_Log(("Tick thread exited with status " + std::to_string(status) + ".").c_str());
+            // SDL_WaitThread(this->renderThread, &status);
+            // this->renderThread = nullptr;
+            // SDL_Log(("Render thread exited with status " + std::to_string(status) + ".").c_str());
+            // SDL_WaitThread(this->tickThread, &status);
+            // this->tickThread = nullptr;
+            // SDL_Log(("Tick thread exited with status " + std::to_string(status) + ".").c_str());
         }
 
         virtual void renderWindow() {
+            this->tick();
             SDL_RenderClear(this->renderer);
             for (Renderable* renderable : this->renderList) renderable->render();
             // this->gui->render();
