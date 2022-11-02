@@ -4,6 +4,7 @@
 #include "map_h.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
+#include "map_menu_h.hpp"
 #include "enemies.hpp"
 #include "sprite.hpp"
 #include <algorithm>
@@ -14,6 +15,13 @@
 #include <string>
 
 namespace game {
+    MapData::MapData(
+        const std::vector<std::vector<int>>& initMap,
+        const std::vector<SDL_Texture*>& initTextures
+    ) :
+        textures{initTextures},
+        map{initMap} {}
+
     void Map::updateMapSize() {
         if (
             this->destRect->w != -1
@@ -35,11 +43,11 @@ namespace game {
     }
 
     void Map::updateTiles() {
-        for (int i = 0; i < this->mapSprites.size(); i++) {
-            for (int j = 0; j < this->mapSprites[i].size(); j++) {
-                this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
-            }
-        }
+        // for (int i = 0; i < this->mapSprites.size(); i++) {
+        //     for (int j = 0; j < this->mapSprites[i].size(); j++) {
+        //         this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
+        //     }
+        // }
     }
 
     bool Map::efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths) {
@@ -102,7 +110,7 @@ namespace game {
     }
 
     Map::~Map() {
-        for (std::vector<StaticSprite*>& col : this->mapSprites) for (StaticSprite* sprite : col) delete sprite;
+        // for (std::vector<StaticSprite*>& col : this->mapSprites) for (StaticSprite* sprite : col) delete sprite;
         for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
         for (Path* path : this->paths) delete path;
         delete this->graph;
@@ -121,7 +129,8 @@ namespace game {
                         : type
                     ),
                     nullptr,
-                    this->mapSprites[i][j]->getDestRect()
+                    this->getTileDest({i, j})
+                    // this->mapSprites[i][j]->getDestRect()
                 );
             }
             this->enemyHandler->render();
@@ -144,8 +153,8 @@ namespace game {
     GameState* Map::loadMap(const std::string& mapFileName) {
         this->dead = false;
         this->map.clear();
-        for (std::vector<StaticSprite*>& column : this->mapSprites) for (StaticSprite* sprite : column) delete sprite;
-        this->mapSprites.clear();
+        // for (std::vector<StaticSprite*>& column : this->mapSprites) for (StaticSprite* sprite : column) delete sprite;
+        // this->mapSprites.clear();
 
         std::fstream
             mapFile("assets/maps/" + mapFileName, std::ios_base::in);
@@ -177,15 +186,15 @@ namespace game {
         }
 
         for (int i = 0; i < this->map.size(); i++) {
-            this->mapSprites.push_back({});
+            // this->mapSprites.push_back({});
             for (int j = 0; j < this->map[i].size(); j++) {
                 int type = this->map[i][j];
                 IPoint index{i, j};
-                this->mapSprites.back().push_back(new StaticSprite(
-                    this->renderer,
-                    this->textures.at(type),
-                    this->getTileDest(index)
-                ));
+                // this->mapSprites.back().push_back(new StaticSprite(
+                //     this->renderer,
+                //     this->textures.at(type),
+                //     this->getTileDest(index)
+                // ));
 
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
@@ -293,6 +302,10 @@ namespace game {
             this->gameState
         );
         return this->gameState;
+    }
+
+    void Map::start(MapMenu::Option option) {
+        this->enemyHandler->start(option);
     }
 
     void Map::displayDeathScreen() {

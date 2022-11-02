@@ -1,140 +1,134 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include "map_menu_h.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
+#include "map_h.hpp"
+#include <vector>
 
 namespace game {
-    class MapMenu : public Renderable {
-    public:
-        enum Option {
-            None = 0,
-            Right = 1,
-            Left = 2,
-            Easy = 3,
-            Normal = 4,
-            Hard = 5,
-            Fun = 6
-        };
-    protected:
-        SDL_Texture
-            * arrow,
-            * arrowHovered,
-            * difficultyEasy,
-            * difficultyEasyHovered,
-            * difficultyNormal,
-            * difficultyNormalHovered,
-            * difficultyHard,
-            * difficultyHardHovered,
-            * difficultyFun,
-            * difficultyFunHovered;
-        SDL_Rect
-            * arrowRightRect,
-            * arrowLeftRect,
-            * difficultyEasyRect,
-            * difficultyNormalRect,
-            * difficultyHardRect,
-            * difficultyFunRect;
-        Option hovered = Option::None;
+    void MapMenu::updatePosition() {}
 
-        virtual void updatePosition() {}
-    public:
-        MapMenu(
-            SDL_Renderer* initRenderer,
-            SDL_Rect* initDestRect
-        ) : Renderable{
+    MapMenu::MapMenu(
+        SDL_Renderer* initRenderer,
+        SDL_Rect* initDestRect,
+        Map* initMap,
+        const std::vector<std::string>& initMapList
+    )
+        : Renderable{
             initRenderer,
             initDestRect
-        } {
-            SDL_Surface* surface = IMG_Load("assets/images/arrow_right.png");
-            this->arrow = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/arrow_right_hovered.png");
-            this->arrowHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_easy.png");
-            this->difficultyEasy = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_easy_hovered.png");
-            this->difficultyEasyHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_normal.png");
-            this->difficultyNormal = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_normal_hovered.png");
-            this->difficultyNormalHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_hard.png");
-            this->difficultyHard = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_hard_hovered.png");
-            this->difficultyHardHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_fun.png");
-            this->difficultyFun = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-            surface = IMG_Load("assets/images/difficulty_fun_hovered.png");
-            this->difficultyFunHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
-            SDL_FreeSurface(surface);
-        }
+        },
+        map{initMap},
+        mapList{initMapList} {
+        SDL_Surface* surface = IMG_Load("assets/images/arrow_right.png");
+        this->arrow = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/arrow_right_hovered.png");
+        this->arrowHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_easy.png");
+        this->difficultyEasy = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_easy_hovered.png");
+        this->difficultyEasyHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_normal.png");
+        this->difficultyNormal = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_normal_hovered.png");
+        this->difficultyNormalHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_hard.png");
+        this->difficultyHard = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_hard_hovered.png");
+        this->difficultyHardHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_fun.png");
+        this->difficultyFun = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        surface = IMG_Load("assets/images/difficulty_fun_hovered.png");
+        this->difficultyFunHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        this->map->loadMap(this->mapList.front());
+    }
 
-        ~MapMenu() {
-            SDL_DestroyTexture(this->arrow);
-            SDL_DestroyTexture(this->arrowHovered);
-            SDL_DestroyTexture(this->difficultyEasy);
-            SDL_DestroyTexture(this->difficultyEasyHovered);
-            SDL_DestroyTexture(this->difficultyNormal);
-            SDL_DestroyTexture(this->difficultyNormalHovered);
-            SDL_DestroyTexture(this->difficultyHard);
-            SDL_DestroyTexture(this->difficultyHardHovered);
-            SDL_DestroyTexture(this->difficultyFun);
-            SDL_DestroyTexture(this->difficultyFunHovered);
-        }
+    MapMenu::~MapMenu() {
+        SDL_DestroyTexture(this->arrow);
+        SDL_DestroyTexture(this->arrowHovered);
+        SDL_DestroyTexture(this->difficultyEasy);
+        SDL_DestroyTexture(this->difficultyEasyHovered);
+        SDL_DestroyTexture(this->difficultyNormal);
+        SDL_DestroyTexture(this->difficultyNormalHovered);
+        SDL_DestroyTexture(this->difficultyHard);
+        SDL_DestroyTexture(this->difficultyHardHovered);
+        SDL_DestroyTexture(this->difficultyFun);
+        SDL_DestroyTexture(this->difficultyFunHovered);
+    }
 
-        virtual void render() {
-            SDL_RenderCopy(
-                this->renderer,
-                this->hovered == Option::Right ? this->arrowHovered : this->arrow,
-                nullptr,
-                this->arrowRightRect
-            );
-            SDL_RenderCopyEx(
-                this->renderer,
-                this->hovered == Option::Left ? this->arrowHovered : this->arrow,
-                nullptr,
-                this->arrowLeftRect,
-                0.f, nullptr,
-                SDL_FLIP_HORIZONTAL
-            );
-            SDL_RenderCopy(
-                this->renderer,
-                this->hovered == Option::Easy ? this->difficultyEasyHovered : this->difficultyEasy,
-                nullptr,
-                this->difficultyEasyRect
-            );
-            SDL_RenderCopy(
-                this->renderer,
-                this->hovered == Option::Normal ? this->difficultyNormalHovered : this->difficultyNormal,
-                nullptr,
-                this->difficultyNormalRect
-            );
-            SDL_RenderCopy(
-                this->renderer,
-                this->hovered == Option::Hard ? this->difficultyHardHovered : this->difficultyHard,
-                nullptr,
-                this->difficultyHardRect
-            );
-            SDL_RenderCopy(
-                this->renderer,
-                this->hovered == Option::Fun ? this->difficultyFunHovered : this->difficultyFun,
-                nullptr,
-                this->difficultyFunRect
-            );
-        }
+    void MapMenu::render() {
+        SDL_RenderCopy(
+            this->renderer,
+            this->hovered == Option::Right ? this->arrowHovered : this->arrow,
+            nullptr,
+            this->arrowRightRect
+        );
+        SDL_RenderCopyEx(
+            this->renderer,
+            this->hovered == Option::Left ? this->arrowHovered : this->arrow,
+            nullptr,
+            this->arrowLeftRect,
+            0.f, nullptr,
+            SDL_FLIP_HORIZONTAL
+        );
+        SDL_RenderCopy(
+            this->renderer,
+            this->hovered == Option::Easy ? this->difficultyEasyHovered : this->difficultyEasy,
+            nullptr,
+            this->difficultyEasyRect
+        );
+        SDL_RenderCopy(
+            this->renderer,
+            this->hovered == Option::Normal ? this->difficultyNormalHovered : this->difficultyNormal,
+            nullptr,
+            this->difficultyNormalRect
+        );
+        SDL_RenderCopy(
+            this->renderer,
+            this->hovered == Option::Hard ? this->difficultyHardHovered : this->difficultyHard,
+            nullptr,
+            this->difficultyHardRect
+        );
+        SDL_RenderCopy(
+            this->renderer,
+            this->hovered == Option::Fun ? this->difficultyFunHovered : this->difficultyFun,
+            nullptr,
+            this->difficultyFunRect
+        );
+    }
 
-        virtual void handleEvent(SDL_Event* event) {
-            if (event->type == SDL_MOUSEMOTION) {
-            }
+    void MapMenu::handleEvent(SDL_Event* event) {
+        if (event->type == SDL_MOUSEMOTION) {
+            IPoint point = {event->motion.x, event->motion.y};
+            if (contains(this->arrowLeftRect, point)) this->hovered = Option::Left;
+            else if (contains(this->arrowRightRect, point)) this->hovered = Option::Right;
+            else if (contains(this->difficultyEasyRect, point)) this->hovered = Option::Easy;
+            else if (contains(this->difficultyNormalRect, point)) this->hovered = Option::Normal;
+            else if (contains(this->difficultyHardRect, point)) this->hovered = Option::Hard;
+            else if (contains(this->difficultyFunRect, point)) this->hovered = Option::Fun;
+            else this->hovered = Option::None;
+        } else if (event->type == SDL_MOUSEBUTTONUP) {
+            if (this->hovered == Option::Left) {
+                this->place--;
+                while (this->place < 0) this->place = this->mapList.size() + place;
+                this->map->loadMap(this->mapList[this->place]);
+            } else if (this->hovered == Option::Right) {
+                this->place++;
+                while (this->place >= this->mapList.size()) this->place -= this->mapList.size();
+                this->map->loadMap(this->mapList[this->place]);
+            } else if (this->hovered != Option::None) this->map->start(this->hovered);
         }
-    };
+    }
 };

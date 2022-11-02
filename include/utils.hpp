@@ -89,4 +89,8 @@ namespace game {
         rect->h = (int)size.y;
         return rect;
     }
+
+    bool contains(SDL_Rect* rect, const IPoint& point) {
+        return point.x >= rect->x && point.x < rect->x + rect->w && point.y >= rect->y && point.y < rect->y + rect->h;
+    }
 };

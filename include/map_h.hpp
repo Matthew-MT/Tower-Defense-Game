@@ -13,6 +13,17 @@
 #include <string>
 
 namespace game {
+    class MapData {
+    public:
+        std::vector<std::vector<int>> map;
+        std::vector<SDL_Texture*> textures;
+
+        MapData(
+            const std::vector<std::vector<int>>& initMap,
+            const std::vector<SDL_Texture*>& initTextures
+        );
+    };
+
     class Map : public Renderable {
     public:
         using TileGraph = Graph<IPoint>;
@@ -21,11 +32,12 @@ namespace game {
         SDL_Texture* deathBackground;
         Text* deathText;
         GameState* gameState = nullptr;
+        MapMenu* mapMenu;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
         std::vector<std::vector<int>> map;
         std::vector<SDL_Texture*> textures;
-        std::vector<std::vector<StaticSprite*>> mapSprites;
+        // std::vector<std::vector<StaticSprite*>> mapSprites;
         std::vector<IPoint>
             spawns,
             bases;
@@ -56,6 +68,7 @@ namespace game {
         virtual void render();
         virtual void tick(double scalar);
         virtual GameState* loadMap(const std::string& mapFileName);
+        virtual void start(MapMenu::Option option);
         virtual void displayDeathScreen();
 
         virtual bool placeTurret(const IPoint& index);

@@ -76,6 +76,8 @@ namespace game {
         virtual void render();
         virtual void tick(double scalar);
 
+        virtual void start(MapMenu::Option option);
+
         virtual typename Enemies::iterator begin();
         virtual typename Enemies::iterator end();
 

@@ -4,6 +4,7 @@
 #include "enemies_h.hpp"
 #include "pathfinder_h.hpp"
 #include "game_state.hpp"
+#include "map_menu_h.hpp"
 #include <unordered_set>
 #include "sprite.hpp"
 #include "map_h.hpp"
@@ -155,6 +156,8 @@ namespace game {
         }
         this->dying.clear();
     }
+
+    void EnemyHandler::start(MapMenu::Option option) {}
 
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
         return this->enemies.begin();
