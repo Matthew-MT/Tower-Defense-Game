@@ -18,4 +18,14 @@ namespace game {
         First = 1,
         Strongest = 2
     };
+
+    enum Option {
+        None = 0,
+        Right = 1,
+        Left = 2,
+        Easy = 3,
+        Normal = 4,
+        Hard = 5,
+        Fun = 6
+    };
 };

@@ -19,5 +19,4 @@ namespace game {
     class Sound;
     class Music;
     class MapMenu;
-    enum MapMenu::Option;
 };

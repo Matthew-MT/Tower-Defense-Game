@@ -4,6 +4,7 @@
 #include "turret_h.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
+#include "enums.hpp"
 #include <vector>
 
 namespace game {
@@ -76,7 +77,7 @@ namespace game {
         virtual void render();
         virtual void tick(double scalar);
 
-        virtual void start(MapMenu::Option option);
+        virtual void start(Option option);
 
         virtual typename Enemies::iterator begin();
         virtual typename Enemies::iterator end();

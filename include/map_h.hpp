@@ -68,7 +68,7 @@ namespace game {
         virtual void render();
         virtual void tick(double scalar);
         virtual GameState* loadMap(const std::string& mapFileName);
-        virtual void start(MapMenu::Option option);
+        virtual void start(Option option);
         virtual void displayDeathScreen();
 
         virtual bool placeTurret(const IPoint& index);

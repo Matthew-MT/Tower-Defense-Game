@@ -157,7 +157,7 @@ namespace game {
         this->dying.clear();
     }
 
-    void EnemyHandler::start(MapMenu::Option option) {}
+    void EnemyHandler::start(Option option) {}
 
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
         return this->enemies.begin();

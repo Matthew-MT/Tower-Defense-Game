@@ -7,16 +7,6 @@
 
 namespace game {
     class MapMenu : public Renderable {
-    public:
-        enum Option {
-            None = 0,
-            Right = 1,
-            Left = 2,
-            Easy = 3,
-            Normal = 4,
-            Hard = 5,
-            Fun = 6
-        };
     protected:
         Map* map;
         std::vector<std::string> mapList;

@@ -304,7 +304,7 @@ namespace game {
         return this->gameState;
     }
 
-    void Map::start(MapMenu::Option option) {
+    void Map::start(Option option) {
         this->enemyHandler->start(option);
     }
 
