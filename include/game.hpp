@@ -17,9 +17,6 @@ namespace game {
     protected:
         SDL_Window* window = nullptr;
         SDL_Renderer* renderer = nullptr;
-        // SDL_Thread
-        //     * renderThread = nullptr,
-        //     * tickThread = nullptr;
         TTF_Font* font;
         GameState* gameState = nullptr;
         Music* music;
@@ -28,30 +25,9 @@ namespace game {
             ready = SDL_FALSE;
         std::unordered_set<SDL_Texture*> textureList;
         std::vector<Renderable*> renderList;
-        // std::vector<std::string> mapProgression;
         Uint64 lastTick = 0;
-        // GUI* gui;
         std::string title;
         SDL_Rect* windowRect;
-
-        // static int renderThreadFn(void* thisArg) {
-        //     Game* game = (Game*)thisArg;
-        //     while (!game->exited()) {
-        //         game->renderWindow();
-        //         SDL_Delay(100);
-        //     }
-        //     game->ready = SDL_FALSE;
-        //     return 0;
-        // }
-
-        // static int tickThreadFn(void* thisArg) {
-        //     Game* game = (Game*)thisArg;
-        //     while (!game->exited()) {
-        //         game->tick();
-        //         SDL_Delay(100);
-        //     }
-        //     return 0;
-        // }
     public:
         Game(
             const std::string& initTitle,
@@ -59,12 +35,6 @@ namespace game {
         ) :
             title{initTitle},
             windowRect{initWindowRect} {
-            // std::ifstream
-            //     mapProgressionFile("assets/config/map_progression.txt", std::ios_base::in);
-            // std::string buffer;
-
-            // while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
-
             this->font = TTF_OpenFont("assets/fonts/arial.ttf", 20);
 
             this->window = SDL_CreateWindow(this->title.c_str(), this->windowRect->x, this->windowRect->y, this->windowRect->w, this->windowRect->h, 0);
@@ -84,7 +54,6 @@ namespace game {
                 "Tower Defense"
             );
 
-            // this->gameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
 
@@ -107,16 +76,12 @@ namespace game {
             this->music->playMusic();
 
             delete mapRect;
-            // this->tickThread = SDL_CreateThread(this->tickThreadFn, "tick", this);
         }
 
         ~Game() {
-            // delete this->gui;
             delete this->music;
             this->exit = SDL_TRUE;
             int status;
-            // if (this->renderThread != nullptr) SDL_WaitThread(this->renderThread, &status);
-            // if (this->tickThread != nullptr) SDL_WaitThread(this->tickThread, &status);
             for (SDL_Texture* texture : this->textureList) SDL_DestroyTexture(texture);
             this->textureList.clear();
             for (Renderable* renderable : this->renderList) delete renderable;
@@ -126,7 +91,6 @@ namespace game {
         }
 
         virtual void run() {
-            // this->renderThread = SDL_CreateThread(this->renderThreadFn, "render", this);
             SDL_Event event;
             while (!this->exited()) {
                 this->renderWindow();
@@ -146,19 +110,12 @@ namespace game {
                 SDL_Delay(10);
             }
             int status;
-            // SDL_WaitThread(this->renderThread, &status);
-            // this->renderThread = nullptr;
-            // SDL_Log(("Render thread exited with status " + std::to_string(status) + ".").c_str());
-            // SDL_WaitThread(this->tickThread, &status);
-            // this->tickThread = nullptr;
-            // SDL_Log(("Tick thread exited with status " + std::to_string(status) + ".").c_str());
         }
 
         virtual void renderWindow() {
             this->tick();
             SDL_RenderClear(this->renderer);
             for (Renderable* renderable : this->renderList) renderable->render();
-            // this->gui->render();
             SDL_RenderPresent(this->renderer);
         }
 

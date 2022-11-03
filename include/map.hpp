@@ -43,11 +43,6 @@ namespace game {
     }
 
     void Map::updateMapPosition() {
-        // for (int i = 0; i < this->mapSprites.size(); i++) {
-        //     for (int j = 0; j < this->mapSprites[i].size(); j++) {
-        //         this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
-        //     }
-        // }
         if (this->gameState != nullptr) this->gameState->setPosition(this->getPosition());
     }
 
@@ -132,11 +127,12 @@ namespace game {
     }
 
     Map::~Map() {
-        // for (std::vector<StaticSprite*>& col : this->mapSprites) for (StaticSprite* sprite : col) delete sprite;
         for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
         for (Path* path : this->paths) delete path;
+        for (const std::pair<std::string, std::pair<GameState*, std::vector<std::vector<int>>>>& mapData : this->maps) delete mapData.second.first;
         delete this->graph;
         delete this->enemyHandler;
+        delete this->mapMenu;
     }
 
     void Map::render() {
@@ -153,7 +149,6 @@ namespace game {
                     ),
                     nullptr,
                     this->getTileDest({i, j})
-                    // this->mapSprites[i][j]->getDestRect()
                 );
             }
             this->enemyHandler->render();
@@ -185,8 +180,6 @@ namespace game {
             this->maps[this->map].first->reset();
             return this->maps[this->map].first;
         }
-        // for (std::vector<StaticSprite*>& column : this->mapSprites) for (StaticSprite* sprite : column) delete sprite;
-        // this->mapSprites.clear();
 
         std::fstream
             mapFile("assets/maps/" + mapFileName, std::ios_base::in);
@@ -230,15 +223,9 @@ namespace game {
         }
 
         for (int i = 0; i < newMap.size(); i++) {
-            // this->mapSprites.push_back({});
             for (int j = 0; j < newMap[i].size(); j++) {
                 int type = newMap[i][j];
                 IPoint index{i, j};
-                // this->mapSprites.back().push_back(new StaticSprite(
-                //     this->renderer,
-                //     this->textures.at(type),
-                //     this->getTileDest(index)
-                // ));
 
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
