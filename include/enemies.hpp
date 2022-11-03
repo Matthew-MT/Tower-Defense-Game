@@ -30,6 +30,7 @@ namespace game {
         Path* initPath,
         EnemyHandler* initHandler,
         EnemyData* initData,
+        double initDifficulty,
         SDL_Rect* initDestRect,
         SDL_Rect* initSourceRect = nullptr
     ) : StaticSprite{
@@ -43,7 +44,7 @@ namespace game {
         path{initPath},
         handler{initHandler},
         movementSpeed{initData->movementSpeed},
-        health{initData->health},
+        health{(int)std::round((double)initData->health * initDifficulty)},
         reward{initData->reward} {}
 
     Enemy::~Enemy() {
@@ -104,11 +105,12 @@ namespace game {
         gameState{initGameState},
         map{initMap} {
         std::fstream
-            textureAssociation("assets/config/enemy_data_association.txt", std::ios_base::in);
+            enemyDataAssociation("assets/config/enemy_data_association.txt", std::ios_base::in),
+            difficultyData("assets/config/wave_difficulty.txt", std::ios_base::in);
         std::string buffer;
 
-        while (!textureAssociation.eof()) {
-            std::getline(textureAssociation, buffer);
+        while (!enemyDataAssociation.eof()) {
+            std::getline(enemyDataAssociation, buffer);
             std::fstream
                 enemyData("assets/enemies/" + buffer, std::ios_base::in);
 
@@ -132,10 +134,16 @@ namespace game {
                 ));
                 SDL_FreeSurface(surface);
             }
-        }
 
-        textureAssociation.close();
-        // this->spawn();
+            enemyData.close();
+        }
+        enemyDataAssociation.close();
+
+        while (!difficultyData.eof()) {
+            std::getline(difficultyData, buffer);
+            this->difficulties.push_back(std::stod(buffer));
+        }
+        difficultyData.close();
     }
 
     EnemyHandler::~EnemyHandler() {}
@@ -146,10 +154,10 @@ namespace game {
 
     void EnemyHandler::tick(double scalar) {
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
-        if (std::rand() % 1000 < 4) {
-            std::vector<IPoint> spawns = this->map->getAllSpawns();
-            this->spawn(0, spawns[std::rand() % spawns.size()]);
-        }
+        // if (std::rand() % 1000 < 4) {
+        //     std::vector<IPoint> spawns = this->map->getAllSpawns();
+        //     this->spawn(0, spawns[std::rand() % spawns.size()]);
+        // }
         for (Enemy* enemy : this->dying) {
             this->enemies.erase(enemy);
             delete enemy;
@@ -157,7 +165,12 @@ namespace game {
         this->dying.clear();
     }
 
-    void EnemyHandler::start(Option option) {}
+    void EnemyHandler::start(Option option) {
+        if (option == Option::Easy) this->difficulty = 0;
+        else if (option == Option::Normal) this->difficulty = 1;
+        else if (option == Option::Hard) this->difficulty = 2;
+        else if (option == Option::Fun) this->difficulty = 3;
+    }
 
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
         return this->enemies.begin();
@@ -179,6 +192,7 @@ namespace game {
             validPaths[std::rand() % validPaths.size()],
             this,
             this->types.at(type),
+            this->difficulties.at(this->difficulty),
             initDestRect
         ));
     }

@@ -4,7 +4,7 @@
 #include "map_h.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
-#include "map_menu_h.hpp"
+#include "map_menu.hpp"
 #include "enemies.hpp"
 #include "sprite.hpp"
 #include <algorithm>
@@ -28,7 +28,7 @@ namespace game {
         ) {
             this->tileSize.x
                 = this->destRect->w
-                / this->map.size();
+                / this->mapRef->size();
         }
 
         if (
@@ -38,16 +38,21 @@ namespace game {
                 = (
                     this->destRect->h
                     - this->headerHeight
-                ) / this->map.back().size();
+                ) / this->mapRef->back().size();
         }
     }
 
-    void Map::updateTiles() {
+    void Map::updateMapPosition() {
         // for (int i = 0; i < this->mapSprites.size(); i++) {
         //     for (int j = 0; j < this->mapSprites[i].size(); j++) {
         //         this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
         //     }
         // }
+        if (this->gameState != nullptr) this->gameState->setPosition(this->getPosition());
+    }
+
+    void Map::updateMapMenu() {
+        if (this->mapMenu != nullptr) this->mapMenu->setDestRect(this->getMapDestRect());
     }
 
     bool Map::efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths) {
@@ -89,7 +94,8 @@ namespace game {
         headerHeight{initHeaderHeight} {
 
         std::fstream
-            textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
+            textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in),
+            mapList("assets/config/maps.txt", std::ios_base::in);
         std::string buffer;
 
         while (!textureAssociation.eof()) {
@@ -106,7 +112,23 @@ namespace game {
 
         textureAssociation.close();
 
+        while (!mapList.eof()) {
+            std::getline(mapList, buffer);
+            this->mapNames.push_back(buffer);
+        }
+
+        mapList.close();
+
         this->deathBackground = this->textures[TileType::Wall];
+
+        this->mapMenu = new MapMenu(
+            this->renderer,
+            this->getDestRect(),
+            this,
+            this->mapNames
+        );
+
+        this->updateMapMenu();
     }
 
     Map::~Map() {
@@ -118,9 +140,10 @@ namespace game {
     }
 
     void Map::render() {
+        std::vector<std::vector<int>>& map = *this->mapRef;
         if (!this->dead) {
-            for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
-                int type = this->map[i][j];
+            for (int i = 0; i < map.size(); i++) for (int j = 0; j < map[i].size(); j++) {
+                int type = map[i][j];
                 SDL_RenderCopy(
                     this->renderer,
                     this->textures.at(
@@ -144,15 +167,24 @@ namespace game {
             );
         }
         this->gameState->render();
+        this->mapMenu->render();
     }
 
     void Map::tick(double scalar) {
         this->enemyHandler->tick(scalar);
     }
 
+    void Map::handleEvent(SDL_Event* event) {
+        this->mapMenu->handleEvent(event);
+    }
+
     GameState* Map::loadMap(const std::string& mapFileName) {
         this->dead = false;
-        this->map.clear();
+        this->map = mapFileName;
+        if (this->maps.find(this->map) != this->maps.end()) {
+            this->maps[this->map].first->reset();
+            return this->maps[this->map].first;
+        }
         // for (std::vector<StaticSprite*>& column : this->mapSprites) for (StaticSprite* sprite : column) delete sprite;
         // this->mapSprites.clear();
 
@@ -164,14 +196,24 @@ namespace game {
         int health = std::stoi(buffer);
         std::getline(mapFile, buffer);
         int cash = std::stoi(buffer);
+        this->maps.insert({
+            mapFileName,
+            {
+                nullptr,
+                {}
+            }
+        });
+
+        this->mapRef = &this->maps[this->map].second;
+        std::vector<std::vector<int>>& newMap = *this->mapRef;
 
         while (!mapFile.eof()) {
             std::getline(mapFile, buffer);
-            map.push_back({});
-            map.back().push_back(0);
+            newMap.push_back({});
+            newMap.back().push_back(0);
             for (char c : buffer) {
-                if (c == ',') map.back().push_back(0);
-                else if (c >= '0' && c <= '9') (map.back().back() *= 10) += (int)(c - '0');
+                if (c == ',') newMap.back().push_back(0);
+                else if (c >= '0' && c <= '9') (newMap.back().back() *= 10) += (int)(c - '0');
                 else {
                     SDL_Log("`loadMap` failed parsing a map file. Check that syntax is correct in the file.");
                     throw 1;
@@ -179,16 +221,18 @@ namespace game {
             }
         }
 
-        const int height = this->map.back().size();
-        for (std::vector<int> column : this->map) if (column.size() != height) {
+        mapFile.close();
+
+        const int height = newMap.back().size();
+        for (std::vector<int> column : newMap) if (column.size() != height) {
             SDL_Log("`loadMap`: map must be rectangular.");
             throw 1;
         }
 
-        for (int i = 0; i < this->map.size(); i++) {
+        for (int i = 0; i < newMap.size(); i++) {
             // this->mapSprites.push_back({});
-            for (int j = 0; j < this->map[i].size(); j++) {
-                int type = this->map[i][j];
+            for (int j = 0; j < newMap[i].size(); j++) {
+                int type = newMap[i][j];
                 IPoint index{i, j};
                 // this->mapSprites.back().push_back(new StaticSprite(
                 //     this->renderer,
@@ -210,9 +254,9 @@ namespace game {
                 if (
                     i > 0
                     && (
-                        this->map[i - 1][j] == TileType::Empty
-                        || this->map[i - 1][j] == TileType::Spawn
-                        || this->map[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == TileType::Empty
+                        || newMap[i - 1][j] == TileType::Spawn
+                        || newMap[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j}))->link(node);
@@ -221,9 +265,9 @@ namespace game {
                 if (
                     j > 0
                     && (
-                        this->map[i][j - 1] == TileType::Empty
-                        || this->map[i][j - 1] == TileType::Spawn
-                        || this->map[i][j - 1] == TileType::Base
+                        newMap[i][j - 1] == TileType::Empty
+                        || newMap[i][j - 1] == TileType::Spawn
+                        || newMap[i][j - 1] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i, j - 1}))->link(node);
@@ -232,46 +276,45 @@ namespace game {
                 if (
                     i > 0 && j > 0
                     && (
-                        this->map[i - 1][j - 1] == TileType::Empty
-                        || this->map[i - 1][j - 1] == TileType::Spawn
-                        || this->map[i - 1][j - 1] == TileType::Base
+                        newMap[i - 1][j - 1] == TileType::Empty
+                        || newMap[i - 1][j - 1] == TileType::Spawn
+                        || newMap[i - 1][j - 1] == TileType::Base
                     ) && (
-                        this->map[i][j - 1] == TileType::Empty
-                        || this->map[i][j - 1] == TileType::Spawn
-                        || this->map[i][j - 1] == TileType::Base
+                        newMap[i][j - 1] == TileType::Empty
+                        || newMap[i][j - 1] == TileType::Spawn
+                        || newMap[i][j - 1] == TileType::Base
                     ) && (
-                        this->map[i - 1][j] == TileType::Empty
-                        || this->map[i - 1][j] == TileType::Spawn
-                        || this->map[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == TileType::Empty
+                        || newMap[i - 1][j] == TileType::Spawn
+                        || newMap[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j - 1}))->link(node, sqrtOf2);
                 }
 
                 if (
-                    i > 0 && j < this->map.back().size() - 1
+                    i > 0 && j < newMap.back().size() - 1
                     && (
-                        this->map[i - 1][j + 1] == TileType::Empty
-                        || this->map[i - 1][j + 1] == TileType::Spawn
-                        || this->map[i - 1][j + 1] == TileType::Base
+                        newMap[i - 1][j + 1] == TileType::Empty
+                        || newMap[i - 1][j + 1] == TileType::Spawn
+                        || newMap[i - 1][j + 1] == TileType::Base
                     ) && (
-                        this->map[i][j + 1] == TileType::Empty
-                        || this->map[i][j + 1] == TileType::Spawn
-                        || this->map[i][j + 1] == TileType::Base
+                        newMap[i][j + 1] == TileType::Empty
+                        || newMap[i][j + 1] == TileType::Spawn
+                        || newMap[i][j + 1] == TileType::Base
                     ) && (
-                        this->map[i - 1][j] == TileType::Empty
-                        || this->map[i - 1][j] == TileType::Spawn
-                        || this->map[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == TileType::Empty
+                        || newMap[i - 1][j] == TileType::Spawn
+                        || newMap[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j + 1}))->link(node, sqrtOf2);
                 }
             }
         }
-
-        mapFile.close();
         this->updateMapSize();
-        this->updateTiles();
+        this->updateMapPosition();
+        this->updateMapMenu();
 
         std::vector<std::vector<IPoint>> paths;
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
@@ -281,7 +324,7 @@ namespace game {
             delete this->gameState;
             this->gameState = nullptr;
         }
-        this->gameState = new GameState(
+        this->gameState = this->maps[this->map].first = new GameState(
             this->renderer,
             this->font,
             createRect(
@@ -305,6 +348,7 @@ namespace game {
     }
 
     void Map::start(Option option) {
+        this->mapMenu->setDisplayed(false);
         this->enemyHandler->start(option);
     }
 
@@ -313,14 +357,15 @@ namespace game {
     }
 
     bool Map::placeTurret(const IPoint& index) {
+        std::vector<std::vector<int>>& map = *this->mapRef;
         if (
             index.x < 0
-            || index.x >= this->map.size()
+            || index.x >= map.size()
             || index.y < 0
-            || index.y >= this->map.back().size()
-            || this->map[index.x][index.y] != TileType::Empty
+            || index.y >= map.back().size()
+            || map[index.x][index.y] != TileType::Empty
         ) return false;
-        this->map[index.x][index.y] = TileType::TurretType;
+        map[index.x][index.y] = TileType::TurretType;
         TileGraph::Node* node = *this->graph->find(index);
         std::vector<std::vector<IPoint>> paths;
 
@@ -365,7 +410,7 @@ namespace game {
             if (nodeW != end) node->link(*nodeW);
             if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
-            this->map[index.x][index.y] = TileType::Empty;
+            map[index.x][index.y] = TileType::Empty;
         };
 
         for (IPoint& spawn : this->spawns) {
@@ -406,12 +451,13 @@ namespace game {
     }
 
     bool Map::sellTurret(const IPoint& index) {
+        std::vector<std::vector<int>>& map = this->maps[this->map].second;
         if (
             index.x < 0
-            || index.x >= this->map.size()
+            || index.x >= map.size()
             || index.y < 0
-            || index.y >= this->map.back().size()
-            || this->map[index.x][index.y] != TileType::TurretType
+            || index.y >= map.back().size()
+            || map[index.x][index.y] != TileType::TurretType
         ) return false;
 
         typename TileGraph::Nodes::iterator
@@ -443,7 +489,7 @@ namespace game {
         if (nodeW != end) node->link(*nodeW);
         if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
-        this->map[index.x][index.y] = TileType::Empty;
+        map[index.x][index.y] = TileType::Empty;
 
         for (Path* path : this->paths) delete path;
         this->paths.clear();
@@ -472,29 +518,43 @@ namespace game {
     void Map::setDestRect(SDL_Rect* newDestRect) {
         delete this->destRect;
         this->destRect = newDestRect;
-        this->updateTiles();
+        this->updateMapPosition();
+        this->updateMapMenu();
     }
 
     void Map::setPosition(const IPoint& position) {
         this->Renderable::setPosition(position);
-        this->updateTiles();
+        this->updateMapPosition();
+        this->updateMapMenu();
+    }
+
+    SDL_Rect* Map::getMapDestRect() const {
+        SDL_Rect* rect = new SDL_Rect();
+        rect->x = this->destRect->x;
+        rect->y = this->destRect->y + this->headerHeight;
+        if (this->maps.empty()) rect->w = this->tileSize.x;
+        else rect->w = this->tileSize.x * this->mapRef->size();
+        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->tileSize.y;
+        else rect->h = this->tileSize.y * this->mapRef->back().size();
+        return rect;
     }
 
     SDL_Rect* Map::getDestRect() const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x;
         rect->y = this->destRect->y;
-        rect->w = this->tileSize.x * this->map.size();
-        if (this->map.empty()) rect->h = this->headerHeight;
-        else rect->h = (this->tileSize.y * this->map.back().size()) + this->headerHeight;
+        if (this->maps.empty()) rect->w = this->tileSize.x;
+        else rect->w = this->tileSize.x * this->mapRef->size();
+        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->headerHeight;
+        else rect->h = (this->tileSize.y * this->mapRef->back().size()) + this->headerHeight;
         return rect;
     }
 
     IPoint Map::getSize() const {
-        if (this->map.empty()) return {0, this->headerHeight};
+        if (map.empty()) return {0, this->headerHeight};
         else return {
-            this->tileSize.x * (int)this->map.size(),
-            (this->tileSize.y * (int)this->map.back().size()) + this->headerHeight
+            this->tileSize.x * (int)this->mapRef->size(),
+            (this->tileSize.y * (int)this->mapRef->back().size()) + this->headerHeight
         };
     }
 
@@ -503,8 +563,8 @@ namespace game {
         if (
             position.x < rect->x
             || position.y < rect->y + this->headerHeight
-            || position.x > rect->x + (this->map.size() * this->tileSize.x)
-            || position.y > rect->y + (this->map.front().size() * this->tileSize.y) + this->headerHeight
+            || position.x > rect->x + (this->mapRef->size() * this->tileSize.x)
+            || position.y > rect->y + (this->mapRef->front().size() * this->tileSize.y) + this->headerHeight
         ) {
             delete rect;
             return {-1, -1};
@@ -538,8 +598,8 @@ namespace game {
     }
 
     int Map::getTileType(const IPoint& index) const {
-        if (index.x < 0 || index.x >= this->map.size() || index.y < 0 || index.y >= this->map.back().size()) return TileType::Wall;
-        return this->map[index.x][index.y];
+        if (index.x < 0 || index.x >= this->mapRef->size() || index.y < 0 || index.y >= this->mapRef->back().size()) return TileType::Wall;
+        return (*this->mapRef)[index.x][index.y];
     }
 
     const std::vector<IPoint>& Map::getAllSpawns() const {

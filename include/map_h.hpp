@@ -32,17 +32,27 @@ namespace game {
         SDL_Texture* deathBackground;
         Text* deathText;
         GameState* gameState = nullptr;
-        MapMenu* mapMenu;
+        MapMenu* mapMenu = nullptr;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
-        std::vector<std::vector<int>> map;
+        std::vector<std::string> mapNames;
+        std::unordered_map<
+            std::string,
+            std::pair<
+                GameState*,
+                std::vector<std::vector<int>>
+            >
+        > maps;
+        std::vector<std::vector<int>>* mapRef;
         std::vector<SDL_Texture*> textures;
         // std::vector<std::vector<StaticSprite*>> mapSprites;
         std::vector<IPoint>
             spawns,
             bases;
         std::vector<Path*> paths;
-        std::string title;
+        std::string
+            title,
+            map;
         IPoint tileSize;
         int headerHeight;
         bool dead = false;
@@ -51,7 +61,10 @@ namespace game {
         virtual void updateMapSize();
 
         // Call this function if you update the map's position.
-        virtual void updateTiles();
+        virtual void updateMapPosition();
+
+        // Call this function if you update tile sizes or map destRect width and height or the map's position.
+        virtual void updateMapMenu();
 
         virtual bool efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths);
     public:
@@ -67,6 +80,7 @@ namespace game {
 
         virtual void render();
         virtual void tick(double scalar);
+        virtual void handleEvent(SDL_Event* event);
         virtual GameState* loadMap(const std::string& mapFileName);
         virtual void start(Option option);
         virtual void displayDeathScreen();
@@ -77,6 +91,7 @@ namespace game {
         virtual void setDestRect(SDL_Rect* newDestRect);
         virtual void setPosition(const IPoint& position);
 
+        virtual SDL_Rect* getMapDestRect() const;
         virtual SDL_Rect* getDestRect() const;
         virtual IPoint getSize() const;
         virtual IPoint getTileIndex(IPoint position) const;

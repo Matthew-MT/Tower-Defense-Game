@@ -8,15 +8,92 @@
 #include <vector>
 
 namespace game {
-    void MapMenu::updatePosition() {}
+    void MapMenu::updatePosition() {
+        if (this->arrowRightRect != nullptr) delete this->arrowRightRect;
+        if (this->arrowLeftRect != nullptr) delete this->arrowLeftRect;
+        if (this->difficultyEasyRect != nullptr) delete this->difficultyEasyRect;
+        if (this->difficultyNormalRect != nullptr) delete this->difficultyNormalRect;
+        if (this->difficultyHardRect != nullptr) delete this->difficultyHardRect;
+        if (this->difficultyFunRect != nullptr) delete this->difficultyFunRect;
+
+        IPoint
+            position = this->getPosition(),
+            size = this->getSize();
+
+        this->arrowRightRect = fromCenter(
+            position + IPoint{
+                (size.x >> 2) + (size.x >> 1),
+                size.y >> 1
+            },
+            IPoint{
+                size.x >> 2,
+                size.x >> 2
+            }
+        );
+
+        this->arrowLeftRect = fromCenter(
+            position + IPoint{
+                size.x >> 2,
+                size.y >> 1
+            },
+            IPoint{
+                size.x >> 2,
+                size.x >> 2
+            }
+        );
+
+        this->difficultyEasyRect = fromCenter(
+            position + IPoint{
+                size.x >> 1,
+                (size.y >> 2) + (size.y >> 4)
+            },
+            IPoint{
+                size.x >> 2,
+                (size.x >> 4) + (size.x >> 5)
+            }
+        );
+        
+        this->difficultyNormalRect = fromCenter(
+            position + IPoint{
+                size.x >> 1,
+                (size.y >> 1) - (size.y >> 4)
+            },
+            IPoint{
+                size.x >> 2,
+                (size.x >> 4) + (size.x >> 5)
+            }
+        );
+
+        this->difficultyHardRect = fromCenter(
+            position + IPoint{
+                size.x >> 1,
+                (size.y >> 1) + (size.y >> 4)
+            },
+            IPoint{
+                size.x >> 2,
+                (size.x >> 4) + (size.x >> 5)
+            }
+        );
+
+        this->difficultyFunRect = fromCenter(
+            position + IPoint{
+                size.x >> 1,
+                ((size.y >> 1) + (size.y >> 2)) - (size.y >> 4)
+            },
+            IPoint{
+                size.x >> 2,
+                (size.x >> 4) + (size.x >> 5)
+            }
+        );
+    }
 
     MapMenu::MapMenu(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
         Map* initMap,
         const std::vector<std::string>& initMapList
-    )
-        : Renderable{
+    ) :
+        Renderable{
             initRenderer,
             initDestRect
         },
@@ -69,6 +146,7 @@ namespace game {
     }
 
     void MapMenu::render() {
+        if (!this->displayed) return;
         SDL_RenderCopy(
             this->renderer,
             this->hovered == Option::Right ? this->arrowHovered : this->arrow,
@@ -110,6 +188,7 @@ namespace game {
     }
 
     void MapMenu::handleEvent(SDL_Event* event) {
+        if (!this->displayed) return;
         if (event->type == SDL_MOUSEMOTION) {
             IPoint point = {event->motion.x, event->motion.y};
             if (contains(this->arrowLeftRect, point)) this->hovered = Option::Left;
@@ -130,5 +209,24 @@ namespace game {
                 this->map->loadMap(this->mapList[this->place]);
             } else if (this->hovered != Option::None) this->map->start(this->hovered);
         }
+    }
+
+    void MapMenu::setDestRect(SDL_Rect* newDestRect) {
+        this->Renderable::setDestRect(newDestRect);
+        this->updatePosition();
+    }
+
+    void MapMenu::setPosition(const IPoint& position) {
+        this->Renderable::setPosition(position);
+        this->updatePosition();
+    }
+    
+    void MapMenu::setPosition(const DPoint& position) {
+        this->Renderable::setPosition(position);
+        this->updatePosition();
+    }
+
+    void MapMenu::setDisplayed(bool newDisplayed) {
+        this->displayed = newDisplayed;
     }
 };

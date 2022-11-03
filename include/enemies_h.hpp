@@ -38,6 +38,7 @@ namespace game {
             Path* initPath,
             EnemyHandler* initHandler,
             EnemyData* initData,
+            double initDifficulty,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect
         );
@@ -64,6 +65,8 @@ namespace game {
             enemies,
             dying;
         std::vector<EnemyData*> types;
+        std::vector<double> difficulties;
+        int difficulty = 0;
     public:
         EnemyHandler(
             SDL_Renderer* initRenderer,

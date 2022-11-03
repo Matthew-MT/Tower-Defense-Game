@@ -21,14 +21,14 @@ namespace game {
         //     * renderThread = nullptr,
         //     * tickThread = nullptr;
         TTF_Font* font;
-        GameState* gameState;
+        GameState* gameState = nullptr;
         Music* music;
         SDL_bool
             exit = SDL_FALSE,
             ready = SDL_FALSE;
         std::unordered_set<SDL_Texture*> textureList;
         std::vector<Renderable*> renderList;
-        std::vector<std::string> mapProgression;
+        // std::vector<std::string> mapProgression;
         Uint64 lastTick = 0;
         // GUI* gui;
         std::string title;
@@ -59,11 +59,11 @@ namespace game {
         ) :
             title{initTitle},
             windowRect{initWindowRect} {
-            std::ifstream
-                mapProgressionFile("assets/config/map_progression.txt", std::ios_base::in);
-            std::string buffer;
+            // std::ifstream
+            //     mapProgressionFile("assets/config/map_progression.txt", std::ios_base::in);
+            // std::string buffer;
 
-            while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
+            // while (std::getline(mapProgressionFile, buffer)) this->mapProgression.push_back(buffer);
 
             this->font = TTF_OpenFont("assets/fonts/arial.ttf", 20);
 
@@ -84,7 +84,7 @@ namespace game {
                 "Tower Defense"
             );
 
-            this->gameState = map->loadMap(this->mapProgression.front());
+            // this->gameState = map->loadMap(this->mapProgression.front());
             this->renderList.push_back(map);
             mapRect = map->getDestRect();
 
@@ -187,7 +187,7 @@ namespace game {
             const double scalar = (double)(nextTick - this->lastTick) / 1000.f;
             this->lastTick = nextTick;
             for (Renderable* renderable : this->renderList) renderable->tick(scalar);
-            if (this->gameState->isDead()) {}
+            if (this->gameState != nullptr && this->gameState->isDead()) {}
         }
 
         virtual void handleEvent(SDL_Event* event) {

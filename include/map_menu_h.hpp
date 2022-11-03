@@ -23,13 +23,14 @@ namespace game {
             * difficultyFun,
             * difficultyFunHovered;
         SDL_Rect
-            * arrowRightRect,
-            * arrowLeftRect,
-            * difficultyEasyRect,
-            * difficultyNormalRect,
-            * difficultyHardRect,
-            * difficultyFunRect;
+            * arrowRightRect = nullptr,
+            * arrowLeftRect = nullptr,
+            * difficultyEasyRect = nullptr,
+            * difficultyNormalRect = nullptr,
+            * difficultyHardRect = nullptr,
+            * difficultyFunRect = nullptr;
         Option hovered = Option::None;
+        bool displayed = true;
 
         virtual void updatePosition();
     public:
@@ -44,5 +45,10 @@ namespace game {
 
         virtual void render();
         virtual void handleEvent(SDL_Event* event);
+
+        virtual void setDestRect(SDL_Rect* newDestRect);
+        virtual void setPosition(const IPoint& position);
+        virtual void setPosition(const DPoint& position);
+        virtual void setDisplayed(bool newDisplayed);
     };
 };

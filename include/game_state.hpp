@@ -51,6 +51,7 @@ namespace game {
             initRenderer,
             initDestRect
         },
+        maxCash{initCash},
         maxHealth{initHealth},
         cash{initCash},
         health{initHealth} {
@@ -82,6 +83,11 @@ namespace game {
         this->titleDisplay->render();
         this->cashDisplay->render();
         this->healthDisplay->render();
+    }
+
+    void GameState::reset() {
+        this->cash = this->maxCash;
+        this->health = this->maxHealth;
     }
 
     void GameState::setDestRect(SDL_Rect* rect) {
