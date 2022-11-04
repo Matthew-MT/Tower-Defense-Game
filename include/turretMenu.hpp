@@ -9,6 +9,7 @@
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "turretMenu_h.hpp"
+#include "map_h"
 
 namespace game{
     TurretMenu::TurretMenu(
@@ -26,16 +27,20 @@ namespace game{
             SDL_Surface * surface = IMG_Load("assets/images/turret_menu.png");
             this->gatling = SDL_CreateTextureFromSurface(this->renderer, surface);
             SDL_FreeSurface(surface);
+            SDL_Surface * surface = IMG_Load("assets/images/turret_menu_select.png");
+            this->gatlingSelect = SDL_CreateTextureFromSurface(this->renderer, surface);
+            SDL_FreeSurface(surface);
         }
 
     TurretMenu::~TurretMenu(){
         SDL_DestroyTexture(this->gatling);
+        SDL_DestoryTexture(this->gatlingSelect);
     }
 
     void TurretMenu::render(){
         SDL_RenderCopy(
             this->renderer,
-            this->gatling,
+            this->selected == Option::gatling ? this->gatlingSelect : this->gatling,
             nullptr,
             this->gatlingRect
         );

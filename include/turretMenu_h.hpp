@@ -15,9 +15,11 @@ namespace game{
         Turret* turret;
         std::vector<std::string> turretList;
         SDL_Texture
-            *gatling;
+            *gatling, 
+            *gatlingSelect;
         SDL_Rect
-            *gatlingRect;
+            *gatlingRect = nullptr;
+        Option selected = Option::None;
     public:
         TurretMenu(
             Turret* initTurret,
