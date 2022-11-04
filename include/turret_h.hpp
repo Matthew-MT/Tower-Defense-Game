@@ -3,6 +3,7 @@
 #include "game_state.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
+#include "enums.hpp"
 #include "map.hpp"
 #include <vector>
 
@@ -55,6 +56,7 @@ namespace game{
         Map* map;
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
+        bool started = false;
         public:
         TurretHandler(
             SDL_Renderer* initRenderer,
@@ -71,6 +73,8 @@ namespace game{
         void handleEvent(SDL_Event* event);
 
         void tick(double scalar);
+
+        void start(Option option);
 
         EnemyHandler* getEnemyHandler();
 

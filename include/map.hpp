@@ -4,6 +4,7 @@
 #include "map_h.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
+#include "turret_h.hpp"
 #include "map_menu.hpp"
 #include "enemies.hpp"
 #include "sprite.hpp"
@@ -123,6 +124,12 @@ namespace game {
             this->mapNames
         );
 
+        this->turretHandler = new TurretHandler(
+            this->renderer,
+            this->getDestRect(),
+            this
+        );
+
         this->updateMapMenu();
     }
 
@@ -163,13 +170,16 @@ namespace game {
         }
         this->gameState->render();
         this->mapMenu->render();
+        this->turretHandler->render();
     }
 
     void Map::tick(double scalar) {
         this->enemyHandler->tick(scalar);
+        this->turretHandler->tick(scalar);
     }
 
     void Map::handleEvent(SDL_Event* event) {
+        this->turretHandler->handleEvent(event);
         this->mapMenu->handleEvent(event);
     }
 
@@ -337,6 +347,7 @@ namespace game {
     void Map::start(Option option) {
         this->mapMenu->setDisplayed(false);
         this->enemyHandler->start(option);
+        this->turretHandler->start(option);
     }
 
     void Map::displayDeathScreen() {

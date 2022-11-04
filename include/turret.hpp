@@ -203,9 +203,9 @@ namespace game{
 
     void  TurretHandler::handleEvent(SDL_Event* event)
     {
-        int x, y;
-        if(event->type == SDL_MOUSEBUTTONUP)
+        if(this->started && event->type == SDL_MOUSEBUTTONUP)
         {
+            int x, y;
             SDL_GetMouseState(&x, &y);
             IPoint index = this->map->getTileIndex({x,y});
 
@@ -233,6 +233,10 @@ namespace game{
     {
         for(Turret* turret : this->turrets) 
             turret->tick(scalar);
+    }
+
+    void TurretHandler::start(Option option) {
+        this->started = true;
     }
 
     EnemyHandler* TurretHandler::getEnemyHandler()
