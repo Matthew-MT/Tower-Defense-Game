@@ -20,13 +20,22 @@ namespace game{
         SDL_Rect
             *gatlingRect = nullptr;
         Option selected = Option::None;
+
+        virtual void updatePosition();
     public:
         TurretMenu(
+            SDL_Renderer* initRenderer,
+            SDL_Rect* initDestRect,
             Turret* initTurret,
             const std::vector<std::string>& initTurretList
         );
         ~TurretMenu();
         virtual void render();
         virtual void handleEvent(SDL_Event* event);
+
+        virtual void setDestRect(SDL_Rect* newDestRect);
+        virtual void setPosition(const IPoint& position);
+        virtual void setPosition(const DPoint& position);
+        virtual void setDisplayed(bool newDisplayed);
     }
 };
