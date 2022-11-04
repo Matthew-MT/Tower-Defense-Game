@@ -66,7 +66,14 @@ namespace game {
             dying;
         std::vector<EnemyData*> types;
         std::vector<double> difficulties;
-        int difficulty = 0;
+        std::vector<std::pair<int, std::vector<int>>> waves;
+        int
+            difficulty = 0,
+            completedWaves = 0,
+            completedWavesTime = 0,
+            spawnedEnemiesTracker = 0;
+        double elapsed = 0.f;
+        bool started = false;
     public:
         EnemyHandler(
             SDL_Renderer* initRenderer,

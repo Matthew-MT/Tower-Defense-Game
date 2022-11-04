@@ -153,23 +153,68 @@ namespace game {
     }
 
     void EnemyHandler::tick(double scalar) {
+        if (!this->started) return;
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
-        // if (std::rand() % 1000 < 4) {
-        //     std::vector<IPoint> spawns = this->map->getAllSpawns();
-        //     this->spawn(0, spawns[std::rand() % spawns.size()]);
-        // }
         for (Enemy* enemy : this->dying) {
             this->enemies.erase(enemy);
             delete enemy;
         }
         this->dying.clear();
+        this->elapsed += scalar;
+        if (this->elapsed >= this->completedWavesTime + this->waves[this->completedWaves].first) {
+            this->completedWaves++;
+            this->spawnedEnemiesTracker = 0;
+            if (this->completedWaves >= this->waves.size()) {
+                this->elapsed -= (double)this->completedWavesTime;
+                this->completedWaves = 0;
+                this->completedWavesTime = 0;
+            } else this->completedWavesTime += this->waves[this->completedWaves - 1].first;
+        }
+
+        double inWaveTime = this->elapsed - this->completedWavesTime;
+        int spawnedEnemies = (int)std::round(inWaveTime * 2.f) - this->spawnedEnemiesTracker;
+        for (int i = this->spawnedEnemiesTracker; i < this->spawnedEnemiesTracker + spawnedEnemies; i++) {
+            this->spawn(this->waves[this->completedWaves].second[i]);
+        }
     }
 
     void EnemyHandler::start(Option option) {
-        if (option == Option::Easy) this->difficulty = 0;
-        else if (option == Option::Normal) this->difficulty = 1;
-        else if (option == Option::Hard) this->difficulty = 2;
-        else if (option == Option::Fun) this->difficulty = 3;
+        std::string
+            wavesFile,
+            buffer;
+        if (option == Option::Easy) {
+            this->difficulty = 0;
+            wavesFile = "easy.txt";
+        } else if (option == Option::Normal) {
+            this->difficulty = 1;
+            wavesFile = "normal.txt";
+        } else if (option == Option::Hard) {
+            this->difficulty = 2;
+            wavesFile = "hard.txt";
+        } else if (option == Option::Fun) {
+            this->difficulty = 3;
+            wavesFile = "fun.txt";
+        } else return;
+        std::fstream
+            wavesData(((std::string)"assets/waves/" + wavesFile).c_str(), std::ios_base::in);
+        
+        while (!wavesData.eof()) {
+            std::getline(wavesData, buffer);
+            int time = std::stoi(buffer);
+            std::getline(wavesData, buffer);
+            std::vector<int> wave;
+            wave.push_back(0);
+            for (char c : buffer) {
+                if (c == ',') wave.push_back(0);
+                else if (c >= '0' && c <= '9') (wave.back() *= 10) += (int)(c - '0');
+                else {
+                    SDL_Log("`EnemyHandler` failed parsing a waves file. Check that syntax is correct in the file.");
+                    throw 1;
+                }
+            }
+            this->waves.push_back({time, wave});
+        }
+        this->started = true;
     }
 
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
