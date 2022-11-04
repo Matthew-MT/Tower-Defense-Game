@@ -181,6 +181,8 @@ namespace game {
             this->completedWavesTime = 0;
         }
 
+        SDL_Log(("Spawned enemies tracker: " + std::to_string(this->spawnedEnemiesTracker)).c_str());
+        SDL_Log(("Enemies to spawn: " + std::to_string(this->waves.at(this->completedWaves).second.size())).c_str());
         if (this->spawnedEnemiesTracker < this->waves.at(this->completedWaves).second.size()) {
             double inWaveTime = this->elapsed - (double)this->completedWavesTime;
             int spawnedEnemies = (int)std::round(inWaveTime * 2.f) - this->spawnedEnemiesTracker;
