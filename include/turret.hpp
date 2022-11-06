@@ -9,6 +9,7 @@
 #include "utils.hpp"
 #include <cstring>
 #include "sound.hpp"
+#include <math.h>
 
 namespace game{
     Turret::Turret(
@@ -159,10 +160,16 @@ namespace game{
         std::fstream 
             turretFile("assets/turrets/" + turretFileName, std::ios_base::in);
         std::string buffer;
-        int damage;
         float reloadTime;
-        int range;
-        SDL_Texture* texture;
+        int
+            buyPrice,
+            sellPrice,
+            damage,
+            range;
+        SDL_Texture
+            * texture,
+            * menuTexture,
+            * menuTextureSelected;
 
         std::getline(turretFile, buffer);
         damage = std::stoi(buffer);
@@ -177,7 +184,25 @@ namespace game{
         SDL_FreeSurface(surface);
         std::getline(turretFile, buffer);
         Sound* turretSpawnSound = new Sound("assets/sound/" + buffer);
-        turretTypes.push_back(new TurretData(damage, reloadTime, range, texture, turretSpawnSound));
+        std::getline(turretFile, buffer);
+        surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
+        menuTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        std::getline(turretFile, buffer);
+        surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
+        menuTextureSelected = SDL_CreateTextureFromSurface(this->renderer, surface);
+        SDL_FreeSurface(surface);
+        turretTypes.push_back(new TurretData(
+            buyPrice,
+            sellPrice,
+            damage,
+            reloadTime,
+            range,
+            texture,
+            menuTexture,
+            menuTextureSelected,
+            turretSpawnSound
+        ));
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index)
@@ -249,19 +274,28 @@ namespace game{
         return this->map;
     }
 
+    std::vector<TurretData*> TurretHandler::getTurretTypes() {
+        return this->turretTypes;
+    }
 
     TurretData::TurretData(
+        int initBuyPrice,
+        int initSellPrice,
         int initDamage, 
         double initReload, 
         int initRange,
-        SDL_Texture* initTexture, 
+        SDL_Texture* initTexture,
+        SDL_Texture* initMenuTexture,
+        SDL_Texture* initMenuTextureSelected,
         Sound* initTurretSpawnSound
-    )
-    {
-        damage = initDamage;
-        reload = initReload;
-        range = initRange;
-        texture = initTexture;
-        turretSpawnSound = initTurretSpawnSound;
-    }
+    ) :
+        buyPrice{initBuyPrice},
+        sellPrice{initSellPrice},
+        damage{initDamage},
+        reload{initReload},
+        range{initRange},
+        texture{initTexture},
+        menuTexture{initMenuTexture},
+        menuTextureSelected{initMenuTextureSelected},
+        turretSpawnSound{initTurretSpawnSound} {}
 };
