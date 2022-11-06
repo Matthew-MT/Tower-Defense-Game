@@ -2,31 +2,29 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include "forward.hpp"
+#include "turret.hpp"
+#include "sprite.hpp"
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "turret.hpp"
-#include "forward.hpp"
-#include "sprite.hpp"
 
 namespace game{
     class TurretMenu : public Renderable {
     protected:
-        Turret* turret;
-        std::vector<std::string> turretList;
-        SDL_Texture
-            *gatling, 
-            *gatlingSelect;
-        SDL_Rect
-            *gatlingRect = nullptr;
-        Option selected = Option::None;
+        std::vector<TurretData*> options;
+        std::vector<SDL_Rect*> optionRects;
+        IPoint optionSize;
+        int selected = 0;
 
+        virtual IPoint getOptionCenterByIndex(int index);
         virtual void updatePosition();
     public:
         TurretMenu(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
-            Turret* initTurret
+            const std::vector<TurretData*>& initOptions,
+            const IPoint& initOptionSize
         );
         ~TurretMenu();
         virtual void render();
@@ -35,6 +33,6 @@ namespace game{
         virtual void setDestRect(SDL_Rect* newDestRect);
         virtual void setPosition(const IPoint& position);
         virtual void setPosition(const DPoint& position);
-        virtual void setDisplayed(bool newDisplayed);
-    }
+        virtual int getSelectedType();
+    };
 };

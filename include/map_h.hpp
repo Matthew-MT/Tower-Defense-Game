@@ -1,6 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include "forward.hpp"
+#include "turret_menu_h.hpp"
 #include "game_state_h.hpp"
 #include "enemies_h.hpp"
 #include "sprite.hpp"
@@ -33,6 +34,7 @@ namespace game {
         Text* deathText;
         GameState* gameState = nullptr;
         MapMenu* mapMenu = nullptr;
+        TurretMenu* turretMenu = nullptr;
         TileGraph* graph;
         EnemyHandler* enemyHandler;
         TurretHandler* turretHandler;
@@ -55,7 +57,7 @@ namespace game {
             title,
             map;
         IPoint tileSize;
-        int headerHeight;
+        int guiHeight;
         bool dead = false;
 
         // Call this function if you update tile sizes or map destRect width and height.
@@ -93,6 +95,7 @@ namespace game {
         virtual void setPosition(const IPoint& position);
 
         virtual SDL_Rect* getMapDestRect() const;
+        virtual SDL_Rect* getTurretMenuDestRect() const;
         virtual SDL_Rect* getDestRect() const;
         virtual IPoint getSize() const;
         virtual IPoint getTileIndex(IPoint position) const;
@@ -106,5 +109,6 @@ namespace game {
         virtual const std::vector<Path*>& getPaths() const;
         virtual GameState* getGameState();
         virtual EnemyHandler* getEnemyHandler();
+        virtual TurretMenu* getTurretMenu();
     };
 };

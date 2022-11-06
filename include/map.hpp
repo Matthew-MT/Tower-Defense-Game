@@ -2,6 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "map_h.hpp"
+#include "turret_menu.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
 #include "turret_h.hpp"
@@ -38,7 +39,7 @@ namespace game {
             this->tileSize.y
                 = (
                     this->destRect->h
-                    - this->headerHeight
+                    - (this->guiHeight << 1)
                 ) / this->mapRef->back().size();
         }
     }
@@ -77,7 +78,7 @@ namespace game {
         SDL_Rect* initDestRect,
         const IPoint& initTileSize,
         const std::string& initTitle,
-        int initHeaderHeight
+        int initGuiHeight
     ) :
         Renderable{
             initRenderer,
@@ -87,7 +88,7 @@ namespace game {
         graph{new TileGraph()},
         tileSize{initTileSize},
         title{initTitle},
-        headerHeight{initHeaderHeight} {
+        guiHeight{initGuiHeight} {
 
         std::fstream
             textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in),
@@ -119,7 +120,7 @@ namespace game {
 
         this->mapMenu = new MapMenu(
             this->renderer,
-            this->getDestRect(),
+            this->getMapDestRect(),
             this,
             this->mapNames
         );
@@ -128,6 +129,13 @@ namespace game {
             this->renderer,
             this->getDestRect(),
             this
+        );
+
+        this->turretMenu = new TurretMenu(
+            this->renderer,
+            this->getTurretMenuDestRect(),
+            this->turretHandler->getTurretTypes(),
+            this->tileSize
         );
 
         this->updateMapMenu();
@@ -147,6 +155,7 @@ namespace game {
         if (!this->dead) {
             for (int i = 0; i < map.size(); i++) for (int j = 0; j < map[i].size(); j++) {
                 int type = map[i][j];
+                SDL_Rect* tileDest = this->getTileDest({i, j});
                 SDL_RenderCopy(
                     this->renderer,
                     this->textures.at(
@@ -155,8 +164,9 @@ namespace game {
                         : type
                     ),
                     nullptr,
-                    this->getTileDest({i, j})
+                    tileDest
                 );
+                delete tileDest;
             }
             this->enemyHandler->render();
         } else {
@@ -171,6 +181,7 @@ namespace game {
         this->gameState->render();
         this->mapMenu->render();
         this->turretHandler->render();
+        this->turretMenu->render();
     }
 
     void Map::tick(double scalar) {
@@ -181,6 +192,7 @@ namespace game {
     void Map::handleEvent(SDL_Event* event) {
         this->turretHandler->handleEvent(event);
         this->mapMenu->handleEvent(event);
+        this->turretMenu->handleEvent(event);
     }
 
     GameState* Map::loadMap(const std::string& mapFileName) {
@@ -328,7 +340,7 @@ namespace game {
                 this->getPosition(),
                 IPoint{
                     this->getSize().x,
-                    this->headerHeight
+                    this->guiHeight
                 }
             ),
             this->title,
@@ -529,11 +541,21 @@ namespace game {
     SDL_Rect* Map::getMapDestRect() const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x;
-        rect->y = this->destRect->y + this->headerHeight;
+        rect->y = this->destRect->y + this->guiHeight;
         if (this->maps.empty()) rect->w = this->tileSize.x;
         else rect->w = this->tileSize.x * this->mapRef->size();
         if (this->maps.empty() || this->mapRef->empty()) rect->h = this->tileSize.y;
         else rect->h = this->tileSize.y * this->mapRef->back().size();
+        return rect;
+    }
+
+    SDL_Rect* Map::getTurretMenuDestRect() const {
+        SDL_Rect* rect = new SDL_Rect();
+        rect->x = this->destRect->x;
+        rect->y = this->destRect->y + (this->tileSize.y * this->mapRef->back().size()) + this->guiHeight;
+        if (this->maps.empty()) rect->w = this->tileSize.x;
+        else rect->w = this->tileSize.x * this->mapRef->size();
+        rect->h = this->guiHeight;
         return rect;
     }
 
@@ -543,16 +565,16 @@ namespace game {
         rect->y = this->destRect->y;
         if (this->maps.empty()) rect->w = this->tileSize.x;
         else rect->w = this->tileSize.x * this->mapRef->size();
-        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->headerHeight;
-        else rect->h = (this->tileSize.y * this->mapRef->back().size()) + this->headerHeight;
+        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->guiHeight << 1;
+        else rect->h = (this->tileSize.y * this->mapRef->back().size()) + (this->guiHeight << 1);
         return rect;
     }
 
     IPoint Map::getSize() const {
-        if (map.empty()) return {0, this->headerHeight};
+        if (map.empty()) return {0, this->guiHeight << 1};
         else return {
             this->tileSize.x * (int)this->mapRef->size(),
-            (this->tileSize.y * (int)this->mapRef->back().size()) + this->headerHeight
+            (this->tileSize.y * (int)this->mapRef->back().size()) + (this->guiHeight << 1)
         };
     }
 
@@ -560,9 +582,9 @@ namespace game {
         SDL_Rect* rect = this->getDestRect();
         if (
             position.x < rect->x
-            || position.y < rect->y + this->headerHeight
+            || position.y < rect->y + this->guiHeight
             || position.x > rect->x + (this->mapRef->size() * this->tileSize.x)
-            || position.y > rect->y + (this->mapRef->front().size() * this->tileSize.y) + this->headerHeight
+            || position.y > rect->y + (this->mapRef->front().size() * this->tileSize.y) + this->guiHeight
         ) {
             delete rect;
             return {-1, -1};
@@ -571,7 +593,7 @@ namespace game {
         delete rect;
         return {
             (int)std::floor((double)(position.x - this->destRect->x) / (double)this->tileSize.x),
-            (int)std::floor((double)(position.y - (this->destRect->y + this->headerHeight)) / (double)this->tileSize.y)
+            (int)std::floor((double)(position.y - (this->destRect->y + this->guiHeight)) / (double)this->tileSize.y)
         };
     }
 
@@ -582,7 +604,7 @@ namespace game {
     SDL_Rect* Map::getTileDest(const IPoint& index) const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x + (this->tileSize.x * index.x);
-        rect->y = this->destRect->y + (this->tileSize.y * index.y) + this->headerHeight;
+        rect->y = this->destRect->y + (this->tileSize.y * index.y) + this->guiHeight;
         rect->w = this->tileSize.x;
         rect->h = this->tileSize.y;
         return rect;
@@ -591,7 +613,7 @@ namespace game {
     IPoint Map::getTileCenter(const IPoint& index) const {
         return {
             this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
-            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1) + this->headerHeight
+            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1) + this->guiHeight
         };
     }
 
@@ -622,5 +644,9 @@ namespace game {
 
     EnemyHandler* Map::getEnemyHandler() {
         return this->enemyHandler;
+    }
+
+    TurretMenu* Map::getTurretMenu() {
+        return this->turretMenu;
     }
 };

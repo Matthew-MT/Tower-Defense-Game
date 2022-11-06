@@ -64,7 +64,7 @@ namespace game{
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
             Map* initMap
-            ); 
+        );
 
         void render();
 
@@ -81,23 +81,35 @@ namespace game{
         EnemyHandler* getEnemyHandler();
 
         Map* getMap();
+
+        std::vector<TurretData*> getTurretTypes();
     };
 
     class TurretData
     {
         public:
-        int damage;
         double reload;
-        int range;
-        SDL_Texture* texture;
+        int
+            buyPrice,
+            sellPrice,
+            damage,
+            range;
+        SDL_Texture
+            * texture,
+            * menuTexture,
+            * menuTextureSelected;
         Sound* turretSpawnSound;
         Sound* turretShootSound;
         public:
         TurretData(
+            int initBuyPrice,
+            int initSellPrice,
             int initDamage, 
             double initReload, 
             int initRange,
-            SDL_Texture* initTexture, 
+            SDL_Texture* initTexture,
+            SDL_Texture* initMenuTexture,
+            SDL_Texture* initMenuTextureSelected,
             Sound* initTurretSpawnSound,
             Sound* initTurretShootSound
         );

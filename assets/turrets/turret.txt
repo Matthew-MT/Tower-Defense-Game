@@ -1,0 +1,7 @@
+5
+0.5
+80
+turret.bmp
+mixkit-retro-game-notification-212.wav
+turret_menu.png
+turret_menu_selected.png

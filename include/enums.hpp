@@ -9,10 +9,6 @@ namespace game {
         TurretType = 4
     };
 
-    /*enum TurretType{
-        Gatling = 0
-    };*/
-
     enum TargetType {
         Closest = 0,
         First = 1,
