@@ -10,7 +10,7 @@
 #include "sprite.hpp"
 
 namespace game{
-    class TurretMenu : public renderable{
+    class TurretMenu : public Renderable {
     protected:
         Turret* turret;
         std::vector<std::string> turretList;
@@ -26,8 +26,7 @@ namespace game{
         TurretMenu(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
-            Turret* initTurret,
-            const std::vector<std::string>& initTurretList
+            Turret* initTurret
         );
         ~TurretMenu();
         virtual void render();

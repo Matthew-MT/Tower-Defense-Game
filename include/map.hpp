@@ -151,7 +151,7 @@ namespace game {
                     this->renderer,
                     this->textures.at(
                         type == TileType::TurretType
-                        ? TileType::Wall
+                        ? TileType::Empty
                         : type
                     ),
                     nullptr,

@@ -9,7 +9,7 @@
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "turretMenu_h.hpp"
-#include "map_h"
+#include "map_h.hpp"
 
 namespace game{
     void TurretMenu::updatePosition(){
@@ -34,15 +34,13 @@ namespace game{
     TurretMenu::TurretMenu(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
-        Turret* initTurret,
-        std::vector<std::string> initTurretList
+        Turret* initTurret
     ) 
         : Renderable{
             initRenderer,
             initDestRect
         },
-        turret{initTurret} 
-        turretList{initTurretList} {
+        turret{initTurret} {
             SDL_Surface * surface = IMG_Load("assets/images/turret_menu.png");
             this->gatling = SDL_CreateTextureFromSurface(this->renderer, surface);
             SDL_FreeSurface(surface);
