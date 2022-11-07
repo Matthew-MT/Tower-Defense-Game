@@ -1,1 +1,2 @@
-turret.txt
+gatling.txt
+sniper.txt

@@ -15,9 +15,9 @@ namespace game {
     IPoint TurretMenu::getOptionCenterByIndex(int index) {
         int
             spacing = this->destRect->h >> 1,
-            leftBegin = (this->destRect->w - (spacing * this->options.size())) >> 1;
+            leftBegin = (this->destRect->w - (((int)((double)spacing * 1.5) * this->options.size()) - (spacing >> 1))) >> 1;
         return {
-            this->destRect->x + leftBegin + (spacing * index),
+            this->destRect->x + leftBegin + ((int)((double)spacing * 1.5) * index),
             this->destRect->y + (this->destRect->h >> 1)
         };
     }

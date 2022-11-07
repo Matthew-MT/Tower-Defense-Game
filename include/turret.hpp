@@ -147,6 +147,7 @@ namespace game{
         Map* initMap
         ) : Renderable{initRenderer, initDestRect}, map{initMap}
         {
+            readTurretData("gatling.txt");
             readTurretData("sniper.txt");
         }
 
@@ -174,6 +175,10 @@ namespace game{
             * menuTexture,
             * menuTextureSelected;
 
+        std::getline(turretFile, buffer);
+        buyPrice = std::stoi(buffer);
+        std::getline(turretFile, buffer);
+        sellPrice = std::stoi(buffer);
         std::getline(turretFile, buffer);
         damage = std::stoi(buffer);
         std::getline(turretFile, buffer);
@@ -206,7 +211,8 @@ namespace game{
             texture,
             menuTexture,
             menuTextureSelected,
-            turretSpawnSound
+            turretSpawnSound,
+            turretShootSound
         ));
     }
 

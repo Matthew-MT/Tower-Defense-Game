@@ -1,7 +1,10 @@
+10
+5
 5
 0.5
 80
 gatling.png
 mixkit-retro-game-notification-212.wav
+076415_light-machine-gun-m249-39827.wav
 turret_menu.png
 turret_menu_selected.png
