@@ -51,9 +51,7 @@ namespace game {
     TurretMenu::~TurretMenu() {}
 
     void TurretMenu::render(){
-        SDL_Log(("Rendering... There are " + std::to_string(this->options.size()) + " options.").c_str());
         for (int i = 0; i < this->options.size(); i++) {
-            SDL_Log(("Rendering an option at (" + std::to_string(this->optionRects.at(i)->x) + ", " + std::to_string(this->optionRects.at(i)->y) + ")").c_str());
             SDL_RenderCopy(
                 this->renderer,
                 i == this->selected ? this->options.at(i)->menuTextureSelected : this->options.at(i)->menuTexture,
@@ -61,21 +59,17 @@ namespace game {
                 this->optionRects.at(i)
             );
         }
-        SDL_Log(("Rendered " + std::to_string(this->options.size()) + " options.").c_str());
     }
 
     void TurretMenu::handleEvent(SDL_Event* event) {
-        SDL_Log("Handling event...");
         if (event->type == SDL_MOUSEBUTTONUP) {
             for (int i = 0; i < this->optionRects.size(); i++) {
-                SDL_Log(("Mouse position: (" + std::to_string(event->button.x) + ", " + std::to_string(event->button.y) + ")").c_str());
                 if (contains(this->optionRects.at(i), {event->button.x, event->button.y})) {
                     this->selected = i;
                     break;
                 }
             }
         }
-        SDL_Log("Event handled.");
     }
 
     void TurretMenu::setDestRect(SDL_Rect* newDestRect) {

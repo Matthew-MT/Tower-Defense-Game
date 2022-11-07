@@ -42,7 +42,7 @@ namespace game {
 
             SDL_Rect* mapRect = new SDL_Rect();
             mapRect->x = 20;
-            mapRect->y = 20;
+            mapRect->y = 0;
             mapRect->w = -1;
             mapRect->h = -1;
 
@@ -59,7 +59,7 @@ namespace game {
 
             IPoint winSize = {
                 mapRect->w + 40,
-                mapRect->h + 80
+                mapRect->h
             };
 
             SDL_SetWindowSize(this->window, winSize.x, winSize.y);

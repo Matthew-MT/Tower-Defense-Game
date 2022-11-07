@@ -39,7 +39,7 @@ namespace game {
             this->tileSize.y
                 = (
                     this->destRect->h
-                    - (this->guiHeight << 1)
+                    - (this->guiHeight * 3)
                 ) / this->mapRef->back().size();
         }
     }
@@ -555,7 +555,7 @@ namespace game {
         rect->y = this->destRect->y + (this->tileSize.y * this->mapRef->back().size()) + this->guiHeight;
         if (this->maps.empty()) rect->w = this->tileSize.x;
         else rect->w = this->tileSize.x * this->mapRef->size();
-        rect->h = this->guiHeight;
+        rect->h = this->guiHeight << 1;
         return rect;
     }
 
@@ -565,16 +565,16 @@ namespace game {
         rect->y = this->destRect->y;
         if (this->maps.empty()) rect->w = this->tileSize.x;
         else rect->w = this->tileSize.x * this->mapRef->size();
-        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->guiHeight << 1;
-        else rect->h = (this->tileSize.y * this->mapRef->back().size()) + (this->guiHeight << 1);
+        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->guiHeight * 3;
+        else rect->h = (this->tileSize.y * this->mapRef->back().size()) + (this->guiHeight * 3);
         return rect;
     }
 
     IPoint Map::getSize() const {
-        if (map.empty()) return {0, this->guiHeight << 1};
+        if (map.empty()) return {0, this->guiHeight * 3};
         else return {
             this->tileSize.x * (int)this->mapRef->size(),
-            (this->tileSize.y * (int)this->mapRef->back().size()) + (this->guiHeight << 1)
+            (this->tileSize.y * (int)this->mapRef->back().size()) + (this->guiHeight * 3)
         };
     }
 
