@@ -23,7 +23,8 @@ namespace game{
         IPoint initIndex,
         TurretHandler* initTurretHandler,
         double initAngle,
-        Sound* initSpawnSound
+        Sound* initSpawnSound,
+        Sound* initShootSound
     ) : Sprite {
         initRenderer, 
         initTexture, 
@@ -36,7 +37,8 @@ namespace game{
     range{initRange},
     index{initIndex},
     turretHandler{initTurretHandler},
-    spawnSound{initSpawnSound}
+    spawnSound{initSpawnSound},
+    shootSound{initShootSound}
     {}
 
     IPoint Turret::getIndex()
@@ -80,6 +82,7 @@ namespace game{
                 if(remainingReload<=0)
                 {
                     this->targetedEnemy->damage(this->damage);
+                    this->shootSound->playSound();
                     this->remainingReload = reloadTime;
                 }
             }
@@ -144,7 +147,7 @@ namespace game{
         Map* initMap
         ) : Renderable{initRenderer, initDestRect}, map{initMap}
         {
-            readTurretData("turret.txt");
+            readTurretData("sniper.txt");
         }
 
     void TurretHandler::render()
@@ -183,7 +186,9 @@ namespace game{
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
         std::getline(turretFile, buffer);
-        Sound* turretSpawnSound = new Sound("assets/sound/" + buffer);
+        Sound* turretSpawnSound = new Sound("assets/sounds/" + buffer);
+        std::getline(turretFile, buffer);
+        Sound* turretShootSound = new Sound("assets/sounds/" + buffer);
         std::getline(turretFile, buffer);
         surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
         menuTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
@@ -221,13 +226,15 @@ namespace game{
             index,
             this,
             0.0,
-            data->turretSpawnSound
+            data->turretSpawnSound,
+            data->turretShootSound
         );
         this->turrets.insert(turret);
     }
 
     void  TurretHandler::handleEvent(SDL_Event* event)
     {
+        Sound* sellSound = new Sound("assets/sounds/coinbag-91016.mp3");
         if(this->started && event->type == SDL_MOUSEBUTTONUP)
         {
             int x, y;
@@ -243,6 +250,7 @@ namespace game{
             else if(this->map->getTileType(index)==TileType::TurretType)
             {
                 this->map->sellTurret(index);
+                sellSound->playSound();
                 std::unordered_set<Turret*>::iterator i = std::find_if(this->turrets.begin(),this->turrets.end(),[&](Turret* turret)->bool{
                     return turret->getIndex()==index;
                 });
@@ -287,7 +295,8 @@ namespace game{
         SDL_Texture* initTexture,
         SDL_Texture* initMenuTexture,
         SDL_Texture* initMenuTextureSelected,
-        Sound* initTurretSpawnSound
+        Sound* initTurretSpawnSound,
+        Sound* initTurretShootSound
     ) :
         buyPrice{initBuyPrice},
         sellPrice{initSellPrice},
@@ -297,5 +306,6 @@ namespace game{
         texture{initTexture},
         menuTexture{initMenuTexture},
         menuTextureSelected{initMenuTextureSelected},
-        turretSpawnSound{initTurretSpawnSound} {}
+        turretSpawnSound{initTurretSpawnSound},
+        turretShootSound{initTurretShootSound} {}
 };

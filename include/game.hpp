@@ -64,7 +64,7 @@ namespace game {
 
             SDL_SetWindowSize(this->window, winSize.x, winSize.y);
 
-            this->music = new Music("assets/sound/Industrial Revolution.mp3");
+            this->music = new Music("assets/sounds/Industrial Revolution.mp3");
             this->music->playMusic();
 
             delete mapRect;

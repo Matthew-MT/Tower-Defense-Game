@@ -21,6 +21,7 @@ namespace game{
         double remainingReload=0;
         double angle;
         Sound* spawnSound;
+        Sound* shootSound;
         public:
         Turret(
             SDL_Renderer* initRenderer,
@@ -33,7 +34,8 @@ namespace game{
             IPoint initIndex,
             TurretHandler* initTurretHandler,
             double initAngle,
-            Sound* initSpawnSound
+            Sound* initSpawnSound,
+            Sound* initShootSound
         );
 
         IPoint getIndex();
@@ -97,6 +99,7 @@ namespace game{
             * menuTexture,
             * menuTextureSelected;
         Sound* turretSpawnSound;
+        Sound* turretShootSound;
         public:
         TurretData(
             int initBuyPrice,
@@ -107,7 +110,8 @@ namespace game{
             SDL_Texture* initTexture,
             SDL_Texture* initMenuTexture,
             SDL_Texture* initMenuTextureSelected,
-            Sound* initTurretSpawnSound
+            Sound* initTurretSpawnSound,
+            Sound* initTurretShootSound
         );
     };
 };
