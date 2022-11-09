@@ -63,12 +63,21 @@ namespace game {
 
     void TurretMenu::handleEvent(SDL_Event* event) {
         if (event->type == SDL_MOUSEBUTTONUP) {
+            SDL_Log(("Mouse position: (" + std::to_string(event->button.x) + ", " + std::to_string(event->button.y) + ")").c_str());
             for (int i = 0; i < this->optionRects.size(); i++) {
+                SDL_Log((
+                    "Option rect: ("
+                    + std::to_string(this->optionRects.at(i)->x)
+                    + ", " + std::to_string(this->optionRects.at(i)->y)
+                    + "); (" + std::to_string(this->optionRects.at(i)->w)
+                    + ", " + std::to_string(this->optionRects.at(i)->h) + ")"
+                ).c_str());
                 if (contains(this->optionRects.at(i), {event->button.x, event->button.y})) {
                     this->selected = i;
                     break;
                 }
             }
+            SDL_Log(("Selected option: " + std::to_string(this->selected)).c_str());
         }
     }
 

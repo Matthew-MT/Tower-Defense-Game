@@ -251,7 +251,7 @@ namespace game{
 
             if(placed)
             {
-                createTurret(0, index);
+                createTurret(this->map->getTurretMenu()->getSelectedType(), index);
             }
             else if(this->map->getTileType(index)==TileType::TurretType)
             {
@@ -263,7 +263,6 @@ namespace game{
                 delete *i;
 
                 this->turrets.erase(i);
-
             }
         }
     }
