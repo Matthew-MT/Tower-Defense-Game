@@ -10,6 +10,7 @@ namespace game {
     class Pathfinder;
     template<typename Type> class Node;
     template<typename Type> class Graph;
+    class EnemyData;
     class Enemy;
     class EnemyHandler;
     class Turret;
@@ -17,4 +18,6 @@ namespace game {
     class TurretHandler;
     class Sound;
     class Music;
+    class MapMenu;
+    class TurretMenu;
 };

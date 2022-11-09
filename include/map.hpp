@@ -1,8 +1,12 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "map_h.hpp"
+#include "turret_menu.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
+#include "turret_h.hpp"
+#include "map_menu.hpp"
 #include "enemies.hpp"
 #include "sprite.hpp"
 #include <algorithm>
@@ -13,13 +17,20 @@
 #include <string>
 
 namespace game {
+    MapData::MapData(
+        const std::vector<std::vector<int>>& initMap,
+        const std::vector<SDL_Texture*>& initTextures
+    ) :
+        textures{initTextures},
+        map{initMap} {}
+
     void Map::updateMapSize() {
         if (
             this->destRect->w != -1
         ) {
             this->tileSize.x
                 = this->destRect->w
-                / this->map.size();
+                / this->mapRef->size();
         }
 
         if (
@@ -28,17 +39,17 @@ namespace game {
             this->tileSize.y
                 = (
                     this->destRect->h
-                    - this->headerHeight
-                ) / this->map.back().size();
+                    - (this->guiHeight * 3)
+                ) / this->mapRef->back().size();
         }
     }
 
-    void Map::updateTiles() {
-        for (int i = 0; i < this->mapSprites.size(); i++) {
-            for (int j = 0; j < this->mapSprites[i].size(); j++) {
-                this->mapSprites[i][j]->setDestRect(this->getTileDest({i, j}));
-            }
-        }
+    void Map::updateMapPosition() {
+        if (this->gameState != nullptr) this->gameState->setPosition(this->getPosition());
+    }
+
+    void Map::updateMapMenu() {
+        if (this->mapMenu != nullptr) this->mapMenu->setDestRect(this->getMapDestRect());
     }
 
     bool Map::efficientPathfindToMultipleTargets(const IPoint& origin, std::vector<std::vector<IPoint>>& paths) {
@@ -67,7 +78,7 @@ namespace game {
         SDL_Rect* initDestRect,
         const IPoint& initTileSize,
         const std::string& initTitle,
-        int initHeaderHeight
+        int initGuiHeight
     ) :
         Renderable{
             initRenderer,
@@ -77,15 +88,16 @@ namespace game {
         graph{new TileGraph()},
         tileSize{initTileSize},
         title{initTitle},
-        headerHeight{initHeaderHeight} {
+        guiHeight{initGuiHeight} {
 
         std::fstream
-            textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in);
+            textureAssociation("assets/config/map_texture_association.txt", std::ios_base::in),
+            mapList("assets/config/maps.txt", std::ios_base::in);
         std::string buffer;
 
         while (!textureAssociation.eof()) {
             std::getline(textureAssociation, buffer);
-            SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
+            SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
             this->textures.push_back(
                 SDL_CreateTextureFromSurface(
                     this->renderer,
@@ -97,31 +109,64 @@ namespace game {
 
         textureAssociation.close();
 
+        while (!mapList.eof()) {
+            std::getline(mapList, buffer);
+            this->mapNames.push_back(buffer);
+        }
+
+        mapList.close();
+
         this->deathBackground = this->textures[TileType::Wall];
+
+        this->mapMenu = new MapMenu(
+            this->renderer,
+            this->getMapDestRect(),
+            this,
+            this->mapNames
+        );
+
+        this->turretHandler = new TurretHandler(
+            this->renderer,
+            this->getDestRect(),
+            this
+        );
+
+        this->turretMenu = new TurretMenu(
+            this->renderer,
+            this->getTurretMenuDestRect(),
+            this->turretHandler->getTurretTypes(),
+            this->tileSize
+        );
+
+        this->updateMapMenu();
     }
 
     Map::~Map() {
-        for (std::vector<StaticSprite*>& col : this->mapSprites) for (StaticSprite* sprite : col) delete sprite;
         for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
         for (Path* path : this->paths) delete path;
+        for (const std::pair<std::string, std::pair<GameState*, std::vector<std::vector<int>>>>& mapData : this->maps) delete mapData.second.first;
         delete this->graph;
         delete this->enemyHandler;
+        delete this->mapMenu;
     }
 
     void Map::render() {
+        std::vector<std::vector<int>>& map = *this->mapRef;
         if (!this->dead) {
-            for (int i = 0; i < this->map.size(); i++) for (int j = 0; j < this->map[i].size(); j++) {
-                int type = this->map[i][j];
+            for (int i = 0; i < map.size(); i++) for (int j = 0; j < map[i].size(); j++) {
+                int type = map[i][j];
+                SDL_Rect* tileDest = this->getTileDest({i, j});
                 SDL_RenderCopy(
                     this->renderer,
                     this->textures.at(
                         type == TileType::TurretType
-                        ? TileType::Wall
+                        ? TileType::Empty
                         : type
                     ),
                     nullptr,
-                    this->mapSprites[i][j]->getDestRect()
+                    tileDest
                 );
+                delete tileDest;
             }
             this->enemyHandler->render();
         } else {
@@ -134,17 +179,30 @@ namespace game {
             );
         }
         this->gameState->render();
+        this->mapMenu->render();
+        this->turretHandler->render();
+        this->turretMenu->render();
     }
 
     void Map::tick(double scalar) {
         this->enemyHandler->tick(scalar);
+        this->turretHandler->tick(scalar);
+    }
+
+    void Map::handleEvent(SDL_Event* event) {
+        this->turretHandler->handleEvent(event);
+        this->mapMenu->handleEvent(event);
+        this->turretMenu->handleEvent(event);
     }
 
     GameState* Map::loadMap(const std::string& mapFileName) {
         this->dead = false;
-        this->map.clear();
-        for (std::vector<StaticSprite*>& column : this->mapSprites) for (StaticSprite* sprite : column) delete sprite;
-        this->mapSprites.clear();
+        this->map = mapFileName;
+        if (this->maps.find(this->map) != this->maps.end()) {
+            this->maps[this->map].first->reset();
+            this->mapRef = &(this->maps[this->map].second);
+            return this->maps[this->map].first;
+        }
 
         std::fstream
             mapFile("assets/maps/" + mapFileName, std::ios_base::in);
@@ -154,14 +212,24 @@ namespace game {
         int health = std::stoi(buffer);
         std::getline(mapFile, buffer);
         int cash = std::stoi(buffer);
+        this->maps.insert({
+            mapFileName,
+            {
+                nullptr,
+                {}
+            }
+        });
+
+        this->mapRef = &this->maps[this->map].second;
+        std::vector<std::vector<int>>& newMap = *this->mapRef;
 
         while (!mapFile.eof()) {
             std::getline(mapFile, buffer);
-            map.push_back({});
-            map.back().push_back(0);
+            newMap.push_back({});
+            newMap.back().push_back(0);
             for (char c : buffer) {
-                if (c == ',') map.back().push_back(0);
-                else if (c >= '0' && c <= '9') (map.back().back() *= 10) += (int)(c - '0');
+                if (c == ',') newMap.back().push_back(0);
+                else if (c >= '0' && c <= '9') (newMap.back().back() *= 10) += (int)(c - '0');
                 else {
                     SDL_Log("`loadMap` failed parsing a map file. Check that syntax is correct in the file.");
                     throw 1;
@@ -169,22 +237,18 @@ namespace game {
             }
         }
 
-        const int height = this->map.back().size();
-        for (std::vector<int> column : this->map) if (column.size() != height) {
+        mapFile.close();
+
+        const int height = newMap.back().size();
+        for (std::vector<int> column : newMap) if (column.size() != height) {
             SDL_Log("`loadMap`: map must be rectangular.");
             throw 1;
         }
 
-        for (int i = 0; i < this->map.size(); i++) {
-            this->mapSprites.push_back({});
-            for (int j = 0; j < this->map[i].size(); j++) {
-                int type = this->map[i][j];
+        for (int i = 0; i < newMap.size(); i++) {
+            for (int j = 0; j < newMap[i].size(); j++) {
+                int type = newMap[i][j];
                 IPoint index{i, j};
-                this->mapSprites.back().push_back(new StaticSprite(
-                    this->renderer,
-                    this->textures.at(type),
-                    this->getTileDest(index)
-                ));
 
                 if (type == TileType::Spawn) this->spawns.push_back(index);
                 else if (type == TileType::Base) this->bases.push_back(index);
@@ -200,9 +264,9 @@ namespace game {
                 if (
                     i > 0
                     && (
-                        this->map[i - 1][j] == TileType::Empty
-                        || this->map[i - 1][j] == TileType::Spawn
-                        || this->map[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == TileType::Empty
+                        || newMap[i - 1][j] == TileType::Spawn
+                        || newMap[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j}))->link(node);
@@ -211,9 +275,9 @@ namespace game {
                 if (
                     j > 0
                     && (
-                        this->map[i][j - 1] == TileType::Empty
-                        || this->map[i][j - 1] == TileType::Spawn
-                        || this->map[i][j - 1] == TileType::Base
+                        newMap[i][j - 1] == TileType::Empty
+                        || newMap[i][j - 1] == TileType::Spawn
+                        || newMap[i][j - 1] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i, j - 1}))->link(node);
@@ -222,46 +286,45 @@ namespace game {
                 if (
                     i > 0 && j > 0
                     && (
-                        this->map[i - 1][j - 1] == TileType::Empty
-                        || this->map[i - 1][j - 1] == TileType::Spawn
-                        || this->map[i - 1][j - 1] == TileType::Base
+                        newMap[i - 1][j - 1] == TileType::Empty
+                        || newMap[i - 1][j - 1] == TileType::Spawn
+                        || newMap[i - 1][j - 1] == TileType::Base
                     ) && (
-                        this->map[i][j - 1] == TileType::Empty
-                        || this->map[i][j - 1] == TileType::Spawn
-                        || this->map[i][j - 1] == TileType::Base
+                        newMap[i][j - 1] == TileType::Empty
+                        || newMap[i][j - 1] == TileType::Spawn
+                        || newMap[i][j - 1] == TileType::Base
                     ) && (
-                        this->map[i - 1][j] == TileType::Empty
-                        || this->map[i - 1][j] == TileType::Spawn
-                        || this->map[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == TileType::Empty
+                        || newMap[i - 1][j] == TileType::Spawn
+                        || newMap[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j - 1}))->link(node, sqrtOf2);
                 }
 
                 if (
-                    i > 0 && j < this->map.back().size() - 1
+                    i > 0 && j < newMap.back().size() - 1
                     && (
-                        this->map[i - 1][j + 1] == TileType::Empty
-                        || this->map[i - 1][j + 1] == TileType::Spawn
-                        || this->map[i - 1][j + 1] == TileType::Base
+                        newMap[i - 1][j + 1] == TileType::Empty
+                        || newMap[i - 1][j + 1] == TileType::Spawn
+                        || newMap[i - 1][j + 1] == TileType::Base
                     ) && (
-                        this->map[i][j + 1] == TileType::Empty
-                        || this->map[i][j + 1] == TileType::Spawn
-                        || this->map[i][j + 1] == TileType::Base
+                        newMap[i][j + 1] == TileType::Empty
+                        || newMap[i][j + 1] == TileType::Spawn
+                        || newMap[i][j + 1] == TileType::Base
                     ) && (
-                        this->map[i - 1][j] == TileType::Empty
-                        || this->map[i - 1][j] == TileType::Spawn
-                        || this->map[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == TileType::Empty
+                        || newMap[i - 1][j] == TileType::Spawn
+                        || newMap[i - 1][j] == TileType::Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j + 1}))->link(node, sqrtOf2);
                 }
             }
         }
-
-        mapFile.close();
         this->updateMapSize();
-        this->updateTiles();
+        this->updateMapPosition();
+        this->updateMapMenu();
 
         std::vector<std::vector<IPoint>> paths;
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
@@ -271,14 +334,14 @@ namespace game {
             delete this->gameState;
             this->gameState = nullptr;
         }
-        this->gameState = new GameState(
+        this->gameState = this->maps[this->map].first = new GameState(
             this->renderer,
             this->font,
             createRect(
                 this->getPosition(),
                 IPoint{
                     this->getSize().x,
-                    this->headerHeight
+                    this->guiHeight
                 }
             ),
             this->title,
@@ -294,19 +357,26 @@ namespace game {
         return this->gameState;
     }
 
+    void Map::start(Option option) {
+        this->mapMenu->setDisplayed(false);
+        this->enemyHandler->start(option);
+        this->turretHandler->start(option);
+    }
+
     void Map::displayDeathScreen() {
         this->dead = true;
     }
 
     bool Map::placeTurret(const IPoint& index) {
+        std::vector<std::vector<int>>& map = *this->mapRef;
         if (
             index.x < 0
-            || index.x >= this->map.size()
+            || index.x >= map.size()
             || index.y < 0
-            || index.y >= this->map.back().size()
-            || this->map[index.x][index.y] != TileType::Empty
+            || index.y >= map.back().size()
+            || map[index.x][index.y] != TileType::Empty
         ) return false;
-        this->map[index.x][index.y] = TileType::TurretType;
+        map[index.x][index.y] = TileType::TurretType;
         TileGraph::Node* node = *this->graph->find(index);
         std::vector<std::vector<IPoint>> paths;
 
@@ -351,7 +421,7 @@ namespace game {
             if (nodeW != end) node->link(*nodeW);
             if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
-            this->map[index.x][index.y] = TileType::Empty;
+            map[index.x][index.y] = TileType::Empty;
         };
 
         for (IPoint& spawn : this->spawns) {
@@ -392,12 +462,13 @@ namespace game {
     }
 
     bool Map::sellTurret(const IPoint& index) {
+        std::vector<std::vector<int>>& map = this->maps[this->map].second;
         if (
             index.x < 0
-            || index.x >= this->map.size()
+            || index.x >= map.size()
             || index.y < 0
-            || index.y >= this->map.back().size()
-            || this->map[index.x][index.y] != TileType::TurretType
+            || index.y >= map.back().size()
+            || map[index.x][index.y] != TileType::TurretType
         ) return false;
 
         typename TileGraph::Nodes::iterator
@@ -429,7 +500,7 @@ namespace game {
         if (nodeW != end) node->link(*nodeW);
         if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
-        this->map[index.x][index.y] = TileType::Empty;
+        map[index.x][index.y] = TileType::Empty;
 
         for (Path* path : this->paths) delete path;
         this->paths.clear();
@@ -458,29 +529,53 @@ namespace game {
     void Map::setDestRect(SDL_Rect* newDestRect) {
         delete this->destRect;
         this->destRect = newDestRect;
-        this->updateTiles();
+        this->updateMapPosition();
+        this->updateMapMenu();
     }
 
     void Map::setPosition(const IPoint& position) {
         this->Renderable::setPosition(position);
-        this->updateTiles();
+        this->updateMapPosition();
+        this->updateMapMenu();
+    }
+
+    SDL_Rect* Map::getMapDestRect() const {
+        SDL_Rect* rect = new SDL_Rect();
+        rect->x = this->destRect->x;
+        rect->y = this->destRect->y + this->guiHeight;
+        if (this->maps.empty()) rect->w = this->tileSize.x;
+        else rect->w = this->tileSize.x * this->mapRef->size();
+        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->tileSize.y;
+        else rect->h = this->tileSize.y * this->mapRef->back().size();
+        return rect;
+    }
+
+    SDL_Rect* Map::getTurretMenuDestRect() const {
+        SDL_Rect* rect = new SDL_Rect();
+        rect->x = this->destRect->x;
+        rect->y = this->destRect->y + (this->tileSize.y * this->mapRef->back().size()) + this->guiHeight;
+        if (this->maps.empty()) rect->w = this->tileSize.x;
+        else rect->w = this->tileSize.x * this->mapRef->size();
+        rect->h = this->guiHeight << 1;
+        return rect;
     }
 
     SDL_Rect* Map::getDestRect() const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x;
         rect->y = this->destRect->y;
-        rect->w = this->tileSize.x * this->map.size();
-        if (this->map.empty()) rect->h = this->headerHeight;
-        else rect->h = (this->tileSize.y * this->map.back().size()) + this->headerHeight;
+        if (this->maps.empty()) rect->w = this->tileSize.x;
+        else rect->w = this->tileSize.x * this->mapRef->size();
+        if (this->maps.empty() || this->mapRef->empty()) rect->h = this->guiHeight * 3;
+        else rect->h = (this->tileSize.y * this->mapRef->back().size()) + (this->guiHeight * 3);
         return rect;
     }
 
     IPoint Map::getSize() const {
-        if (this->map.empty()) return {0, this->headerHeight};
+        if (map.empty()) return {0, this->guiHeight * 3};
         else return {
-            this->tileSize.x * (int)this->map.size(),
-            (this->tileSize.y * (int)this->map.back().size()) + this->headerHeight
+            this->tileSize.x * (int)this->mapRef->size(),
+            (this->tileSize.y * (int)this->mapRef->back().size()) + (this->guiHeight * 3)
         };
     }
 
@@ -488,9 +583,9 @@ namespace game {
         SDL_Rect* rect = this->getDestRect();
         if (
             position.x < rect->x
-            || position.y < rect->y + this->headerHeight
-            || position.x > rect->x + (this->map.size() * this->tileSize.x)
-            || position.y > rect->y + (this->map.front().size() * this->tileSize.y) + this->headerHeight
+            || position.y < rect->y + this->guiHeight
+            || position.x > rect->x + (this->mapRef->size() * this->tileSize.x)
+            || position.y > rect->y + (this->mapRef->front().size() * this->tileSize.y) + this->guiHeight
         ) {
             delete rect;
             return {-1, -1};
@@ -499,7 +594,7 @@ namespace game {
         delete rect;
         return {
             (int)std::floor((double)(position.x - this->destRect->x) / (double)this->tileSize.x),
-            (int)std::floor((double)(position.y - (this->destRect->y + this->headerHeight)) / (double)this->tileSize.y)
+            (int)std::floor((double)(position.y - (this->destRect->y + this->guiHeight)) / (double)this->tileSize.y)
         };
     }
 
@@ -510,7 +605,7 @@ namespace game {
     SDL_Rect* Map::getTileDest(const IPoint& index) const {
         SDL_Rect* rect = new SDL_Rect();
         rect->x = this->destRect->x + (this->tileSize.x * index.x);
-        rect->y = this->destRect->y + (this->tileSize.y * index.y) + this->headerHeight;
+        rect->y = this->destRect->y + (this->tileSize.y * index.y) + this->guiHeight;
         rect->w = this->tileSize.x;
         rect->h = this->tileSize.y;
         return rect;
@@ -519,13 +614,13 @@ namespace game {
     IPoint Map::getTileCenter(const IPoint& index) const {
         return {
             this->destRect->x + (this->tileSize.x * index.x) + (this->tileSize.x >> 1),
-            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1) + this->headerHeight
+            this->destRect->y + (this->tileSize.y * index.y) + (this->tileSize.y >> 1) + this->guiHeight
         };
     }
 
     int Map::getTileType(const IPoint& index) const {
-        if (index.x < 0 || index.x >= this->map.size() || index.y < 0 || index.y >= this->map.back().size()) return TileType::Wall;
-        return this->map[index.x][index.y];
+        if (index.x < 0 || index.x >= this->mapRef->size() || index.y < 0 || index.y >= this->mapRef->back().size()) return TileType::Wall;
+        return (*this->mapRef)[index.x][index.y];
     }
 
     const std::vector<IPoint>& Map::getAllSpawns() const {
@@ -550,5 +645,9 @@ namespace game {
 
     EnemyHandler* Map::getEnemyHandler() {
         return this->enemyHandler;
+    }
+
+    TurretMenu* Map::getTurretMenu() {
+        return this->turretMenu;
     }
 };

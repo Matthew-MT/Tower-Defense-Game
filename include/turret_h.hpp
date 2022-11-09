@@ -3,6 +3,7 @@
 #include "game_state.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
+#include "enums.hpp"
 #include "map.hpp"
 #include <vector>
 #include "animation.hpp"
@@ -22,6 +23,7 @@ namespace game{
         double angle;
         Sound* spawnSound;
         SDL_Texture* defTexture;
+        Sound* shootSound;
         public:
        
         Turret(
@@ -38,7 +40,8 @@ namespace game{
             Sound* initSpawnSound,
             std::string initTurretTexture,
             int initFrames,
-            int initMillisPerFrame
+            int initMillisPerFrame,
+            Sound* initShootSound
         );
 
         IPoint getIndex();
@@ -61,12 +64,13 @@ namespace game{
         Map* map;
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
+        bool started = false;
         public:
         TurretHandler(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
             Map* initMap
-            ); 
+        );
 
         void render();
 
@@ -78,26 +82,42 @@ namespace game{
 
         void tick(double scalar);
 
+        void start(Option option);
+
         EnemyHandler* getEnemyHandler();
 
         Map* getMap();
+
+        std::vector<TurretData*> getTurretTypes();
     };
 
     class TurretData
     {
         public:
-        int damage;
         double reload;
-        int range;
-        SDL_Texture* texture;
+        int
+            buyPrice,
+            sellPrice,
+            damage,
+            range;
+        SDL_Texture
+            * texture,
+            * menuTexture,
+            * menuTextureSelected;
         Sound* turretSpawnSound;
+        Sound* turretShootSound;
         public:
         TurretData(
+            int initBuyPrice,
+            int initSellPrice,
             int initDamage, 
             double initReload, 
             int initRange,
-            SDL_Texture* initTexture, 
-            Sound* initTurretSpawnSound
+            SDL_Texture* initTexture,
+            SDL_Texture* initMenuTexture,
+            SDL_Texture* initMenuTextureSelected,
+            Sound* initTurretSpawnSound,
+            Sound* initTurretShootSound
         );
     };
 };

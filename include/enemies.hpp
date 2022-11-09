@@ -1,8 +1,10 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "enemies_h.hpp"
 #include "pathfinder_h.hpp"
 #include "game_state.hpp"
+#include "map_menu_h.hpp"
 #include <unordered_set>
 #include "sprite.hpp"
 #include "map_h.hpp"
@@ -28,6 +30,7 @@ namespace game {
         Path* initPath,
         EnemyHandler* initHandler,
         EnemyData* initData,
+        double initDifficulty,
         SDL_Rect* initDestRect,
         SDL_Rect* initSourceRect = nullptr
     ) : StaticSprite{
@@ -41,7 +44,7 @@ namespace game {
         path{initPath},
         handler{initHandler},
         movementSpeed{initData->movementSpeed},
-        health{initData->health},
+        health{(int)std::round((double)initData->health * initDifficulty)},
         reward{initData->reward} {}
 
     Enemy::~Enemy() {
@@ -102,26 +105,45 @@ namespace game {
         gameState{initGameState},
         map{initMap} {
         std::fstream
-            textureAssociation("assets/config/enemy_texture_association.txt", std::ios_base::in);
+            enemyDataAssociation("assets/config/enemy_data_association.txt", std::ios_base::in),
+            difficultyData("assets/config/wave_difficulty.txt", std::ios_base::in);
         std::string buffer;
 
-        while (!textureAssociation.eof()) {
-            std::getline(textureAssociation, buffer);
-            SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
-            this->types.push_back(new EnemyData(
-                SDL_CreateTextureFromSurface(
-                    this->renderer,
-                    surface
-                ),
-                100,
-                100,
-                1
-            ));
-            SDL_FreeSurface(surface);
-        }
+        while (!enemyDataAssociation.eof()) {
+            std::getline(enemyDataAssociation, buffer);
+            std::fstream
+                enemyData("assets/enemies/" + buffer, std::ios_base::in);
 
-        textureAssociation.close();
-        // this->spawn();
+            while (!enemyData.eof()) {
+                std::getline(enemyData, buffer);
+                SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
+                std::getline(enemyData, buffer);
+                int movementSpeed = std::stoi(buffer);
+                std::getline(enemyData, buffer);
+                int health = std::stoi(buffer);
+                std::getline(enemyData, buffer);
+                int reward = std::stoi(buffer);
+                this->types.push_back(new EnemyData(
+                    SDL_CreateTextureFromSurface(
+                        this->renderer,
+                        surface
+                    ),
+                    movementSpeed,
+                    health,
+                    reward
+                ));
+                SDL_FreeSurface(surface);
+            }
+
+            enemyData.close();
+        }
+        enemyDataAssociation.close();
+
+        while (!difficultyData.eof()) {
+            std::getline(difficultyData, buffer);
+            this->difficulties.push_back(std::stod(buffer));
+        }
+        difficultyData.close();
     }
 
     EnemyHandler::~EnemyHandler() {}
@@ -131,16 +153,85 @@ namespace game {
     }
 
     void EnemyHandler::tick(double scalar) {
+        if (!this->started) return;
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
-        if (std::rand() % 1000 < 4) {
-            std::vector<IPoint> spawns = this->map->getAllSpawns();
-            this->spawn(0, spawns[std::rand() % spawns.size()]);
-        }
         for (Enemy* enemy : this->dying) {
             this->enemies.erase(enemy);
             delete enemy;
         }
         this->dying.clear();
+        this->elapsed += scalar;
+
+        if (this->elapsed >= this->completedWavesTime + this->waves.at(this->completedWaves).first) {
+            this->completedWaves++;
+            this->spawnedEnemiesTracker = 0;
+            if (this->completedWaves >= this->waves.size()) {
+                this->elapsed -= (double)this->completedWavesTime;
+                this->completedWaves = 0;
+                this->completedWavesTime = 0;
+                this->spawnedEnemiesTracker = 0;
+            } else this->completedWavesTime += this->waves.at(this->completedWaves - 1).first;
+        }
+
+        if (this->completedWaves >= this->waves.size()) {
+            if (this->elapsed > this->completedWavesTime) this->elapsed -= (double)this->completedWavesTime;
+            this->completedWaves = 0;
+            this->spawnedEnemiesTracker = 0;
+            this->completedWavesTime = 0;
+        }
+
+        if (this->spawnedEnemiesTracker < this->waves.at(this->completedWaves).second.size()) {
+            double inWaveTime = this->elapsed - (double)this->completedWavesTime;
+            int spawnedEnemies = (int)std::round(inWaveTime * 2.f) - this->spawnedEnemiesTracker;
+            std::vector<IPoint> spawns = this->map->getAllSpawns();
+            for (
+                int i = this->spawnedEnemiesTracker, e = this->spawnedEnemiesTracker + spawnedEnemies;
+                i < e; i++
+            ) {
+                if (this->spawnedEnemiesTracker >= this->waves.at(this->completedWaves).second.size()) break;
+                this->spawnedEnemiesTracker++;
+                this->spawn(this->waves.at(this->completedWaves).second.at(i), spawns.at(std::rand() % spawns.size()));
+            }
+        }
+    }
+
+    void EnemyHandler::start(Option option) {
+        std::string
+            wavesFile,
+            buffer;
+        if (option == Option::Easy) {
+            this->difficulty = 0;
+            wavesFile = "easy.txt";
+        } else if (option == Option::Normal) {
+            this->difficulty = 1;
+            wavesFile = "normal.txt";
+        } else if (option == Option::Hard) {
+            this->difficulty = 2;
+            wavesFile = "hard.txt";
+        } else if (option == Option::Fun) {
+            this->difficulty = 3;
+            wavesFile = "fun.txt";
+        } else return;
+        std::fstream
+            wavesData(((std::string)"assets/waves/" + wavesFile).c_str(), std::ios_base::in);
+        
+        while (!wavesData.eof()) {
+            std::getline(wavesData, buffer);
+            int time = std::stoi(buffer);
+            std::getline(wavesData, buffer);
+            std::vector<int> wave;
+            if (buffer.size()) wave.push_back(0);
+            for (char c : buffer) {
+                if (c == ',') wave.push_back(0);
+                else if (c >= '0' && c <= '9') (wave.back() *= 10) += (int)(c - '0');
+                else {
+                    SDL_Log("`EnemyHandler` failed parsing a waves file. Check that syntax is correct in the file.");
+                    throw 1;
+                }
+            }
+            this->waves.push_back({time, wave});
+        }
+        this->started = true;
     }
 
     typename EnemyHandler::Enemies::iterator EnemyHandler::begin() {
@@ -163,6 +254,7 @@ namespace game {
             validPaths[std::rand() % validPaths.size()],
             this,
             this->types.at(type),
+            this->difficulties.at(this->difficulty),
             initDestRect
         ));
     }

@@ -4,6 +4,7 @@
 #include "turret_h.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
+#include "enums.hpp"
 #include <vector>
 
 namespace game {
@@ -37,6 +38,7 @@ namespace game {
             Path* initPath,
             EnemyHandler* initHandler,
             EnemyData* initData,
+            double initDifficulty,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect
         );
@@ -63,6 +65,15 @@ namespace game {
             enemies,
             dying;
         std::vector<EnemyData*> types;
+        std::vector<double> difficulties;
+        std::vector<std::pair<int, std::vector<int>>> waves;
+        int
+            difficulty = 0,
+            completedWaves = 0,
+            completedWavesTime = 0,
+            spawnedEnemiesTracker = 0;
+        double elapsed = 0.f;
+        bool started = false;
     public:
         EnemyHandler(
             SDL_Renderer* initRenderer,
@@ -75,6 +86,8 @@ namespace game {
 
         virtual void render();
         virtual void tick(double scalar);
+
+        virtual void start(Option option);
 
         virtual typename Enemies::iterator begin();
         virtual typename Enemies::iterator end();

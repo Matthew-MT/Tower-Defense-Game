@@ -12,6 +12,7 @@ namespace game {
             * cashDisplay = nullptr,
             * healthDisplay = nullptr;
         int
+            maxCash,
             maxHealth,
             cash,
             health;
@@ -36,6 +37,8 @@ namespace game {
         ~GameState();
 
         virtual void render();
+
+        virtual void reset();
 
         virtual void setDestRect(SDL_Rect* rect);
         virtual void setPosition(const IPoint& position);
