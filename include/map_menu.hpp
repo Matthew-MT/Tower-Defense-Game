@@ -201,11 +201,13 @@ namespace game {
         } else if (event->type == SDL_MOUSEBUTTONUP) {
             if (this->hovered == Option::Left) {
                 this->place--;
-                while (this->place < 0) this->place = this->mapList.size() + place;
+                while (this->place < 0) this->place += this->mapList.size();
+                SDL_Log(("Place: " + std::to_string(this->place)).c_str());
                 this->map->loadMap(this->mapList[this->place]);
             } else if (this->hovered == Option::Right) {
                 this->place++;
-                while (this->place >= this->mapList.size()) this->place -= this->mapList.size();
+                this->place %= this->mapList.size();
+                SDL_Log(("Place: " + std::to_string(this->place)).c_str());
                 this->map->loadMap(this->mapList[this->place]);
             } else if (this->hovered != Option::None) this->map->start(this->hovered);
         }

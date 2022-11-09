@@ -200,6 +200,7 @@ namespace game {
         this->map = mapFileName;
         if (this->maps.find(this->map) != this->maps.end()) {
             this->maps[this->map].first->reset();
+            this->mapRef = &(this->maps[this->map].second);
             return this->maps[this->map].first;
         }
 

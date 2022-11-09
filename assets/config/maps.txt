@@ -1,1 +1,2 @@
 testMap.txt
+map2.txt
