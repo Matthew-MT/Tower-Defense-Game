@@ -57,7 +57,7 @@ namespace game
         void Animation::tick(double scalar)
         {
             int millis = SDL_GetTicks();
-            unsigned current = currentTime/20;
+            unsigned current = currentTime/100;
             if(current>=images.size()) current = 0;
             this->storedTexture = images[current].texture;
             this->render();
