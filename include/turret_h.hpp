@@ -5,9 +5,10 @@
 #include "sprite.hpp"
 #include "map.hpp"
 #include <vector>
+#include "animation.hpp"
 
 namespace game{
-    class Turret : public Sprite
+    class Turret : public Animation
     {
         protected:
         GameState* gamestate;
@@ -20,7 +21,9 @@ namespace game{
         double remainingReload=0;
         double angle;
         Sound* spawnSound;
+        SDL_Texture* defTexture;
         public:
+       
         Turret(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
@@ -32,7 +35,10 @@ namespace game{
             IPoint initIndex,
             TurretHandler* initTurretHandler,
             double initAngle,
-            Sound* initSpawnSound
+            Sound* initSpawnSound,
+            std::string initTurretTexture,
+            int initFrames,
+            int initMillisPerFrame
         );
 
         IPoint getIndex();

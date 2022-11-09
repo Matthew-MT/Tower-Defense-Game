@@ -11,6 +11,7 @@
 #include <vector>
 #include "sound.hpp"
 #include "music.hpp"
+#include "animation.hpp"
 
 namespace game {
     class Game {
@@ -33,6 +34,8 @@ namespace game {
         // GUI* gui;
         std::string title;
         SDL_Rect* windowRect;
+        Animation* turretAnimation;
+
 
         // static int renderThreadFn(void* thisArg) {
         //     Game* game = (Game*)thisArg;
@@ -105,6 +108,7 @@ namespace game {
 
             this->music = new Music("assets/sound/Industrial Revolution.mp3");
             this->music->playMusic();
+
 
             delete mapRect;
             // this->tickThread = SDL_CreateThread(this->tickThreadFn, "tick", this);

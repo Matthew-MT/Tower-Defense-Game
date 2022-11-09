@@ -8,6 +8,7 @@
 #include "utils.hpp"
 #include <cstring>
 #include "sound.hpp"
+#include "animation.hpp"
 
 namespace game{
     Turret::Turret(
@@ -21,21 +22,27 @@ namespace game{
         IPoint initIndex,
         TurretHandler* initTurretHandler,
         double initAngle,
-        Sound* initSpawnSound
-    ) : Sprite {
+        Sound* initSpawnSound,
+        std::string initTurretTexture,
+        int initFrames,
+        int initMillisPerFrame
+    ) : Animation {
         initRenderer, 
         initTexture, 
         initDestRect,
         initSourceRect,
-        initAngle
+        initAngle,
+        initTurretTexture,
+        frames,
+        millisPerFrame
     },
     damage{initDamage},
     reloadTime{initReload},
     range{initRange},
     index{initIndex},
     turretHandler{initTurretHandler},
-    spawnSound{initSpawnSound}
-    {}
+    spawnSound{initSpawnSound},
+    defTexture{texture}{}
 
     IPoint Turret::getIndex()
     {
@@ -54,13 +61,13 @@ namespace game{
             {
                 this->targetedEnemy = enemy;
                 this->targetedEnemy->track(this);
-                //rotateTurret(enemyPosition, turretPosition);
                 break;
             }
         }
     }
 
     void Turret::checkTarget(double scalar) {
+
         if(remainingReload>0)
         {
             this->remainingReload-=scalar;
@@ -79,15 +86,23 @@ namespace game{
                 {
                     this->targetedEnemy->damage(this->damage);
                     this->remainingReload = reloadTime;
+                    this->texture = getTexture();
+
                 }
+                else
+                    this->texture = defTexture;
             }
             else
             {
                 stopTracking();
+                this->texture = defTexture;
             }
         }
-        else   
+        else
+        {
+            this->texture = defTexture;
             this->findTarget();
+        }
     }
 
     void Turret::stopTracking()
@@ -136,6 +151,7 @@ namespace game{
     }
 
 
+
     TurretHandler::TurretHandler(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
@@ -169,7 +185,6 @@ namespace game{
         reloadTime = std::stof(buffer);
         std::getline(turretFile, buffer);
         range = std::stoi(buffer);
-
         std::getline(turretFile, buffer);
         SDL_Surface* surface = SDL_LoadBMP(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
@@ -195,7 +210,10 @@ namespace game{
             index,
             this,
             0.0,
-            data->turretSpawnSound
+            data->turretSpawnSound,
+            "assets/images/turrets/Turret",
+            4,
+            100
         );
         this->turrets.insert(turret);
     }
