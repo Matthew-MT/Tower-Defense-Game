@@ -38,10 +38,10 @@ namespace game{
             TurretHandler* initTurretHandler,
             double initAngle,
             Sound* initSpawnSound,
+            Sound* initShootSound,
             std::string initTurretTexture,
             int initFrames,
-            int initMillisPerFrame,
-            Sound* initShootSound
+            int initMillisPerFrame
         );
 
         IPoint getIndex();
