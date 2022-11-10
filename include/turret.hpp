@@ -285,7 +285,7 @@ namespace game{
                 delete *i;
                 this->turrets.erase(i);
                 this->map->sellTurret(index);
-            }
+            } else this->map->getGameState()->earn(buyPrice);
         }
     }
 

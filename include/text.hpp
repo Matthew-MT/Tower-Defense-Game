@@ -76,7 +76,7 @@ namespace game {
 
         void setText(const std::string& text) {
             this->text = text;
-            SDL_Surface* surface = TTF_RenderText_Solid(this->font, this->text.c_str(), {0x1C, 0x1C, 0x1C, 0});
+            SDL_Surface* surface = TTF_RenderText_Solid(this->font, this->text.c_str(), {0xDD, 0xDD, 0xDD, 0});
             this->texture = SDL_CreateTextureFromSurface(this->renderer, surface);
             SDL_FreeSurface(surface);
             SDL_QueryTexture(this->texture, nullptr, nullptr, &(this->size.x), &(this->size.y));
