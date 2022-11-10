@@ -1,0 +1,4 @@
+default_enemy.bmp
+200
+30
+10
