@@ -261,6 +261,10 @@ namespace game{
         Sound* sellSound = new Sound("assets/sounds/coinbag-91016.mp3");
         if(this->started && event->type == SDL_MOUSEBUTTONUP)
         {
+            int
+                selectedType = this->map->getTurretMenu()->getSelectedType(),
+                buyPrice = this->turretTypes.at(selectedType)->buyPrice;
+            if (!this->map->getGameState()->buy(buyPrice)) return;
             int x, y;
             SDL_GetMouseState(&x, &y);
             IPoint index = this->map->getTileIndex({x,y});
@@ -269,18 +273,18 @@ namespace game{
 
             if(placed)
             {
-                createTurret(this->map->getTurretMenu()->getSelectedType(), index);
+                createTurret(selectedType, index);
             }
             else if(this->map->getTileType(index)==TileType::TurretType)
             {
-                this->map->sellTurret(index);
                 sellSound->playSound();
+                this->map->getGameState()->earn(buyPrice);
                 std::unordered_set<Turret*>::iterator i = std::find_if(this->turrets.begin(),this->turrets.end(),[&](Turret* turret)->bool{
                     return turret->getIndex()==index;
                 });
                 delete *i;
-
                 this->turrets.erase(i);
+                this->map->sellTurret(index);
             }
         }
     }
