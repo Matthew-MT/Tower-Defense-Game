@@ -35,9 +35,9 @@ namespace game {
         GameState* gameState = nullptr;
         MapMenu* mapMenu = nullptr;
         TurretMenu* turretMenu = nullptr;
-        TileGraph* graph;
-        EnemyHandler* enemyHandler;
-        TurretHandler* turretHandler;
+        TileGraph* graph = nullptr;
+        EnemyHandler* enemyHandler = nullptr;
+        TurretHandler* turretHandler = nullptr;
         std::vector<std::string> mapNames;
         std::unordered_map<
             std::string,

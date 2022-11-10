@@ -201,6 +201,20 @@ namespace game {
         if (this->maps.find(this->map) != this->maps.end()) {
             this->maps[this->map].first->reset();
             this->mapRef = &(this->maps[this->map].second);
+            for (Path* path : this->paths) delete path;
+            this->paths.clear();
+            this->spawns.clear();
+            this->bases.clear();
+
+            for (int i = 0; i < this->mapRef->size(); i++) for (int j = 0; j < this->mapRef->back().size(); j++) {
+                int type = this->mapRef->at(i).at(j);
+                if (type == TileType::Spawn) this->spawns.push_back({i, j});
+                else if (type == TileType::Base) this->bases.push_back({i, j});
+            }
+
+            std::vector<std::vector<IPoint>> paths;
+            for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
+            for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
             return this->maps[this->map].first;
         }
 
@@ -244,6 +258,9 @@ namespace game {
             SDL_Log("`loadMap`: map must be rectangular.");
             throw 1;
         }
+
+        this->spawns.clear();
+        this->bases.clear();
 
         for (int i = 0; i < newMap.size(); i++) {
             for (int j = 0; j < newMap[i].size(); j++) {
@@ -326,6 +343,8 @@ namespace game {
         this->updateMapPosition();
         this->updateMapMenu();
 
+        for (Path* path : this->paths) delete path;
+        this->paths.clear();
         std::vector<std::vector<IPoint>> paths;
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
@@ -348,6 +367,7 @@ namespace game {
             cash,
             health
         );
+        if (this->enemyHandler != nullptr) delete this->enemyHandler;
         this->enemyHandler = new EnemyHandler(
             this->renderer,
             this->getDestRect(),
