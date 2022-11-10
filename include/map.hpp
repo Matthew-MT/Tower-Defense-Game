@@ -200,6 +200,7 @@ namespace game {
         this->map = mapFileName;
         if (this->maps.find(this->map) != this->maps.end()) {
             this->maps[this->map].first->reset();
+            this->gameState = this->maps[this->map].first;
             this->mapRef = &(this->maps[this->map].second);
             for (Path* path : this->paths) delete path;
             this->paths.clear();
@@ -349,10 +350,6 @@ namespace game {
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
 
-        if (this->gameState != nullptr) {
-            delete this->gameState;
-            this->gameState = nullptr;
-        }
         this->gameState = this->maps[this->map].first = new GameState(
             this->renderer,
             this->font,
