@@ -11,6 +11,7 @@
 #include <vector>
 #include "sound.hpp"
 #include "music.hpp"
+#include "animation.hpp"
 
 namespace game {
     class Game {
@@ -66,6 +67,7 @@ namespace game {
 
             this->music = new Music("assets/sounds/Industrial Revolution.mp3");
             this->music->playMusic();
+
 
             delete mapRect;
         }
