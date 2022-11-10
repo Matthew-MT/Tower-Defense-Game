@@ -144,8 +144,16 @@ namespace game {
     Map::~Map() {
         for (SDL_Texture* texture : this->textures) SDL_DestroyTexture(texture);
         for (Path* path : this->paths) delete path;
-        for (const std::pair<std::string, std::pair<GameState*, std::vector<std::vector<int>>>>& mapData : this->maps) delete mapData.second.first;
-        delete this->graph;
+        for (const std::pair<
+            std::string,
+            std::pair<
+                std::pair<GameState*, TileGraph*>,
+                std::vector<std::vector<int>>
+            >
+        >& mapData : this->maps) {
+            delete mapData.second.first.first;
+            delete mapData.second.first.second;
+        }
         delete this->enemyHandler;
         delete this->mapMenu;
     }
@@ -199,8 +207,9 @@ namespace game {
         this->dead = false;
         this->map = mapFileName;
         if (this->maps.find(this->map) != this->maps.end()) {
-            this->maps[this->map].first->reset();
-            this->gameState = this->maps[this->map].first;
+            this->maps[this->map].first.first->reset();
+            this->gameState = this->maps[this->map].first.first;
+            this->graph = this->maps[this->map].first.second;
             this->mapRef = &(this->maps[this->map].second);
             for (Path* path : this->paths) delete path;
             this->paths.clear();
@@ -216,7 +225,7 @@ namespace game {
             std::vector<std::vector<IPoint>> paths;
             for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
             for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
-            return this->maps[this->map].first;
+            return this->maps[this->map].first.first;
         }
 
         std::fstream
@@ -230,13 +239,14 @@ namespace game {
         this->maps.insert({
             mapFileName,
             {
-                nullptr,
+                {nullptr, new TileGraph()},
                 {}
             }
         });
 
         this->mapRef = &this->maps[this->map].second;
         std::vector<std::vector<int>>& newMap = *this->mapRef;
+        this->graph = this->maps[this->map].first.second;
 
         while (!mapFile.eof()) {
             std::getline(mapFile, buffer);
@@ -350,7 +360,7 @@ namespace game {
         for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
         for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
 
-        this->gameState = this->maps[this->map].first = new GameState(
+        this->gameState = this->maps[this->map].first.first = new GameState(
             this->renderer,
             this->font,
             createRect(
