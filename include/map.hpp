@@ -222,6 +222,14 @@ namespace game {
                 else if (type == TileType::Base) this->bases.push_back({i, j});
             }
 
+            if (this->enemyHandler != nullptr) delete this->enemyHandler;
+            this->enemyHandler = new EnemyHandler(
+                this->renderer,
+                this->getDestRect(),
+                this,
+                this->gameState
+            );
+
             std::vector<std::vector<IPoint>> paths;
             for (IPoint& spawn : this->spawns) this->efficientPathfindToMultipleTargets(spawn, paths);
             for (std::vector<IPoint>& path : paths) this->paths.push_back(new Path(this, path));
