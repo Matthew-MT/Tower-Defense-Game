@@ -36,11 +36,9 @@ namespace game
         frames{initFrames}
 
         {
-            SDL_Log("Inside constructor");
             std::string baseFile = file;
-            for(int i=2; i<=4;i++)
+            for(int i=2; i<=7;i++)
             {
-                SDL_Log("Inside loop");
                 file = baseFile + std::to_string(i) + ".bmp";
                 SDL_Log(file.c_str());
                 SDL_Surface* surface = SDL_LoadBMP(file.c_str());
@@ -48,21 +46,19 @@ namespace game
                 SDL_FreeSurface(surface);
                 images.push_back(AnimationFrame(storedTexture, millisPerFrame));
                 totalTime+=millisPerFrame;
-                SDL_Log("Loaded Textures");
             }
-            currentTime = rand()%300;
+            currentTime = rand()%600;
             
         }
         
         void Animation::tick(double scalar)
         {
             int millis = SDL_GetTicks();
-            unsigned current = currentTime/100;
+            unsigned current = currentTime/50;
             if(current>=images.size()) current = 0;
             this->storedTexture = images[current].texture;
             this->render();
             currentTime =(currentTime+millis)%totalTime;
-            SDL_Log("Tick successful");
         }
 
         SDL_Texture* Animation::getTexture()

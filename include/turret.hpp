@@ -249,7 +249,7 @@ namespace game{
             0.0,
             data->turretSpawnSound,
             data->turretShootSound,
-            "assets/images/turrets/Turret",
+            "assets/images/gattling/gattling",
             4,
             100
         );
