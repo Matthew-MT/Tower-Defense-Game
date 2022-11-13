@@ -53,6 +53,7 @@ namespace game {
         virtual void track(Turret* turret);
 
         virtual DPoint getCenter();
+        virtual int getReward();
     };
 
     class EnemyHandler : public Renderable {

@@ -78,7 +78,6 @@ namespace game {
     void Enemy::damage(int amount) {
         this->health -= amount;
         if (this->health <= 0) {
-            this->gameState->earn(this->reward);
             this->handler->despawn(this);
         }
     }
@@ -92,6 +91,10 @@ namespace game {
             this->position.x + ((double)this->destRect->w / 2.f),
             this->position.y + ((double)this->destRect->h / 2.f)
         };
+    }
+
+    int Enemy::getReward() {
+        return this->reward;
     }
 
     EnemyHandler::EnemyHandler(
@@ -158,6 +161,7 @@ namespace game {
         if (!this->started) return;
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
         for (Enemy* enemy : this->dying) {
+            this->gameState->earn(enemy->getReward());
             this->enemies.erase(enemy);
             delete enemy;
         }
