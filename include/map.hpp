@@ -97,7 +97,7 @@ namespace game {
 
         while (!textureAssociation.eof()) {
             std::getline(textureAssociation, buffer);
-            SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
+            SDL_Surface* surface = IMG_Load(((std::string)"assets/images/tiles/" + buffer).c_str());
             this->textures.push_back(
                 SDL_CreateTextureFromSurface(
                     this->renderer,

@@ -3,9 +3,9 @@
 namespace game {
     enum TileType {
         Empty = 0,
-        Wall = 1,
+        Base = 1,
         Spawn = 2,
-        Base = 3,
+        Wall = 3,
         TurretType = 4
     };
 

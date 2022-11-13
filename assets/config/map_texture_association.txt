@@ -1,4 +1,10 @@
-placeable.png
-wall.png
-homebase.bmp
-spawn.bmp
+empty.png
+base.png
+spawn.png
+wall_center.png
+wall_corner_ne.png
+wall_corner_nw.png
+wall_corner_se.png
+wall_corner_sw.png
+wall_side_ew_simple.png
+wall_side_ns_simple.png
