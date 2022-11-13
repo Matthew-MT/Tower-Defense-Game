@@ -89,10 +89,10 @@ namespace game{
                 if(remainingReload<=0)
                 {
                     this->targetedEnemy->damage(this->damage);
+                    this->texture = getTexture();
                     this->shootSound->playSound();
                     this->remainingReload = reloadTime;
-                    this->texture = getTexture();
-
+                    
                 }
                 else
                     this->texture = defTexture;
@@ -120,6 +120,7 @@ namespace game{
     void Turret::tick(double scalar)
     {
         checkTarget(scalar);
+        Animation::tick(scalar);
     }
 
     void Turret::rotateTurret(DPoint enemy, DPoint turret)
@@ -249,7 +250,7 @@ namespace game{
             0.0,
             data->turretSpawnSound,
             data->turretShootSound,
-            "assets/images/gattling/gattling",
+            "assets/images/gatling/gatling",
             4,
             100
         );

@@ -6,20 +6,10 @@
 
 namespace game
 {
-    class AnimationFrame
-    {
-        public:
-        SDL_Texture *texture;
-        int time;
-        AnimationFrame(
-            SDL_Texture *initTexture, 
-            int initTime);
-    };
-
     class Animation:public Sprite
     {
         protected:
-        std::vector<AnimationFrame> images;
+        std::vector<SDL_Texture*> images;
         long currentTime;
         int totalTime;
         SDL_Texture* storedTexture;

@@ -7,14 +7,6 @@
 
 namespace game
 {
-    AnimationFrame::AnimationFrame(
-        SDL_Texture *initTexture, 
-        int initTime):
-        texture{initTexture},
-        time{initTime}{}
-
-
-
     Animation::Animation(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
@@ -40,30 +32,26 @@ namespace game
             for(int i=2; i<=7;i++)
             {
                 file = baseFile + std::to_string(i) + ".bmp";
-                SDL_Log(file.c_str());
                 SDL_Surface* surface = SDL_LoadBMP(file.c_str());
-                storedTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
+                SDL_Texture* loadTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
                 SDL_FreeSurface(surface);
-                images.push_back(AnimationFrame(storedTexture, millisPerFrame));
+                images.push_back(loadTexture);
                 totalTime+=millisPerFrame;
             }
-            currentTime = rand()%600;
             
         }
         
         void Animation::tick(double scalar)
         {
-            int millis = SDL_GetTicks();
-            unsigned current = currentTime/50;
-            if(current>=images.size()) current = 0;
-            this->storedTexture = images[current].texture;
-            this->render();
-            currentTime =(currentTime+millis)%totalTime;
+            unsigned current = rand()%7;
+            if(current>=images.size() || current > 5) current = 0;
+            storedTexture = images[current];
+            
         }
 
         SDL_Texture* Animation::getTexture()
         {
-            return this->storedTexture;
+            return storedTexture;
         }
 
 }
