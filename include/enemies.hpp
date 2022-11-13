@@ -77,8 +77,10 @@ namespace game {
 
     void Enemy::damage(int amount) {
         this->health -= amount;
-        this->gameState->earn(this->reward);
-        if (this->health <= 0) this->handler->despawn(this);
+        if (this->health <= 0) {
+            this->gameState->earn(this->reward);
+            this->handler->despawn(this);
+        }
     }
 
     void Enemy::track(Turret* turret) {
