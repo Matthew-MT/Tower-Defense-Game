@@ -6,7 +6,6 @@
 #include "turret.hpp"
 #include "text.hpp"
 #include "map.hpp"
-#include "gui.hpp"
 #include <string>
 #include <vector>
 #include "sound.hpp"
