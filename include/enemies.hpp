@@ -118,7 +118,7 @@ namespace game {
 
             while (!enemyData.eof()) {
                 std::getline(enemyData, buffer);
-                SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
+                SDL_Surface* surface = IMG_Load(((std::string)"assets/images/enemies/" + buffer).c_str());
                 std::getline(enemyData, buffer);
                 int movementSpeed = std::stoi(buffer);
                 std::getline(enemyData, buffer);

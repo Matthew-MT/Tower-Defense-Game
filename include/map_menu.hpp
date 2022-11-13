@@ -99,34 +99,34 @@ namespace game {
         },
         map{initMap},
         mapList{initMapList} {
-        SDL_Surface* surface = IMG_Load("assets/images/arrow_right.png");
+        SDL_Surface* surface = IMG_Load("assets/images/map_menu/arrow_right.png");
         this->arrow = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/arrow_right_hovered.png");
+        surface = IMG_Load("assets/images/map_menu/arrow_right_hovered.png");
         this->arrowHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_easy.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_easy.png");
         this->difficultyEasy = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_easy_hovered.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_easy_hovered.png");
         this->difficultyEasyHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_normal.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_normal.png");
         this->difficultyNormal = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_normal_hovered.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_normal_hovered.png");
         this->difficultyNormalHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_hard.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_hard.png");
         this->difficultyHard = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_hard_hovered.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_hard_hovered.png");
         this->difficultyHardHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_fun.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_fun.png");
         this->difficultyFun = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
-        surface = IMG_Load("assets/images/difficulty_fun_hovered.png");
+        surface = IMG_Load("assets/images/map_menu/difficulty_fun_hovered.png");
         this->difficultyFunHovered = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
         this->map->loadMap(this->mapList.front());
