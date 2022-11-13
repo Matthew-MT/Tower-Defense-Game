@@ -1,3 +1,3 @@
-testMap.txt
+map1.txt
 map2.txt
 map3.txt

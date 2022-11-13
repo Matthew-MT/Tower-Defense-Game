@@ -1,7 +1,7 @@
 20
 10
 20
-1.5
+5
 200
 turret.bmp
 mixkit-retro-game-notification-212.wav
