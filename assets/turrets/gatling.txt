@@ -6,5 +6,5 @@
 gatling1.bmp
 mixkit-retro-game-notification-212.wav
 076415_light-machine-gun-m249-39827.wav
-turret_menu.png
-turret_menu_selected.png
+gatling1.bmp
+gatling1_select.png
