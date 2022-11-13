@@ -10,17 +10,19 @@ int main(int argc, char *argv[]) {
 
     SDL_DisplayMode display;
     SDL_GetDesktopDisplayMode(0, &display);
+    SDL_Rect* windowRect = createRect(
+        IPoint{
+            (int)std::floor((double)display.w / 2.f) - 320,
+            (int)std::floor((double)display.h / 2.f) - 320
+        },
+        IPoint{
+            80, 80
+        }
+    );
+
     Game* game = new Game(
-        "Game",
-        createRect(
-            IPoint{
-                (int)std::floor((double)display.w / 2.f) - 40,
-                (int)std::floor((double)display.h / 2.f) - 40
-            },
-            IPoint{
-                80, 80
-            }
-        )
+        "Tower Defense Game",
+        windowRect
     );
 
     SDL_bool loopShouldStop = SDL_FALSE;
