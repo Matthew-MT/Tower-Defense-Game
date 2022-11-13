@@ -1,4 +1,4 @@
-default_enemy.bmp
+big_enemy.png
 75
 175
 30

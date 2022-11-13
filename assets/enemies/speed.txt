@@ -1,4 +1,4 @@
-default_enemy.bmp
+fast_enemy.png
 200
 30
 10
