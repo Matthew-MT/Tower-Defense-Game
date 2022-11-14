@@ -175,7 +175,7 @@ namespace game {
         this->dying.clear();
         this->elapsed += scalar;
 
-        if (this->elapsed >= this->completedWavesTime + this->waves.at(this->completedWaves).time) {
+        if (this->elapsed >= this->completedWavesTime + this->waves.at(this->completedWaves)->time) {
             this->completedWaves++;
             this->spawnedEnemiesTracker = 0;
             if (this->completedWaves >= this->waves.size()) {
@@ -183,7 +183,7 @@ namespace game {
                 this->completedWaves = 0;
                 this->completedWavesTime = 0;
                 this->spawnedEnemiesTracker = 0;
-            } else this->completedWavesTime += this->waves.at(this->completedWaves - 1).time;
+            } else this->completedWavesTime += this->waves.at(this->completedWaves - 1)->time;
         }
 
         if (this->completedWaves >= this->waves.size()) {
@@ -193,17 +193,18 @@ namespace game {
             this->completedWavesTime = 0;
         }
 
-        if (this->spawnedEnemiesTracker < this->waves.at(this->completedWaves).waveList.size()) {
+        WaveData* wave = this->waves.at(this->completedWaves);
+        if (this->spawnedEnemiesTracker < wave->waveList.size()) {
             double inWaveTime = this->elapsed - (double)this->completedWavesTime;
-            int spawnedEnemies = (int)std::round(inWaveTime * 2.f) - this->spawnedEnemiesTracker;
+            int spawnedEnemies = (int)std::round(inWaveTime * wave->spawnedPerSec) - this->spawnedEnemiesTracker;
             std::vector<IPoint> spawns = this->map->getAllSpawns();
             for (
                 int i = this->spawnedEnemiesTracker, e = this->spawnedEnemiesTracker + spawnedEnemies;
                 i < e; i++
             ) {
-                if (this->spawnedEnemiesTracker >= this->waves.at(this->completedWaves).waveList.size()) break;
+                if (this->spawnedEnemiesTracker >= wave->waveList.size()) break;
                 this->spawnedEnemiesTracker++;
-                this->spawn(this->waves.at(this->completedWaves).waveList.at(i), spawns.at(std::rand() % spawns.size()));
+                this->spawn(wave->waveList.at(i), spawns.at(std::rand() % spawns.size()));
             }
         }
     }
@@ -244,11 +245,11 @@ namespace game {
                     throw 1;
                 }
             }
-            this->waves.push_back({
+            this->waves.push_back(new WaveData(
                 time,
                 spawnedPerSec,
                 wave
-            });
+            ));
         }
         this->started = true;
     }

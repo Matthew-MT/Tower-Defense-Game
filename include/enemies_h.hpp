@@ -75,8 +75,8 @@ namespace game {
             enemies,
             dying;
         std::vector<EnemyData*> types;
+        std::vector<WaveData*> waves;
         std::vector<double> difficulties;
-        std::vector<WaveData> waves;
         int
             difficulty = 0,
             completedWaves = 0,
