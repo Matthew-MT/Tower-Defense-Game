@@ -1,4 +1,4 @@
 default_enemy.png
 100
-50
-10
+30
+5
