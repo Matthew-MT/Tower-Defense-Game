@@ -100,7 +100,7 @@ namespace game{
             else
             {
                 stopTracking();
-                this->texture = defTexture;
+                //this->texture = defTexture;
             }
         }
         else
