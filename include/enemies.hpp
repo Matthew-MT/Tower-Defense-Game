@@ -76,9 +76,12 @@ namespace game {
     }
 
     void Enemy::damage(int amount) {
-        this->health -= amount;
-        if (this->health <= 0) {
-            this->handler->despawn(this);
+        if (this->health > 0) {
+            this->health -= amount;
+            if (this->health <= 0) {
+                this->gameState->earn(this->reward);
+                this->handler->despawn(this);
+            }
         }
     }
 
@@ -93,9 +96,14 @@ namespace game {
         };
     }
 
-    int Enemy::getReward() {
-        return this->reward;
-    }
+    WaveData::WaveData(
+        int initTime,
+        int initSpawnedPerSec,
+        const std::vector<int>& initWaveList
+    ) :
+        time{initTime},
+        spawnedPerSec{initSpawnedPerSec},
+        waveList{initWaveList} {}
 
     EnemyHandler::EnemyHandler(
         SDL_Renderer* initRenderer,
@@ -161,14 +169,13 @@ namespace game {
         if (!this->started) return;
         for (Enemy* enemy : this->enemies) enemy->tick(scalar);
         for (Enemy* enemy : this->dying) {
-            this->gameState->earn(enemy->getReward());
             this->enemies.erase(enemy);
             delete enemy;
         }
         this->dying.clear();
         this->elapsed += scalar;
 
-        if (this->elapsed >= this->completedWavesTime + this->waves.at(this->completedWaves).first) {
+        if (this->elapsed >= this->completedWavesTime + this->waves.at(this->completedWaves).time) {
             this->completedWaves++;
             this->spawnedEnemiesTracker = 0;
             if (this->completedWaves >= this->waves.size()) {
@@ -176,7 +183,7 @@ namespace game {
                 this->completedWaves = 0;
                 this->completedWavesTime = 0;
                 this->spawnedEnemiesTracker = 0;
-            } else this->completedWavesTime += this->waves.at(this->completedWaves - 1).first;
+            } else this->completedWavesTime += this->waves.at(this->completedWaves - 1).time;
         }
 
         if (this->completedWaves >= this->waves.size()) {
@@ -186,7 +193,7 @@ namespace game {
             this->completedWavesTime = 0;
         }
 
-        if (this->spawnedEnemiesTracker < this->waves.at(this->completedWaves).second.size()) {
+        if (this->spawnedEnemiesTracker < this->waves.at(this->completedWaves).waveList.size()) {
             double inWaveTime = this->elapsed - (double)this->completedWavesTime;
             int spawnedEnemies = (int)std::round(inWaveTime * 2.f) - this->spawnedEnemiesTracker;
             std::vector<IPoint> spawns = this->map->getAllSpawns();
@@ -194,9 +201,9 @@ namespace game {
                 int i = this->spawnedEnemiesTracker, e = this->spawnedEnemiesTracker + spawnedEnemies;
                 i < e; i++
             ) {
-                if (this->spawnedEnemiesTracker >= this->waves.at(this->completedWaves).second.size()) break;
+                if (this->spawnedEnemiesTracker >= this->waves.at(this->completedWaves).waveList.size()) break;
                 this->spawnedEnemiesTracker++;
-                this->spawn(this->waves.at(this->completedWaves).second.at(i), spawns.at(std::rand() % spawns.size()));
+                this->spawn(this->waves.at(this->completedWaves).waveList.at(i), spawns.at(std::rand() % spawns.size()));
             }
         }
     }
@@ -225,6 +232,8 @@ namespace game {
             std::getline(wavesData, buffer);
             int time = std::stoi(buffer);
             std::getline(wavesData, buffer);
+            int spawnedPerSec = std::stoi(buffer);
+            std::getline(wavesData, buffer);
             std::vector<int> wave;
             if (buffer.size()) wave.push_back(0);
             for (char c : buffer) {
@@ -235,7 +244,11 @@ namespace game {
                     throw 1;
                 }
             }
-            this->waves.push_back({time, wave});
+            this->waves.push_back({
+                time,
+                spawnedPerSec,
+                wave
+            });
         }
         this->started = true;
     }

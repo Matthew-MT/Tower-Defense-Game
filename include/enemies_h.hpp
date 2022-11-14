@@ -53,7 +53,16 @@ namespace game {
         virtual void track(Turret* turret);
 
         virtual DPoint getCenter();
-        virtual int getReward();
+    };
+
+    class WaveData {
+    public:
+        WaveData(int initTime, int initSpawnedPerSec, const std::vector<int>& initWaveList);
+
+        std::vector<int> waveList;
+        int
+            time,
+            spawnedPerSec;
     };
 
     class EnemyHandler : public Renderable {
@@ -67,7 +76,7 @@ namespace game {
             dying;
         std::vector<EnemyData*> types;
         std::vector<double> difficulties;
-        std::vector<std::pair<int, std::vector<int>>> waves;
+        std::vector<WaveData> waves;
         int
             difficulty = 0,
             completedWaves = 0,
