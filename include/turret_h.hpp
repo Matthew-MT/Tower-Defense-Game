@@ -106,6 +106,8 @@ namespace game{
             * menuTextureSelected;
         Sound* turretSpawnSound;
         Sound* turretShootSound;
+        std::string animationFile;
+        int animationFrames;
         public:
         TurretData(
             int initBuyPrice,
@@ -117,7 +119,9 @@ namespace game{
             SDL_Texture* initMenuTexture,
             SDL_Texture* initMenuTextureSelected,
             Sound* initTurretSpawnSound,
-            Sound* initTurretShootSound
+            Sound* initTurretShootSound,
+            std::string animationFile,
+            int initAnimationFrames
         );
     };
 };

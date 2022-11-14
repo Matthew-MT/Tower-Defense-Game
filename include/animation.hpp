@@ -3,6 +3,9 @@
 #include "sprite.hpp"
 #include <vector>
 #include <string.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "animation_h.hpp"
 
 namespace game
@@ -28,10 +31,14 @@ namespace game
         frames{initFrames}
 
         {
+
+
             std::string baseFile = file;
-            for(int i=2; i<=7;i++)
+            frames++;
+            for(int i=2; i<=frames;i++)
             {
                 file = baseFile + std::to_string(i) + ".bmp";
+                SDL_Log(file.c_str());
                 SDL_Surface* surface = SDL_LoadBMP(file.c_str());
                 SDL_Texture* loadTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
                 SDL_FreeSurface(surface);
@@ -43,10 +50,9 @@ namespace game
         
         void Animation::tick(double scalar)
         {
-            unsigned current = rand()%7;
-            if(current>=images.size() || current > 5) current = 0;
+            unsigned current = rand()%(frames+1);
+            if(current>=images.size() || current > frames) current = 0;
             storedTexture = images[current];
-            
         }
 
         SDL_Texture* Animation::getTexture()

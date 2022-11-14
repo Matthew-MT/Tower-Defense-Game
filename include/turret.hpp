@@ -36,8 +36,8 @@ namespace game{
         initSourceRect,
         initAngle,
         initTurretTexture,
-        frames,
-        millisPerFrame
+        initFrames,
+        initMillisPerFrame
     },
     damage{initDamage},
     reloadTime{initReload},
@@ -218,6 +218,10 @@ namespace game{
         surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
         menuTextureSelected = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
+        std::getline(turretFile, buffer);
+        std::string aFile = buffer;
+        std::getline(turretFile, buffer);
+        int aFrames = stoi(buffer);
         turretTypes.push_back(new TurretData(
             buyPrice,
             sellPrice,
@@ -228,7 +232,9 @@ namespace game{
             menuTexture,
             menuTextureSelected,
             turretSpawnSound,
-            turretShootSound
+            turretShootSound,
+            aFile,
+            aFrames
         ));
     }
 
@@ -250,8 +256,8 @@ namespace game{
             0.0,
             data->turretSpawnSound,
             data->turretShootSound,
-            "assets/images/gatling/gatling",
-            4,
+            data->animationFile,
+            data->animationFrames,
             100
         );
         this->turrets.insert(turret);
@@ -324,7 +330,9 @@ namespace game{
         SDL_Texture* initMenuTexture,
         SDL_Texture* initMenuTextureSelected,
         Sound* initTurretSpawnSound,
-        Sound* initTurretShootSound
+        Sound* initTurretShootSound,
+        std::string initAnimationFile,
+        int initAnimationFrames
     ) :
         buyPrice{initBuyPrice},
         sellPrice{initSellPrice},
@@ -335,5 +343,7 @@ namespace game{
         menuTexture{initMenuTexture},
         menuTextureSelected{initMenuTextureSelected},
         turretSpawnSound{initTurretSpawnSound},
-        turretShootSound{initTurretShootSound} {}
+        turretShootSound{initTurretShootSound},
+        animationFile{initAnimationFile},
+        animationFrames{initAnimationFrames}{}
 };

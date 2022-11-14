@@ -3,8 +3,10 @@
 20
 1.5
 200
-turret.bmp
+sniper1.bmp
 mixkit-retro-game-notification-212.wav
 50_sniper_shot-Liam-2028603980.wav
 turret_menu.png
 turret_menu_selected.png
+assets/images/sniper/sniper
+4
