@@ -24,6 +24,7 @@ namespace game{
         Sound* spawnSound;
         SDL_Texture* defTexture;
         Sound* shootSound;
+        int turretKind;
         public:
        
         Turret(
@@ -41,13 +42,15 @@ namespace game{
             Sound* initShootSound,
             std::string initTurretTexture,
             int initFrames,
-            int initMillisPerFrame
+            int initMillisPerFrame,
+            int initTurretKind
         );
 
         IPoint getIndex();
 
         
         void checkTargetGun(double scalar);
+        void checkTargetTower(double scalar);
         void findTarget();
         void stopTracking();
 
@@ -108,6 +111,7 @@ namespace game{
         Sound* turretShootSound;
         std::string animationFile;
         int animationFrames;
+        int turretKind;
         public:
         TurretData(
             int initBuyPrice,
@@ -121,7 +125,8 @@ namespace game{
             Sound* initTurretSpawnSound,
             Sound* initTurretShootSound,
             std::string animationFile,
-            int initAnimationFrames
+            int initAnimationFrames,
+            int initTurretKind
         );
     };
 };

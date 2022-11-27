@@ -28,7 +28,8 @@ namespace game{
         Sound* initShootSound,
         std::string initTurretTexture,
         int initFrames,
-        int initMillisPerFrame
+        int initMillisPerFrame,
+        int initTurretKind
     ) : Animation {
         initRenderer, 
         initTexture, 
@@ -46,7 +47,8 @@ namespace game{
     turretHandler{initTurretHandler},
     spawnSound{initSpawnSound},
     shootSound{initShootSound},
-    defTexture{texture}{}
+    defTexture{texture},
+    turretKind{initTurretKind}{}
 
     IPoint Turret::getIndex()
     {
@@ -110,6 +112,10 @@ namespace game{
         }
     }
 
+    void Turret::checkTargetTower(double scalar){
+
+    }
+
     void Turret::stopTracking()
     {
         targetedEnemy = nullptr;
@@ -119,8 +125,16 @@ namespace game{
 
     void Turret::tick(double scalar)
     {
-        checkTargetGun(scalar);
-        Animation::tick(scalar);
+        switch (turretKind){
+            case 0:
+                checkTargetGun(scalar);
+                Animation::tick(scalar);
+                break;
+            case 1:
+                checkTargetTower(scalar);
+                Animation::tick(scalar);
+                break;
+        }
     }
 
     void Turret::rotateTurret(DPoint enemy, DPoint turret)
@@ -166,6 +180,7 @@ namespace game{
         {
             readTurretData("gatling.txt");
             readTurretData("sniper.txt");
+            readTurretData("tesla.txt");
         }
 
     void TurretHandler::render()
@@ -222,6 +237,8 @@ namespace game{
         std::string aFile = buffer;
         std::getline(turretFile, buffer);
         int aFrames = stoi(buffer);
+        std::getline(turretFile, buffer);
+        int turretKind = std::stoi(buffer);
         turretTypes.push_back(new TurretData(
             buyPrice,
             sellPrice,
@@ -234,7 +251,8 @@ namespace game{
             turretSpawnSound,
             turretShootSound,
             aFile,
-            aFrames
+            aFrames,
+            turretKind
         ));
     }
 
@@ -258,7 +276,8 @@ namespace game{
             data->turretShootSound,
             data->animationFile,
             data->animationFrames,
-            100
+            100,
+            data->turretKind
         );
         this->turrets.insert(turret);
     }
@@ -332,7 +351,8 @@ namespace game{
         Sound* initTurretSpawnSound,
         Sound* initTurretShootSound,
         std::string initAnimationFile,
-        int initAnimationFrames
+        int initAnimationFrames,
+        int initTurretKind
     ) :
         buyPrice{initBuyPrice},
         sellPrice{initSellPrice},
@@ -345,5 +365,6 @@ namespace game{
         turretSpawnSound{initTurretSpawnSound},
         turretShootSound{initTurretShootSound},
         animationFile{initAnimationFile},
-        animationFrames{initAnimationFrames}{}
+        animationFrames{initAnimationFrames},
+        turretKind{initTurretKind}{}
 };
