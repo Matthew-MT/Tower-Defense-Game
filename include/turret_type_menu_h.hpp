@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace game{
-    class TurretMenu : public Renderable {
+    class TurretTypeMenu : public Renderable {
     protected:
         std::vector<TurretData*> options;
         std::vector<SDL_Rect*> optionRects;
@@ -20,13 +20,13 @@ namespace game{
         virtual IPoint getOptionCenterByIndex(int index);
         virtual void updatePosition();
     public:
-        TurretMenu(
+        TurretTypeMenu(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
             const std::vector<TurretData*>& initOptions,
             const IPoint& initOptionSize
         );
-        ~TurretMenu();
+        ~TurretTypeMenu();
         virtual void render();
         virtual void handleEvent(SDL_Event* event);
 

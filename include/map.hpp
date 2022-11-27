@@ -2,7 +2,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "map_h.hpp"
-#include "turret_menu.hpp"
+#include "turret_type_menu.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
 #include "turret_h.hpp"
@@ -131,7 +131,7 @@ namespace game {
             this
         );
 
-        this->turretMenu = new TurretMenu(
+        this->turretTypeMenu = new TurretTypeMenu(
             this->renderer,
             this->getTurretMenuDestRect(),
             this->turretHandler->getTurretTypes(),
@@ -189,7 +189,7 @@ namespace game {
         this->gameState->render();
         this->mapMenu->render();
         this->turretHandler->render();
-        this->turretMenu->render();
+        this->turretTypeMenu->render();
     }
 
     void Map::tick(double scalar) {
@@ -200,7 +200,7 @@ namespace game {
     void Map::handleEvent(SDL_Event* event) {
         this->turretHandler->handleEvent(event);
         this->mapMenu->handleEvent(event);
-        this->turretMenu->handleEvent(event);
+        this->turretTypeMenu->handleEvent(event);
     }
 
     GameState* Map::loadMap(const std::string& mapFileName) {
@@ -682,7 +682,7 @@ namespace game {
         return this->enemyHandler;
     }
 
-    TurretMenu* Map::getTurretMenu() {
-        return this->turretMenu;
+    TurretTypeMenu* Map::getTurretTypeMenu() {
+        return this->turretTypeMenu;
     }
 };

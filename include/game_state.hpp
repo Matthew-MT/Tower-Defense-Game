@@ -105,6 +105,10 @@ namespace game {
         this->updatePosition();
     }
 
+    bool GameState::canBuy(int amount) {
+        return amount <= this->cash;
+    }
+
     bool GameState::buy(int amount) {
         if (amount > this->cash) return false;
         this->cash -= amount;

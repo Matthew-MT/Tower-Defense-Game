@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "turret_menu_h.hpp"
+#include "turret_type_menu_h.hpp"
 #include "forward.hpp"
 #include "turret.hpp"
 #include "sprite.hpp"
@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace game {
-    IPoint TurretMenu::getOptionCenterByIndex(int index) {
+    IPoint TurretTypeMenu::getOptionCenterByIndex(int index) {
         int
             spacing = this->destRect->h >> 1,
             leftBegin = (this->destRect->w - ((int)((double)spacing * 1.5) * (this->options.size() - 1))) >> 1;
@@ -22,7 +22,7 @@ namespace game {
         };
     }
 
-    void TurretMenu::updatePosition() {
+    void TurretTypeMenu::updatePosition() {
         for (int i = 0; i < this->optionRects.size(); i++) {
             if (this->optionRects.at(i) != nullptr) delete this->optionRects.at(i);
             this->optionRects.at(i) = fromCenter(
@@ -32,7 +32,7 @@ namespace game {
         }
     }
 
-    TurretMenu::TurretMenu(
+    TurretTypeMenu::TurretTypeMenu(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
         const std::vector<TurretData*>& initOptions,
@@ -48,9 +48,9 @@ namespace game {
         this->updatePosition();
     }
 
-    TurretMenu::~TurretMenu() {}
+    TurretTypeMenu::~TurretTypeMenu() {}
 
-    void TurretMenu::render(){
+    void TurretTypeMenu::render(){
         for (int i = 0; i < this->options.size(); i++) {
             SDL_RenderCopy(
                 this->renderer,
@@ -61,7 +61,7 @@ namespace game {
         }
     }
 
-    void TurretMenu::handleEvent(SDL_Event* event) {
+    void TurretTypeMenu::handleEvent(SDL_Event* event) {
         if (event->type == SDL_MOUSEBUTTONUP) {
             for (int i = 0; i < this->optionRects.size(); i++) {
                 if (contains(this->optionRects.at(i), {event->button.x, event->button.y})) {
@@ -72,22 +72,22 @@ namespace game {
         }
     }
 
-    void TurretMenu::setDestRect(SDL_Rect* newDestRect) {
+    void TurretTypeMenu::setDestRect(SDL_Rect* newDestRect) {
         this->Renderable::setDestRect(newDestRect);
         this->updatePosition();
     }
 
-    void TurretMenu::setPosition(const IPoint& position) {
+    void TurretTypeMenu::setPosition(const IPoint& position) {
         this->Renderable::setPosition(position);
         this->updatePosition();
     }
     
-    void TurretMenu::setPosition(const DPoint& position) {
+    void TurretTypeMenu::setPosition(const DPoint& position) {
         this->Renderable::setPosition(position);
         this->updatePosition();
     }
 
-    int TurretMenu::getSelectedType() {
+    int TurretTypeMenu::getSelectedType() {
         return this->selected;
     }
 };

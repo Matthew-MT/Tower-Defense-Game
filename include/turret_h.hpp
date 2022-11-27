@@ -9,44 +9,31 @@
 #include "animation.hpp"
 
 namespace game{
-    class Turret : public Animation
-    {
-        protected:
+    class Turret : public Animation {
+    protected:
         GameState* gamestate;
-        int damage;
-        double reloadTime;
-        int range;
+        TurretData* data;
         IPoint index;
         TurretHandler* turretHandler;
         Enemy* targetedEnemy = nullptr;
-        double remainingReload=0;
+        double remainingReload = 0;
         double angle;
-        Sound* spawnSound;
         SDL_Texture* defTexture;
-        Sound* shootSound;
-        public:
-       
+    public:
         Turret(
             SDL_Renderer* initRenderer,
             SDL_Texture* initTexture,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect,
-            int initDamage,
-            double initReload,
-            int initRange,
             IPoint initIndex,
             TurretHandler* initTurretHandler,
-            double initAngle,
-            Sound* initSpawnSound,
-            Sound* initShootSound,
-            std::string initTurretTexture,
-            int initFrames,
+            TurretData* initData,
             int initMillisPerFrame
         );
 
         IPoint getIndex();
+        int getSellPrice();
 
-        
         void checkTarget(double scalar);
         void findTarget();
         void stopTracking();
@@ -58,8 +45,7 @@ namespace game{
         ~Turret();
     };
 
-    class TurretHandler : public Renderable
-    {
+    class TurretHandler : public Renderable {
         protected:
         Map* map;
         std::unordered_set<Turret*> turrets;
@@ -93,7 +79,7 @@ namespace game{
 
     class TurretData
     {
-        public:
+    public:
         double reload;
         int
             buyPrice,
@@ -104,11 +90,12 @@ namespace game{
             * texture,
             * menuTexture,
             * menuTextureSelected;
-        Sound* turretSpawnSound;
-        Sound* turretShootSound;
+        Sound
+            * turretSpawnSound,
+            * turretShootSound;
         std::string animationFile;
         int animationFrames;
-        public:
+
         TurretData(
             int initBuyPrice,
             int initSellPrice,
