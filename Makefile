@@ -19,3 +19,9 @@ debug: $(SOURCES)
 
 run:
 	./$(MAIN)$(EXT)
+
+
+game:
+	clang++ -std=c++11 -stdlib=libc++ main.cpp -o play $(CFLAGS) $(LIBS) && ./play
+clean:
+	rm play

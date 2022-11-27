@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #include "enemies_h.hpp"
 #include "pathfinder_h.hpp"
 #include "game_state.hpp"
@@ -16,12 +16,15 @@ namespace game {
         SDL_Texture* initTexture,
         int initMovementSpeed,
         int initHealth,
-        int initReward
+        int initReward,
+        int initSheild
+        
     ) :
         texture{initTexture},
         movementSpeed{initMovementSpeed},
         health{initHealth},
-        reward{initReward} {}
+        reward{initReward},
+        sheild{initSheild} {}
 
     Enemy::Enemy(
         SDL_Renderer* initRenderer,
@@ -45,6 +48,7 @@ namespace game {
         handler{initHandler},
         movementSpeed{initData->movementSpeed},
         health{(int)std::round((double)initData->health * initDifficulty)},
+        sheild{(int)std::round((double)initData->sheild * initDifficulty)},
         reward{initData->reward} {}
 
     Enemy::~Enemy() {
@@ -77,10 +81,14 @@ namespace game {
 
     void Enemy::damage(int amount) {
         if (this->health > 0) {
-            this->health -= amount;
-            if (this->health <= 0) {
-                this->gameState->earn(this->reward);
-                this->handler->despawn(this);
+            if(this->sheild >0){
+                this->sheild -= amount;
+            }else{
+                this->health -= amount;
+                if (this->health <= 0) {
+                    this->gameState->earn(this->reward);
+                    this->handler->despawn(this);
+                }
             }
         }
     }
@@ -136,6 +144,8 @@ namespace game {
                 int health = std::stoi(buffer);
                 std::getline(enemyData, buffer);
                 int reward = std::stoi(buffer);
+                std::getline(EnemyData, buffer);
+                int sheild = std::stoi(buffer);
                 this->types.push_back(new EnemyData(
                     SDL_CreateTextureFromSurface(
                         this->renderer,
@@ -143,7 +153,8 @@ namespace game {
                     ),
                     movementSpeed,
                     health,
-                    reward
+                    reward,
+                    sheild
                 ));
                 SDL_FreeSurface(surface);
             }

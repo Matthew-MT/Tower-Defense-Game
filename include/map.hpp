@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #include "map_h.hpp"
 #include "turret_menu.hpp"
 #include "pathfinder.hpp"

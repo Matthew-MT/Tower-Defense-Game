@@ -1,6 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL_ttf.h>
 #include <unordered_set>
 #include "sprite.hpp"
 #include "turret.hpp"

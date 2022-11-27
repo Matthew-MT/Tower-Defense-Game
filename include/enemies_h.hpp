@@ -16,7 +16,8 @@ namespace game {
         int
             movementSpeed,
             health,
-            reward;
+            reward,
+            sheild;
     };
 
     class Enemy : public StaticSprite {
@@ -29,7 +30,8 @@ namespace game {
         int
             movementSpeed,
             health,
-            reward;
+            reward,
+            sheild;
     public:
         Enemy(
             SDL_Renderer* initRenderer,

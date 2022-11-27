@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #include "forward.hpp"
 #include "turret.hpp"
 #include "sprite.hpp"
