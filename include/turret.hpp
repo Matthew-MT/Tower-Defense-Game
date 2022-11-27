@@ -70,7 +70,7 @@ namespace game{
         }
     }
 
-    void Turret::checkTarget(double scalar) {
+    void Turret::checkTargetGun(double scalar) {
 
         if(remainingReload>0)
         {
@@ -119,7 +119,7 @@ namespace game{
 
     void Turret::tick(double scalar)
     {
-        checkTarget(scalar);
+        checkTargetGun(scalar);
         Animation::tick(scalar);
     }
 

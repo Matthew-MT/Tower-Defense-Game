@@ -47,7 +47,7 @@ namespace game{
         IPoint getIndex();
 
         
-        void checkTarget(double scalar);
+        void checkTargetGun(double scalar);
         void findTarget();
         void stopTracking();
 
