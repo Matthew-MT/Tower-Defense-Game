@@ -347,3 +347,5 @@ namespace game{
         animationFile{initAnimationFile},
         animationFrames{initAnimationFrames}{}
 };
+
+//test
