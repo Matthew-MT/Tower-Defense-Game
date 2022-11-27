@@ -112,8 +112,44 @@ namespace game{
         }
     }
 
-    void Turret::checkTargetTower(double scalar){
+    void Turret::checkTargetTower(double scalar) {
 
+        if(remainingReload>0)
+        {
+            this->remainingReload-=scalar;
+        }
+
+        
+        if(this->targetedEnemy != nullptr)
+        {
+            DPoint enemyPosition = targetedEnemy->getCenter();
+            DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
+            double enemyDistance = distance(turretPosition,enemyPosition);
+            if(range>=enemyDistance)
+            {
+                this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
+                if(remainingReload<=0)
+                {
+                    this->targetedEnemy->damage(this->damage);
+                    this->texture = getTexture();
+                    this->shootSound->playSound();
+                    this->remainingReload = reloadTime;
+                    
+                }
+                else
+                    this->texture = defTexture;
+            }
+            else
+            {
+                stopTracking();
+                this->texture = defTexture;
+            }
+        }
+        else
+        {
+            this->texture = defTexture;
+            this->findTarget();
+        }
     }
 
     void Turret::stopTracking()
