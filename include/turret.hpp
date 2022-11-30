@@ -11,6 +11,7 @@
 #include "sound.hpp"
 #include "animation.hpp"
 #include <math.h>
+#include <vector>
 
 namespace game{
     Turret::Turret(
@@ -119,6 +120,7 @@ namespace game{
             this->remainingReload-=scalar;
         }
 
+
         
         if(this->targetedEnemy != nullptr)
         {
@@ -127,7 +129,6 @@ namespace game{
             double enemyDistance = distance(turretPosition,enemyPosition);
             if(range>=enemyDistance)
             {
-                this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
                 if(remainingReload<=0)
                 {
                     this->targetedEnemy->damage(this->damage);
