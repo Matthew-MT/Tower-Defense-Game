@@ -77,6 +77,7 @@ namespace game{
             this->remainingReload-=scalar;
         }
 
+
         
         if(this->targetedEnemy != nullptr)
         {
