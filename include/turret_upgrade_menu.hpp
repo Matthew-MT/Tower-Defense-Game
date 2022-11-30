@@ -19,10 +19,24 @@ namespace game {
     void TurretUpgradeMenu::render() {
         if (!shown) return;
         this->StaticSprite::render();
-        if (this->sell != nullptr) SDL_RenderCopy(
-            this->renderer,
-            this->sell
-        );
+        if (this->sellText != nullptr) {
+            SDL_RenderCopy(
+                this->renderer,
+                this->sell,
+                nullptr,
+                this->sellRect
+            );
+            this->sellText->render();
+        }
+        if (this->upgradeText != nullptr) {
+            SDL_RenderCopy(
+                this->renderer,
+                this->upgrade,
+                nullptr,
+                this->upgradeRect
+            );
+            this->upgradeText->render();
+        }
     }
 
     void TurretUpgradeMenu::handleEvent(SDL_Event* event) {}
