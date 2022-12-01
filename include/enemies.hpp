@@ -213,16 +213,16 @@ namespace game {
         std::string
             wavesFile,
             buffer;
-        if (option == Option::Easy) {
+        if (option == Easy) {
             this->difficulty = 0;
             wavesFile = "easy.txt";
-        } else if (option == Option::Normal) {
+        } else if (option == Normal) {
             this->difficulty = 1;
             wavesFile = "normal.txt";
-        } else if (option == Option::Hard) {
+        } else if (option == Hard) {
             this->difficulty = 2;
             wavesFile = "hard.txt";
-        } else if (option == Option::Fun) {
+        } else if (option == Fun) {
             this->difficulty = 3;
             wavesFile = "fun.txt";
         } else return;

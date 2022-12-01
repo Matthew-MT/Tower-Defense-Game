@@ -33,10 +33,12 @@ namespace game{
 
         IPoint getIndex();
         int getSellPrice();
+        TurretData* getTurretData();
 
         void checkTarget(double scalar);
         void findTarget();
         void stopTracking();
+        void setTurretData(TurretData* data);
 
         void tick(double scalar);
         void rotateTurret(DPoint enemy, DPoint turret);
@@ -46,12 +48,13 @@ namespace game{
     };
 
     class TurretHandler : public Renderable {
-        protected:
+    protected:
         Map* map;
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
         bool started = false;
-        public:
+        Sound* sellSound;
+    public:
         TurretHandler(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
@@ -63,6 +66,8 @@ namespace game{
         void readTurretData(const std::string& turretFileName);
 
         void createTurret(int type, const IPoint& index);
+
+        bool sellTurret(const IPoint& index);
 
         void handleEvent(SDL_Event* event);
 
@@ -95,6 +100,7 @@ namespace game{
             * turretShootSound;
         std::string animationFile;
         int animationFrames;
+        TurretData* upgradePath = nullptr;
 
         TurretData(
             int initBuyPrice,
@@ -108,7 +114,8 @@ namespace game{
             Sound* initTurretSpawnSound,
             Sound* initTurretShootSound,
             std::string animationFile,
-            int initAnimationFrames
+            int initAnimationFrames,
+            TurretData* initUpgradePath
         );
     };
 };

@@ -46,6 +46,10 @@ namespace game {
         return this->data->sellPrice;
     }
 
+    TurretData* Turret::getTurretData() {
+        return this->data;
+    }
+
     void Turret::findTarget() {
         for(Enemy* enemy : *this->turretHandler->getEnemyHandler()) {
             DPoint enemyPosition = enemy->getCenter();
@@ -92,6 +96,10 @@ namespace game {
         targetedEnemy = nullptr;
     }
 
+    void Turret::setTurretData(TurretData* data) {
+        this->data = data;
+    }
+
     Turret::~Turret() {}
 
     void Turret::tick(double scalar)
@@ -136,7 +144,7 @@ namespace game {
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
         Map* initMap
-    ) : Renderable{initRenderer, initDestRect}, map{initMap} {
+    ) : Renderable{initRenderer, initDestRect}, map{initMap}, sellSound{new Sound("assets/sounds/coinbag-91016.mp3")} {
         readTurretData("gatling.txt");
         readTurretData("sniper.txt");
     }
@@ -226,17 +234,33 @@ namespace game {
         this->turrets.insert(turret);
     }
 
+    bool TurretHandler::sellTurret(const IPoint& index) {
+        this->sellSound->playSound();
+        std::unordered_set<Turret*>::iterator i = std::find_if(
+            this->turrets.begin(),
+            this->turrets.end(),
+            [&](Turret* turret) -> bool {
+                return turret->getIndex() == index;
+            }
+        );
+        if (i != this->turrets.end()) {
+            this->map->getGameState()->earn((*i)->getSellPrice());
+            delete *i;
+            this->turrets.erase(i);
+            this->map->sellTurret(index);
+            return true;
+        } else return false;
+    }
+
     void  TurretHandler::handleEvent(SDL_Event* event) {
-        Sound* sellSound = new Sound("assets/sounds/coinbag-91016.mp3");
         if (this->started && event->type == SDL_MOUSEBUTTONUP) {
             int
                 selectedType = this->map->getTurretTypeMenu()->getSelectedType(),
                 buyPrice = this->turretTypes.at(selectedType)->buyPrice;
             IPoint index = this->map->getTileIndex({event->button.x, event->button.y});
             bool tileType = this->map->getTileType(index);
-            
+
             if (tileType == TileType::TurretType) {
-                sellSound->playSound();
                 std::unordered_set<Turret*>::iterator i = std::find_if(
                     this->turrets.begin(),
                     this->turrets.end(),
@@ -254,27 +278,6 @@ namespace game {
                 }
                 this->createTurret(selectedType, index);
             }
-
-            // if (!this->map->getGameState()->buy(buyPrice)) return;
-
-            // bool placed = this->map->placeTurret(index);
-
-            // if (placed) {
-            //     createTurret(selectedType, index);
-            // } else if (this->map->getTileType(index) == TileType::TurretType) {
-            //     sellSound->playSound();
-            //     this->map->getGameState()->earn(buyPrice);
-            //     std::unordered_set<Turret*>::iterator i = std::find_if(
-            //         this->turrets.begin(),
-            //         this->turrets.end(),
-            //         [&](Turret* turret) -> bool {
-            //             return turret->getIndex()==index;
-            //         }
-            //     );
-            //     delete *i;
-            //     this->turrets.erase(i);
-            //     this->map->sellTurret(index);
-            // } else this->map->getGameState()->earn(buyPrice);
         }
     }
 
@@ -311,7 +314,8 @@ namespace game {
         Sound* initTurretSpawnSound,
         Sound* initTurretShootSound,
         std::string initAnimationFile,
-        int initAnimationFrames
+        int initAnimationFrames,
+        TurretData* initUpgradePath = nullptr
     ) :
         buyPrice{initBuyPrice},
         sellPrice{initSellPrice},
@@ -324,5 +328,6 @@ namespace game {
         turretSpawnSound{initTurretSpawnSound},
         turretShootSound{initTurretShootSound},
         animationFile{initAnimationFile},
-        animationFrames{initAnimationFrames} {}
+        animationFrames{initAnimationFrames},
+        upgradePath{initUpgradePath} {}
 };
