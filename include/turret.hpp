@@ -66,14 +66,21 @@ namespace game{
 
             if(range>=enemyDistance)
             {
-                this->targetedEnemy = enemy;
-                this->targetedEnemy->track(this);
+                if(this->turretKind == 1){
+                    this->targetedEnemy = enemy;
+                    this->targetedEnemies.push_back(enemy);
+                    this->targetedEnemy->track(this);
+                }
+                else{
+                    this->targetedEnemy = enemy;
+                    this->targetedEnemy->track(this);
+                }
                 break;
             }
         }
     }
 
-    void Turret::checkTargetGun(double scalar) {
+    void Turret::checkTarget(double scalar) {
 
         if(remainingReload>0)
         {
@@ -81,21 +88,30 @@ namespace game{
         }
 
         
-        if(this->targetedEnemy != nullptr)
+        if(this->targetedEnemy != nullptr || this->targetedEnemies.empty() != true)
         {
             DPoint enemyPosition = targetedEnemy->getCenter();
             DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
             double enemyDistance = distance(turretPosition,enemyPosition);
             if(range>=enemyDistance)
             {
-                this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
+                if(this->turretKind == 0) this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
                 if(remainingReload<=0)
                 {
-                    this->targetedEnemy->damage(this->damage);
-                    this->texture = getTexture();
-                    this->shootSound->playSound();
-                    this->remainingReload = reloadTime;
-                    
+                    if(this->turretKind == 0){
+                        this->targetedEnemy->damage(this->damage);
+                        this->texture = getTexture();
+                        this->shootSound->playSound();
+                        this->remainingReload = reloadTime;
+                    }
+                    if(this->turretKind == 1){
+                        for (int i = 0; i < targetedEnemies.size(); i++){
+                            this->targetedEnemies[i]->damage(this->damage);
+                            this->texture = getTexture();
+                            this->shootSound->playSound();
+                        }
+                        this->remainingReload = reloadTime;
+                    }
                 }
                 else
                     this->texture = defTexture;
@@ -109,69 +125,27 @@ namespace game{
         else
         {
             this->texture = defTexture;
-            this->findTarget();
-        }
-    }
-
-    void Turret::checkTargetTower(double scalar) {
-
-        if(remainingReload>0)
-        {
-            this->remainingReload-=scalar;
-        }
-
-
-        
-        if(this->targetedEnemy != nullptr)
-        {
-            DPoint enemyPosition = targetedEnemy->getCenter();
-            DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
-            double enemyDistance = distance(turretPosition,enemyPosition);
-            if(range>=enemyDistance)
-            {
-                if(remainingReload<=0)
-                {
-                    this->targetedEnemy->damage(this->damage);
-                    this->texture = getTexture();
-                    this->shootSound->playSound();
-                    this->remainingReload = reloadTime;
-                    
+            if(this->turretKind == 0) this->findTarget();
+            if(this->turretKind == 1){
+                for(int i = 0; i < 10; i++){
+                    this->findTarget();
                 }
-                else
-                    this->texture = defTexture;
             }
-            else
-            {
-                stopTracking();
-                this->texture = defTexture;
-            }
-        }
-        else
-        {
-            this->texture = defTexture;
-            this->findTarget();
         }
     }
 
     void Turret::stopTracking()
     {
         targetedEnemy = nullptr;
+        targetedEnemies.erase(targetedEnemies.begin());
     }
 
     Turret::~Turret(){}
 
     void Turret::tick(double scalar)
     {
-        switch (turretKind){
-            case 0:
-                checkTargetGun(scalar);
-                Animation::tick(scalar);
-                break;
-            case 1:
-                checkTargetTower(scalar);
-                Animation::tick(scalar);
-                break;
-        }
+        checkTarget(scalar);
+        Animation::tick(scalar);
     }
 
     void Turret::rotateTurret(DPoint enemy, DPoint turret)

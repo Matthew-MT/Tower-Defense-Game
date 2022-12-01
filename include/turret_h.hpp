@@ -19,6 +19,7 @@ namespace game{
         IPoint index;
         TurretHandler* turretHandler;
         Enemy* targetedEnemy = nullptr;
+        std::vector<Enemy*> targetedEnemies;
         double remainingReload=0;
         double angle;
         Sound* spawnSound;
@@ -49,8 +50,7 @@ namespace game{
         IPoint getIndex();
 
         
-        void checkTargetGun(double scalar);
-        void checkTargetTower(double scalar);
+        void checkTarget(double scalar);
         void findTarget();
         void stopTracking();
 
