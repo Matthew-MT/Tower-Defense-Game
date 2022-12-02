@@ -1,7 +1,6 @@
 #pragma once
 #include <SDL2/SDL_ttf.h>
 #include "forward.hpp"
-#include "turret_h.hpp"
 #include "sprite.hpp"
 #include "enums.hpp"
 #include "text.hpp"
@@ -28,6 +27,7 @@ namespace game {
             shown = false,
             canUpgrade = false;
         SingleOption hovered = Neither;
+        TurretHandler* turretHandler;
         Turret* menuTarget = nullptr;
 
         virtual void updateRects();
@@ -35,6 +35,7 @@ namespace game {
         TurretUpgradeMenu(
             SDL_Renderer* initRenderer,
             Map* initMap,
+            TurretHandler* initTurretHandler,
             TTF_Font* initFont
         );
 

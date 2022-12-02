@@ -5,7 +5,7 @@
 #include "turret_type_menu.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
-#include "turret_h.hpp"
+#include "turret.hpp"
 #include "map_menu.hpp"
 #include "enemies.hpp"
 #include "sprite.hpp"
@@ -128,7 +128,8 @@ namespace game {
         this->turretHandler = new TurretHandler(
             this->renderer,
             this->getDestRect(),
-            this
+            this,
+            this->font
         );
 
         this->turretTypeMenu = new TurretTypeMenu(

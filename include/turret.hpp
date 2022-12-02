@@ -1,15 +1,16 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include "turret_upgrade_menu_h.hpp"
 #include "game_state.hpp"
-#include "sprite.hpp"
-#include "map.hpp"
-#include "forward.hpp"
+#include "animation.hpp"
 #include "turret_h.hpp"
+#include "forward.hpp"
+#include "sprite.hpp"
+#include "sound.hpp"
 #include "utils.hpp"
 #include <cstring>
-#include "sound.hpp"
-#include "animation.hpp"
+#include "map.hpp"
 #include <math.h>
 
 namespace game {
@@ -43,11 +44,11 @@ namespace game {
     }
 
     int Turret::getSellPrice() {
-        return this->data->sellPrice;
+        return ((TurretData*)this->data)->sellPrice;
     }
 
     TurretData* Turret::getTurretData() {
-        return this->data;
+        return ((TurretData*)this->data);
     }
 
     void Turret::findTarget() {
@@ -56,7 +57,7 @@ namespace game {
             DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
             double enemyDistance = distance(turretPosition, enemyPosition);
 
-            if (this->data->range >= enemyDistance) {
+            if (((TurretData*)this->data)->range >= enemyDistance) {
                 this->targetedEnemy = enemy;
                 this->targetedEnemy->track(this);
                 break;
@@ -73,13 +74,13 @@ namespace game {
             DPoint enemyPosition = targetedEnemy->getCenter();
             DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
             double enemyDistance = distance(turretPosition,enemyPosition);
-            if (this->data->range >= enemyDistance) {
+            if (((TurretData*)this->data)->range >= enemyDistance) {
                 this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
                 if (remainingReload <= 0) {
-                    this->targetedEnemy->damage(this->data->damage);
+                    this->targetedEnemy->damage(((TurretData*)this->data)->damage);
                     this->texture = getTexture();
-                    this->data->turretShootSound->playSound();
-                    this->remainingReload = this->data->reload;
+                    ((TurretData*)this->data)->turretShootSound->playSound();
+                    this->remainingReload = ((TurretData*)this->data)->reload;
                 } else this->texture = defTexture;
             } else {
                 stopTracking();
@@ -143,8 +144,18 @@ namespace game {
     TurretHandler::TurretHandler(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
-        Map* initMap
-    ) : Renderable{initRenderer, initDestRect}, map{initMap}, sellSound{new Sound("assets/sounds/coinbag-91016.mp3")} {
+        Map* initMap,
+        TTF_Font* initFont
+    ) :
+        Renderable{initRenderer, initDestRect},
+        map{initMap},
+        turretUpgradeMenu{new TurretUpgradeMenu(
+            initRenderer,
+            initMap,
+            this,
+            initFont
+        )},
+        sellSound{new Sound("assets/sounds/coinbag-91016.mp3")} {
         readTurretData("gatling.txt");
         readTurretData("sniper.txt");
     }
@@ -213,7 +224,8 @@ namespace game {
             turretSpawnSound,
             turretShootSound,
             aFile,
-            aFrames
+            aFrames,
+            nullptr
         ));
     }
 
@@ -234,7 +246,8 @@ namespace game {
         this->turrets.insert(turret);
     }
 
-    bool TurretHandler::sellTurret(const IPoint& index) {
+    bool TurretHandler::sellTurret(Turret* turret) {
+        IPoint index = turret->getIndex();
         this->sellSound->playSound();
         std::unordered_set<Turret*>::iterator i = std::find_if(
             this->turrets.begin(),
@@ -244,10 +257,30 @@ namespace game {
             }
         );
         if (i != this->turrets.end()) {
-            this->map->getGameState()->earn((*i)->getSellPrice());
-            delete *i;
+            this->map->getGameState()->earn(turret->getSellPrice());
             this->turrets.erase(i);
+            delete turret;
             this->map->sellTurret(index);
+            return true;
+        } else return false;
+    }
+
+    bool TurretHandler::upgradeTurret(Turret* turret) {
+        IPoint index = turret->getIndex();
+        std::unordered_set<Turret*>::iterator i = std::find_if(
+            this->turrets.begin(),
+            this->turrets.end(),
+            [&](Turret* turret) -> bool {
+                return turret->getIndex() == index;
+            }
+        );
+        if (
+            i != this->turrets.end()
+            && turret->getTurretData()->upgradePath != nullptr
+            && this->map->getGameState()->canBuy(((TurretData*)turret->getTurretData()->upgradePath)->buyPrice)
+        ) {
+            this->map->getGameState()->buy(((TurretData*)turret->getTurretData()->upgradePath)->buyPrice);
+            turret->setTurretData(((TurretData*)turret->getTurretData()->upgradePath));
             return true;
         } else return false;
     }
@@ -268,9 +301,10 @@ namespace game {
                         return turret->getIndex() == index;
                     }
                 );
-                delete *i;
-                this->turrets.erase(i);
-                this->map->sellTurret(index);
+                this->turretUpgradeMenu->loadMenuFor(*i, index);
+                // delete *i;
+                // this->turrets.erase(i);
+                // this->map->sellTurret(index);
             } else if (this->map->getGameState()->canBuy(buyPrice) && this->map->placeTurret(index)) {
                 if (!this->map->getGameState()->buy(buyPrice)) {
                     this->map->sellTurret(index);

@@ -1,6 +1,7 @@
 #pragma once
 #include "forward.hpp"
 #include "turret_upgrade_menu_h.hpp"
+#include "turret_h.hpp"
 #include "utils.hpp"
 
 namespace game {
@@ -33,6 +34,7 @@ namespace game {
     TurretUpgradeMenu::TurretUpgradeMenu(
         SDL_Renderer* initRenderer,
         Map* initMap,
+        TurretHandler* initTurretHandler,
         TTF_Font* initFont
     ) :
         StaticSprite{
@@ -49,6 +51,7 @@ namespace game {
         upgradeDisabled{textureFromImageFile(initRenderer, "assets/images/turret_upgrade_disabled.png")},
         upgradeText{new Text(initRenderer, initFont, {0, 0})},
         map{initMap},
+        turretHandler{initTurretHandler},
         font{initFont} {}
 
     void TurretUpgradeMenu::setDestRect(SDL_Rect* newDestRect) {
@@ -79,7 +82,7 @@ namespace game {
         if (this->canUpgrade) {
             SDL_RenderCopy(
                 this->renderer,
-                this->map->getGameState()->canBuy(this->menuTarget->getTurretData()->upgradePath->buyPrice)
+                this->map->getGameState()->canBuy(((TurretData*)this->menuTarget->getTurretData()->upgradePath)->buyPrice)
                 ? this->upgradeDisabled
                 :
                     this->hovered == Upgrade
@@ -106,13 +109,13 @@ namespace game {
             };
             case SDL_MOUSEBUTTONUP: {
                 if (this->hovered == Sell) {
-                    this->map->getGameState()->earn(this->menuTarget->getSellPrice());
+                    this->turretHandler->sellTurret(this->menuTarget);
                 }
                 if (
                     this->hovered == Upgrade
-                    && this->map->getGameState()->canBuy(this->menuTarget->getTurretData()->upgradePath->buyPrice)
+                    && this->map->getGameState()->canBuy(((TurretData*)this->menuTarget->getTurretData()->upgradePath)->buyPrice)
                 ) {
-                    this->map->getGameState()->buy(this->menuTarget->getTurretData()->buyPrice);
+                    this->turretHandler->upgradeTurret(this->menuTarget);
                 }
             };
         }
@@ -125,7 +128,7 @@ namespace game {
         this->setDestRect(fromCenter(center, IPoint{160, 160}));
         this->sellText->setText(std::to_string(this->menuTarget->getSellPrice()));
         if (data->upgradePath != nullptr) {
-            this->upgradeText->setText(std::to_string(data->upgradePath->buyPrice));
+            this->upgradeText->setText(std::to_string(((TurretData*)data->upgradePath)->buyPrice));
             this->canUpgrade = true;
         } else this->canUpgrade = false;
         this->updateRects();

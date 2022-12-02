@@ -1,12 +1,13 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "game_state.hpp"
+#include "animation.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "enums.hpp"
 #include "map.hpp"
 #include <vector>
-#include "animation.hpp"
 
 namespace game{
     class Turret : public Animation {
@@ -52,33 +53,30 @@ namespace game{
         Map* map;
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
+        TurretUpgradeMenu* turretUpgradeMenu;
         bool started = false;
         Sound* sellSound;
     public:
         TurretHandler(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
-            Map* initMap
+            Map* initMap,
+            TTF_Font* initFont
         );
 
         void render();
 
         void readTurretData(const std::string& turretFileName);
-
         void createTurret(int type, const IPoint& index);
-
-        bool sellTurret(const IPoint& index);
+        bool sellTurret(Turret* turret);
+        bool upgradeTurret(Turret* turret);
 
         void handleEvent(SDL_Event* event);
-
         void tick(double scalar);
-
         void start(Option option);
 
         EnemyHandler* getEnemyHandler();
-
         Map* getMap();
-
         std::vector<TurretData*> getTurretTypes();
     };
 
@@ -100,7 +98,7 @@ namespace game{
             * turretShootSound;
         std::string animationFile;
         int animationFrames;
-        TurretData* upgradePath = nullptr;
+        void* upgradePath = nullptr;
 
         TurretData(
             int initBuyPrice,
