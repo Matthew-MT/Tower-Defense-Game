@@ -35,7 +35,6 @@ namespace game
             frames++;
             for (int i = 2; i <= frames; i++) {
                 file = baseFile + std::to_string(i) + ".bmp";
-                SDL_Log(file.c_str());
                 SDL_Surface* surface = SDL_LoadBMP(file.c_str());
                 SDL_Texture* loadTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
                 SDL_FreeSurface(surface);

@@ -5,7 +5,7 @@
 #include "turret_type_menu.hpp"
 #include "pathfinder.hpp"
 #include "game_state.hpp"
-#include "turret.hpp"
+#include "turret_h.hpp"
 #include "map_menu.hpp"
 #include "enemies.hpp"
 #include "sprite.hpp"
@@ -116,7 +116,7 @@ namespace game {
 
         mapList.close();
 
-        this->deathBackground = this->textures[TileType::Wall];
+        this->deathBackground = this->textures[Wall];
 
         this->mapMenu = new MapMenu(
             this->renderer,
@@ -168,8 +168,8 @@ namespace game {
                 SDL_RenderCopy(
                     this->renderer,
                     this->textures.at(
-                        type == TileType::TurretType
-                        ? TileType::Empty
+                        type == TurretType
+                        ? Empty
                         : type
                     ),
                     nullptr,
@@ -219,8 +219,8 @@ namespace game {
 
             for (int i = 0; i < this->mapRef->size(); i++) for (int j = 0; j < this->mapRef->back().size(); j++) {
                 int type = this->mapRef->at(i).at(j);
-                if (type == TileType::Spawn) this->spawns.push_back({i, j});
-                else if (type == TileType::Base) this->bases.push_back({i, j});
+                if (type == Spawn) this->spawns.push_back({i, j});
+                else if (type == Base) this->bases.push_back({i, j});
             }
 
             if (this->enemyHandler != nullptr) delete this->enemyHandler;
@@ -287,13 +287,13 @@ namespace game {
                 int type = newMap[i][j];
                 IPoint index{i, j};
 
-                if (type == TileType::Spawn) this->spawns.push_back(index);
-                else if (type == TileType::Base) this->bases.push_back(index);
+                if (type == Spawn) this->spawns.push_back(index);
+                else if (type == Base) this->bases.push_back(index);
 
                 if (
-                    type != TileType::Empty
-                    && type != TileType::Spawn
-                    && type != TileType::Base
+                    type != Empty
+                    && type != Spawn
+                    && type != Base
                 ) continue;
                 std::pair<TileGraph::Nodes::iterator, bool> r = this->graph->insert(index);
                 TileGraph::Node* node = *r.first;
@@ -301,9 +301,9 @@ namespace game {
                 if (
                     i > 0
                     && (
-                        newMap[i - 1][j] == TileType::Empty
-                        || newMap[i - 1][j] == TileType::Spawn
-                        || newMap[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == Empty
+                        || newMap[i - 1][j] == Spawn
+                        || newMap[i - 1][j] == Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j}))->link(node);
@@ -312,9 +312,9 @@ namespace game {
                 if (
                     j > 0
                     && (
-                        newMap[i][j - 1] == TileType::Empty
-                        || newMap[i][j - 1] == TileType::Spawn
-                        || newMap[i][j - 1] == TileType::Base
+                        newMap[i][j - 1] == Empty
+                        || newMap[i][j - 1] == Spawn
+                        || newMap[i][j - 1] == Base
                     )
                 ) {
                     (*this->graph->find({i, j - 1}))->link(node);
@@ -323,17 +323,17 @@ namespace game {
                 if (
                     i > 0 && j > 0
                     && (
-                        newMap[i - 1][j - 1] == TileType::Empty
-                        || newMap[i - 1][j - 1] == TileType::Spawn
-                        || newMap[i - 1][j - 1] == TileType::Base
+                        newMap[i - 1][j - 1] == Empty
+                        || newMap[i - 1][j - 1] == Spawn
+                        || newMap[i - 1][j - 1] == Base
                     ) && (
-                        newMap[i][j - 1] == TileType::Empty
-                        || newMap[i][j - 1] == TileType::Spawn
-                        || newMap[i][j - 1] == TileType::Base
+                        newMap[i][j - 1] == Empty
+                        || newMap[i][j - 1] == Spawn
+                        || newMap[i][j - 1] == Base
                     ) && (
-                        newMap[i - 1][j] == TileType::Empty
-                        || newMap[i - 1][j] == TileType::Spawn
-                        || newMap[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == Empty
+                        || newMap[i - 1][j] == Spawn
+                        || newMap[i - 1][j] == Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j - 1}))->link(node, sqrtOf2);
@@ -342,17 +342,17 @@ namespace game {
                 if (
                     i > 0 && j < newMap.back().size() - 1
                     && (
-                        newMap[i - 1][j + 1] == TileType::Empty
-                        || newMap[i - 1][j + 1] == TileType::Spawn
-                        || newMap[i - 1][j + 1] == TileType::Base
+                        newMap[i - 1][j + 1] == Empty
+                        || newMap[i - 1][j + 1] == Spawn
+                        || newMap[i - 1][j + 1] == Base
                     ) && (
-                        newMap[i][j + 1] == TileType::Empty
-                        || newMap[i][j + 1] == TileType::Spawn
-                        || newMap[i][j + 1] == TileType::Base
+                        newMap[i][j + 1] == Empty
+                        || newMap[i][j + 1] == Spawn
+                        || newMap[i][j + 1] == Base
                     ) && (
-                        newMap[i - 1][j] == TileType::Empty
-                        || newMap[i - 1][j] == TileType::Spawn
-                        || newMap[i - 1][j] == TileType::Base
+                        newMap[i - 1][j] == Empty
+                        || newMap[i - 1][j] == Spawn
+                        || newMap[i - 1][j] == Base
                     )
                 ) {
                     (*this->graph->find({i - 1, j + 1}))->link(node, sqrtOf2);
@@ -410,9 +410,9 @@ namespace game {
             || index.x >= map.size()
             || index.y < 0
             || index.y >= map.back().size()
-            || map[index.x][index.y] != TileType::Empty
+            || map[index.x][index.y] != Empty
         ) return false;
-        map[index.x][index.y] = TileType::TurretType;
+        map[index.x][index.y] = TurretType;
         TileGraph::Node* node = *this->graph->find(index);
         std::vector<std::vector<IPoint>> paths;
 
@@ -457,7 +457,7 @@ namespace game {
             if (nodeW != end) node->link(*nodeW);
             if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
-            map[index.x][index.y] = TileType::Empty;
+            map[index.x][index.y] = Empty;
         };
 
         for (IPoint& spawn : this->spawns) {
@@ -504,7 +504,7 @@ namespace game {
             || index.x >= map.size()
             || index.y < 0
             || index.y >= map.back().size()
-            || map[index.x][index.y] != TileType::TurretType
+            || map[index.x][index.y] != TurretType
         ) return false;
 
         typename TileGraph::Nodes::iterator
@@ -536,7 +536,7 @@ namespace game {
         if (nodeW != end) node->link(*nodeW);
         if (nodeNW != end && nodeN != end && nodeW != end) node->link(*nodeNW, sqrtOf2);
 
-        map[index.x][index.y] = TileType::Empty;
+        map[index.x][index.y] = Empty;
 
         for (Path* path : this->paths) delete path;
         this->paths.clear();
@@ -655,7 +655,7 @@ namespace game {
     }
 
     int Map::getTileType(const IPoint& index) const {
-        if (index.x < 0 || index.x >= this->mapRef->size() || index.y < 0 || index.y >= this->mapRef->back().size()) return TileType::Wall;
+        if (index.x < 0 || index.x >= this->mapRef->size() || index.y < 0 || index.y >= this->mapRef->back().size()) return Wall;
         return (*this->mapRef)[index.x][index.y];
     }
 

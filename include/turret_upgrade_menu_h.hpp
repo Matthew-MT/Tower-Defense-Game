@@ -47,5 +47,7 @@ namespace game {
         virtual void handleEvent(SDL_Event* event);
         virtual void loadMenuFor(Turret* target, const IPoint& index);
         virtual void closeMenu();
+
+        virtual bool isShown();
     };
 };

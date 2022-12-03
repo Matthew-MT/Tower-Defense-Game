@@ -6,7 +6,7 @@
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "enums.hpp"
-#include "map.hpp"
+#include "map_h.hpp"
 #include <vector>
 
 namespace game{
@@ -66,7 +66,7 @@ namespace game{
 
         void render();
 
-        void readTurretData(const std::string& turretFileName);
+        TurretData* readTurretData(const std::string& turretFileName);
         void createTurret(int type, const IPoint& index);
         bool sellTurret(Turret* turret);
         bool upgradeTurret(Turret* turret);

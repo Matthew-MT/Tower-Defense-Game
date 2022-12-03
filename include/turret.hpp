@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "turret_upgrade_menu_h.hpp"
+#include "turret_upgrade_menu.hpp"
 #include "game_state.hpp"
 #include "animation.hpp"
 #include "turret_h.hpp"
@@ -156,18 +156,18 @@ namespace game {
             initFont
         )},
         sellSound{new Sound("assets/sounds/coinbag-91016.mp3")} {
-        readTurretData("gatling.txt");
-        readTurretData("sniper.txt");
+        this->turretTypes.push_back(readTurretData("gatling.txt"));
+        this->turretTypes.push_back(readTurretData("sniper.txt"));
     }
 
     void TurretHandler::render() {
         for(Turret* turret: this->turrets) {
             turret->render();
         }
+        this->turretUpgradeMenu->render();
     }    
 
-    void  TurretHandler::readTurretData(const std::string& turretFileName)
-    {
+    TurretData* TurretHandler::readTurretData(const std::string& turretFileName) {
         std::fstream 
             turretFile("assets/turrets/" + turretFileName, std::ios_base::in);
         std::string buffer;
@@ -184,35 +184,53 @@ namespace game {
 
         std::getline(turretFile, buffer);
         buyPrice = std::stoi(buffer);
+
         std::getline(turretFile, buffer);
         sellPrice = std::stoi(buffer);
+
         std::getline(turretFile, buffer);
         damage = std::stoi(buffer);
+
         std::getline(turretFile, buffer);
         reloadTime = std::stof(buffer);
+
         std::getline(turretFile, buffer);
         range = std::stoi(buffer);
+
         std::getline(turretFile, buffer);
         SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
         texture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
+
         std::getline(turretFile, buffer);
         Sound* turretSpawnSound = new Sound("assets/sounds/" + buffer);
+
         std::getline(turretFile, buffer);
         Sound* turretShootSound = new Sound("assets/sounds/" + buffer);
+
         std::getline(turretFile, buffer);
         surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
         menuTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
+
         std::getline(turretFile, buffer);
         surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
         menuTextureSelected = SDL_CreateTextureFromSurface(this->renderer, surface);
         SDL_FreeSurface(surface);
+
         std::getline(turretFile, buffer);
         std::string aFile = buffer;
+
         std::getline(turretFile, buffer);
         int aFrames = stoi(buffer);
-        turretTypes.push_back(new TurretData(
+
+        TurretData* upgradePath = nullptr;
+        if (!turretFile.eof()) {
+            std::getline(turretFile, buffer);
+            upgradePath = this->readTurretData(buffer);
+        }
+
+        return new TurretData(
             buyPrice,
             sellPrice,
             damage,
@@ -225,8 +243,8 @@ namespace game {
             turretShootSound,
             aFile,
             aFrames,
-            nullptr
-        ));
+            upgradePath
+        );
     }
 
     void  TurretHandler::createTurret(int type, const IPoint& index) {
@@ -286,31 +304,31 @@ namespace game {
     }
 
     void  TurretHandler::handleEvent(SDL_Event* event) {
-        if (this->started && event->type == SDL_MOUSEBUTTONUP) {
-            int
-                selectedType = this->map->getTurretTypeMenu()->getSelectedType(),
-                buyPrice = this->turretTypes.at(selectedType)->buyPrice;
-            IPoint index = this->map->getTileIndex({event->button.x, event->button.y});
-            bool tileType = this->map->getTileType(index);
+        if (this->turretUpgradeMenu->isShown()) this->turretUpgradeMenu->handleEvent(event);
+        else {
+            if (this->started && event->type == SDL_MOUSEBUTTONUP) {
+                IPoint index = this->map->getTileIndex({event->button.x, event->button.y});
+                int
+                    selectedType = this->map->getTurretTypeMenu()->getSelectedType(),
+                    buyPrice = this->turretTypes.at(selectedType)->buyPrice,
+                    tileType = this->map->getTileType(index);
 
-            if (tileType == TileType::TurretType) {
-                std::unordered_set<Turret*>::iterator i = std::find_if(
-                    this->turrets.begin(),
-                    this->turrets.end(),
-                    [&](Turret* turret) -> bool {
-                        return turret->getIndex() == index;
+                if (tileType == TurretType) {
+                    std::unordered_set<Turret*>::iterator i = std::find_if(
+                        this->turrets.begin(),
+                        this->turrets.end(),
+                        [&](Turret* turret) -> bool {
+                            return turret->getIndex() == index;
+                        }
+                    );
+                    if (i != this->turrets.end()) this->turretUpgradeMenu->loadMenuFor(*i, index);
+                } else if (this->map->getGameState()->canBuy(buyPrice) && this->map->placeTurret(index)) {
+                    if (!this->map->getGameState()->buy(buyPrice)) {
+                        this->map->sellTurret(index);
+                        return;
                     }
-                );
-                this->turretUpgradeMenu->loadMenuFor(*i, index);
-                // delete *i;
-                // this->turrets.erase(i);
-                // this->map->sellTurret(index);
-            } else if (this->map->getGameState()->canBuy(buyPrice) && this->map->placeTurret(index)) {
-                if (!this->map->getGameState()->buy(buyPrice)) {
-                    this->map->sellTurret(index);
-                    return;
+                    this->createTurret(selectedType, index);
                 }
-                this->createTurret(selectedType, index);
             }
         }
     }

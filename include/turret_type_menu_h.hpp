@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "forward.hpp"
-#include "turret_h.hpp"
 #include "sprite.hpp"
 #include <iostream>
 #include <fstream>

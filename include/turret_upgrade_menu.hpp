@@ -7,27 +7,30 @@
 namespace game {
     void TurretUpgradeMenu::updateRects() {
         if (this->sellRect != nullptr) delete this->sellRect;
+        if (this->upgradeRect != nullptr) delete this->upgradeRect;
+
         this->sellRect = fromCenter(
             IPoint{
-                this->destRect->x + (this->destRect->w << 2),
-                this->destRect->y + (this->destRect->h << 1)
+                this->destRect->x + (this->destRect->w >> 3) + (this->destRect->w >> 4),
+                this->destRect->y + (this->destRect->h >> 1)
             },
             IPoint{40, 40}
         );
         this->sellText->setPosition(IPoint{
-            this->destRect->x + (this->destRect->w << 2),
-            this->destRect->y + (this->destRect->h << 1)
+            this->destRect->x + (this->destRect->w >> 3) + (this->destRect->w >> 4),
+            this->destRect->y + (this->destRect->h >> 1)
         });
+
         this->upgradeRect = fromCenter(
             IPoint{
-                this->destRect->x + (this->destRect->w << 1) + (this->destRect->w << 2),
-                this->destRect->y + (this->destRect->h << 1)
+                this->destRect->x + (this->destRect->w >> 1) + (this->destRect->w >> 2) + (this->destRect->w >> 4),
+                this->destRect->y + (this->destRect->h >> 1)
             },
             IPoint{40, 40}
         );
         this->upgradeText->setPosition(IPoint{
-            this->destRect->x + (this->destRect->w << 1) + (this->destRect->w << 2),
-            this->destRect->y + (this->destRect->h << 1)
+            this->destRect->x + (this->destRect->w >> 1) + (this->destRect->w >> 2) + (this->destRect->w >> 4),
+            this->destRect->y + (this->destRect->h >> 1)
         });
     }
 
@@ -82,7 +85,7 @@ namespace game {
         if (this->canUpgrade) {
             SDL_RenderCopy(
                 this->renderer,
-                this->map->getGameState()->canBuy(((TurretData*)this->menuTarget->getTurretData()->upgradePath)->buyPrice)
+                !this->map->getGameState()->canBuy(((TurretData*)this->menuTarget->getTurretData()->upgradePath)->buyPrice)
                 ? this->upgradeDisabled
                 :
                     this->hovered == Upgrade
@@ -97,25 +100,32 @@ namespace game {
 
     void TurretUpgradeMenu::handleEvent(SDL_Event* event) {
         if (!this->shown) return;
+        IPoint position = {
+            event->motion.x,
+            event->motion.y
+        };
         switch (event->type) {
             case SDL_MOUSEMOTION: {
-                IPoint position = {
-                    event->motion.x,
-                    event->motion.y
-                };
                 if (contains(this->sellRect, position)) this->hovered = Sell;
                 else if (contains(this->upgradeRect, position)) this->hovered = Upgrade;
+                else this->hovered = Neither;
                 break;
             };
             case SDL_MOUSEBUTTONUP: {
+                if (!contains(this->destRect, position)) {
+                    this->closeMenu();
+                    return;
+                }
                 if (this->hovered == Sell) {
                     this->turretHandler->sellTurret(this->menuTarget);
+                    this->closeMenu();
                 }
                 if (
                     this->hovered == Upgrade
                     && this->map->getGameState()->canBuy(((TurretData*)this->menuTarget->getTurretData()->upgradePath)->buyPrice)
                 ) {
                     this->turretHandler->upgradeTurret(this->menuTarget);
+                    this->closeMenu();
                 }
             };
         }
@@ -132,10 +142,15 @@ namespace game {
             this->canUpgrade = true;
         } else this->canUpgrade = false;
         this->updateRects();
+        this->shown = true;
     }
 
     void TurretUpgradeMenu::closeMenu() {
         this->shown = false;
         this->menuTarget = nullptr;
+    }
+
+    bool TurretUpgradeMenu::isShown() {
+        return this->shown;
     }
 };
