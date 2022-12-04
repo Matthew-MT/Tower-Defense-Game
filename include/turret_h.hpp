@@ -51,7 +51,7 @@ namespace game{
 
         
         void checkTarget(double scalar);
-        void findTarget();
+        void findTarget(int i);
         void stopTracking();
         bool searchTargets(Enemy* enemy);
 

@@ -56,7 +56,7 @@ namespace game{
         return index;
     }
 
-    void Turret::findTarget()
+    void Turret::findTarget(int i)
     {
         for(Enemy* enemy : *this->turretHandler->getEnemyHandler())
         {
@@ -71,8 +71,9 @@ namespace game{
                     if(!searchTargets(enemy)){
                         this->targetedEnemies.push_back(enemy);
                         this->targetedEnemy->track(this);
-                        this->findTarget();
                     }
+                    i++;
+                    continue;
                 }
                 else{
                     this->targetedEnemy = enemy;
@@ -130,7 +131,7 @@ namespace game{
         else
         {
             this->texture = defTexture;
-            this->findTarget();
+            this->findTarget(0);
         }
     }
 
