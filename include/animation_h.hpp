@@ -13,7 +13,6 @@ namespace game
         long currentTime;
         int totalTime;
         SDL_Texture* storedTexture;
-        double angle;
         std::string file;
         int frames;
         int millisPerFrame;

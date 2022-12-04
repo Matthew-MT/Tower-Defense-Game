@@ -18,7 +18,6 @@ namespace game{
         TurretHandler* turretHandler;
         Enemy* targetedEnemy = nullptr;
         double remainingReload = 0;
-        double angle;
         SDL_Texture* defTexture;
     public:
         Turret(
@@ -88,7 +87,8 @@ namespace game{
             buyPrice,
             sellPrice,
             damage,
-            range;
+            range,
+            rotationSpeed;
         SDL_Texture
             * texture,
             * menuTexture,
@@ -106,6 +106,7 @@ namespace game{
             int initDamage, 
             double initReload, 
             int initRange,
+            int initRotationSpeed,
             SDL_Texture* initTexture,
             SDL_Texture* initMenuTexture,
             SDL_Texture* initMenuTextureSelected,

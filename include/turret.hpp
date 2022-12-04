@@ -130,7 +130,13 @@ namespace game {
         if (eX < tX) {
             angleDeg = -1 * angleDeg;
         }
-        setAngle(angleDeg);
+
+        double diff = angleDeg - this->angle;
+        if (diff < 0.f) diff += 360.f;
+        double normal = diff >= 180.f ? diff - 360.f : diff;
+        if (normal > this->data->rotationSpeed) this->setAngle(this->angle + this->data->rotationSpeed);
+        else if (normal < this->data->rotationSpeed) this->setAngle(this->angle - this->data->rotationSpeed);
+        else this->setAngle(angleDeg);
     }
 
     DPoint Turret::getCenter()
@@ -176,7 +182,8 @@ namespace game {
             buyPrice,
             sellPrice,
             damage,
-            range;
+            range,
+            rotationSpeed;
         SDL_Texture
             * texture,
             * menuTexture,
@@ -196,6 +203,9 @@ namespace game {
 
         std::getline(turretFile, buffer);
         range = std::stoi(buffer);
+
+        std::getline(turretFile, buffer);
+        rotationSpeed = std::stoi(buffer);
 
         std::getline(turretFile, buffer);
         SDL_Surface* surface = IMG_Load(((std::string)"assets/images/" + buffer).c_str());
@@ -236,6 +246,7 @@ namespace game {
             damage,
             reloadTime,
             range,
+            rotationSpeed,
             texture,
             menuTexture,
             menuTextureSelected,
@@ -360,6 +371,7 @@ namespace game {
         int initDamage, 
         double initReload, 
         int initRange,
+        int initRotationSpeed,
         SDL_Texture* initTexture,
         SDL_Texture* initMenuTexture,
         SDL_Texture* initMenuTextureSelected,
@@ -374,6 +386,7 @@ namespace game {
         damage{initDamage},
         reload{initReload},
         range{initRange},
+        rotationSpeed{initRotationSpeed},
         texture{initTexture},
         menuTexture{initMenuTexture},
         menuTextureSelected{initMenuTextureSelected},
