@@ -16,12 +16,11 @@ namespace game {
     DPoint Path::next(double scalar, const DPoint& currentPosition, int movementSpeed) {        
         if (movementSpeed < 0) throw "Positive movement speed only.";
 
-        IPoint index = this->map->getTileIndex({
-            (int)currentPosition.x,
-            (int)currentPosition.y
-        });
+        IPoint index = this->map->getTileIndex(currentPosition);
         std::vector<IPoint>::iterator i = std::find(this->path.begin(), this->path.end(), index);
-        DPoint targetPosition = currentPosition;
+        DPoint
+            originPosition = currentPosition,
+            targetPosition = currentPosition;
 
         double range = (double)movementSpeed * scalar;
 
@@ -41,6 +40,7 @@ namespace game {
             if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
             i = (++r).base();
             targetPosition = this->map->getTileCenter(*i);
+            if (i != this->path.begin()) originPosition = this->map->getTileCenter(*(i - 1));
         } else {
             targetPosition = this->map->getTileCenter(*i);
             if (i + 1 != this->path.end()) {
@@ -48,21 +48,24 @@ namespace game {
                 if (
                     distance(currentPosition, targetPosition) <= range
                     || distance(currentPosition, consideredPosition) <= distance(consideredPosition, targetPosition)
-                ) targetPosition = consideredPosition;
+                ) {
+                    originPosition = targetPosition;
+                    targetPosition = consideredPosition;
+                } else if (i != this->path.begin()) originPosition = this->map->getTileCenter(*(i - 1));
             } else return {std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
         }
-        DPoint slope = {
-            (double)targetPosition.x - currentPosition.x,
-            (double)targetPosition.y - currentPosition.y
-        };
 
-        double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
+        SDL_Log(("Current: (" + std::to_string(currentPosition.x) + ", " + std::to_string(currentPosition.y) + ")").c_str());
+        SDL_Log(("Origin:  (" + std::to_string(originPosition.x) + ", " + std::to_string(originPosition.y) + ")").c_str());
+        SDL_Log(("Target:  (" + std::to_string(targetPosition.x) + ", " + std::to_string(targetPosition.y) + ")").c_str());
 
-        slope.x = slope.x / normalizeScalar;
-        slope.y = slope.y / normalizeScalar;
-        return {
-            currentPosition.x + slope.x,
-            currentPosition.y + slope.y
-        };
+        DPoint slope = targetPosition - currentPosition;
+        
+        // if (originPosition == targetPosition) slope -= currentPosition;
+        // else slope -= originPosition;
+
+        // double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
+
+        return currentPosition + slope.normal(range);
     }
 };

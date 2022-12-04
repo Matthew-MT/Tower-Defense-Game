@@ -13,6 +13,7 @@ namespace game {
             x{(Type)other.x},
             y{(Type)other.y} {}
         Point(Type ix, Type iy) : x{ix}, y{iy} {}
+        Point() : x{NULL}, y{NULL} {}
 
         bool operator == (const Point<Type>& other) const {
             return this->x == other.x && this->y == other.y;
@@ -22,18 +23,58 @@ namespace game {
             return this->x != other.x || this->y != other.y;
         }
 
-        template<typename Other> Point<Type> operator + (const Point<Other>& other) {
+        template<typename Other = Type> Point<Type>& operator = (const Point<Other>& other) {
+            this->x = (Type)other.x;
+            this->y = (Type)other.y;
+            return *this;
+        }
+
+        template<typename Other = Type> Point<Type> operator + (const Point<Other>& other) const {
             return {
                 this->x + (Type)other.x,
                 this->y + (Type)other.y
             };
         }
 
-        template<typename Other> Point<Type> operator - (const Point<Other>& other) {
+        template<typename Other = Type> Point<Type> operator - (const Point<Other>& other) const {
             return {
                 this->x - (Type)other.x,
                 this->y - (Type)other.y
             };
+        }
+
+        template<typename Scalar = Type> Point<Type> operator * (Scalar scalar) const {
+            return {
+                (Type)((Scalar)this->x * scalar),
+                (Type)((Scalar)this->y * scalar)
+            };
+        }
+
+        template<typename Scalar = Type> Point<Type> operator / (Scalar scalar) const {
+            return {
+                (Type)((Scalar)this->x / scalar),
+                (Type)((Scalar)this->y / scalar)
+            };
+        }
+
+        template<typename Other = Type> Point<Type>& operator += (const Point<Other>& other) {
+            return *this = *this + other;
+        }
+
+        template<typename Other = Type> Point<Type>& operator -= (const Point<Other>& other) {
+            return *this = *this - other;
+        }
+
+        template<typename Scalar = Type> Point<Type>& operator *= (Scalar scalar) {
+            return *this = *this * scalar;
+        }
+
+        template<typename Scalar = Type> Point<Type>& operator /= (Scalar scalar) {
+            return *this = *this / scalar;
+        }
+
+        template<typename Scalar = Type> Point<Type> normal(Scalar scalar = (Scalar)1) {
+            return *this / (std::sqrt(std::pow(this->x, 2) + std::pow(this->y, 2)) / scalar);
         }
     };
 
