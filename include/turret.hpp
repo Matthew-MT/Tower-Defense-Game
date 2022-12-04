@@ -12,7 +12,6 @@
 #include "animation.hpp"
 #include <math.h>
 #include <vector>
-#include <algorithm>
 
 namespace game{
     Turret::Turret(
@@ -72,6 +71,7 @@ namespace game{
                     if(searchTargets(enemy) == false){
                         this->targetedEnemies.push_back(enemy);
                         this->targetedEnemy->track(this);
+                        this->findTarget();
                     }
                 }
                 else{
@@ -81,6 +81,7 @@ namespace game{
                 break;
             }
         }
+        return;
     }
 
     void Turret::checkTarget(double scalar) {
@@ -129,12 +130,7 @@ namespace game{
         else
         {
             this->texture = defTexture;
-            if(this->turretKind == 0) this->findTarget();
-            if(this->turretKind == 1){
-                for(int i = 0; i < 10; i++){
-                    this->findTarget();
-                }
-            }
+            this->findTarget();
         }
     }
 
