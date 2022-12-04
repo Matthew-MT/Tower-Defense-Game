@@ -68,7 +68,7 @@ namespace game{
             {
                 if(this->turretKind == 1){
                     this->targetedEnemy = enemy;
-                    if(searchTargets(enemy) == false){
+                    if(!searchTargets(enemy)){
                         this->targetedEnemies.push_back(enemy);
                         this->targetedEnemy->track(this);
                         this->findTarget();
