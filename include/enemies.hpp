@@ -264,7 +264,7 @@ namespace game {
 
     void EnemyHandler::spawn(int type, IPoint index) {
         SDL_Rect* initDestRect = this->map->getTileDest(index);
-
+        //Put enemies into a vector for turret, might work?
         std::vector<Path*> validPaths;
         for (Path* path : this->map->getPaths()) if (path->isIndexInPath(index)) validPaths.push_back(path);
         this->enemies.insert(new Enemy(
