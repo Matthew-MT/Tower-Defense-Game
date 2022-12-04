@@ -53,6 +53,7 @@ namespace game{
         void checkTarget(double scalar);
         void findTarget();
         void stopTracking();
+        bool searchTargets(Enemy* enemy);
 
         void tick(double scalar);
         void rotateTurret(DPoint enemy, DPoint turret);

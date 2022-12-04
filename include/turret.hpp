@@ -12,6 +12,7 @@
 #include "animation.hpp"
 #include <math.h>
 #include <vector>
+#include <algorithm>
 
 namespace game{
     Turret::Turret(
@@ -68,8 +69,10 @@ namespace game{
             {
                 if(this->turretKind == 1){
                     this->targetedEnemy = enemy;
-                    this->targetedEnemies.push_back(enemy);
-                    this->targetedEnemy->track(this);
+                    if(searchTargets(enemy) == false){
+                        this->targetedEnemies.push_back(enemy);
+                        this->targetedEnemy->track(this);
+                    }
                 }
                 else{
                     this->targetedEnemy = enemy;
@@ -105,7 +108,8 @@ namespace game{
                         this->remainingReload = reloadTime;
                     }
                     if(this->turretKind == 1){
-                        for (int i = 0; i < targetedEnemies.size(); i++){
+                        for (int i = 0; i < this->targetedEnemies.size(); i++){
+                            std::cout << i << std::endl;
                             this->targetedEnemies[i]->damage(this->damage);
                             this->texture = getTexture();
                             this->shootSound->playSound();
@@ -137,7 +141,14 @@ namespace game{
     void Turret::stopTracking()
     {
         targetedEnemy = nullptr;
-        targetedEnemies.erase(targetedEnemies.begin());
+        targetedEnemies.clear();
+    }
+
+    bool Turret::searchTargets(Enemy* enemy){
+        for (int i = 0; i < this->targetedEnemies.size(); i++){
+            if (this->targetedEnemies[i] == enemy) return true;
+        }
+        return false;
     }
 
     Turret::~Turret(){}
