@@ -241,10 +241,6 @@ namespace game {
             mapFile("assets/maps/" + mapFileName, std::ios_base::in);
         std::string buffer;
 
-        std::getline(mapFile, buffer);
-        int health = std::stoi(buffer);
-        std::getline(mapFile, buffer);
-        int cash = std::stoi(buffer);
         this->maps.insert({
             mapFileName,
             {
@@ -380,8 +376,7 @@ namespace game {
                 }
             ),
             this->title,
-            cash,
-            health
+            0, 0
         );
         if (this->enemyHandler != nullptr) delete this->enemyHandler;
         this->enemyHandler = new EnemyHandler(

@@ -130,12 +130,16 @@ namespace game {
             while (!enemyData.eof()) {
                 std::getline(enemyData, buffer);
                 SDL_Surface* surface = IMG_Load(((std::string)"assets/images/enemies/" + buffer).c_str());
+
                 std::getline(enemyData, buffer);
                 int movementSpeed = std::stoi(buffer);
+
                 std::getline(enemyData, buffer);
                 int health = std::stoi(buffer);
+
                 std::getline(enemyData, buffer);
                 int reward = std::stoi(buffer);
+
                 this->types.push_back(new EnemyData(
                     SDL_CreateTextureFromSurface(
                         this->renderer,
@@ -228,7 +232,16 @@ namespace game {
         } else return;
         std::fstream
             wavesData(((std::string)"assets/waves/" + wavesFile).c_str(), std::ios_base::in);
-        
+
+        std::getline(wavesData, buffer);
+        int cash = std::stoi(buffer);
+        std::getline(wavesData, buffer);
+        int health = std::stoi(buffer);
+
+        this->gameState->setMaxCash(cash);
+        this->gameState->setMaxHealth(health);
+        this->gameState->reset();
+
         while (!wavesData.eof()) {
             std::getline(wavesData, buffer);
             int time = std::stoi(buffer);

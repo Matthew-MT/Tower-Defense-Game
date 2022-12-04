@@ -187,7 +187,6 @@ namespace game {
         }
 
         virtual void setAngle(double angle) {
-            SDL_Log(("Angle: " + std::to_string(angle)).c_str());
             this->angle = angle;
         }
 

@@ -75,8 +75,12 @@ namespace game {
             DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
             double enemyDistance = distance(turretPosition,enemyPosition);
             if (((TurretData*)this->data)->range >= enemyDistance) {
-                this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
-                if (remainingReload <= 0) {
+                double angleDeg = this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
+                if (
+                    remainingReload <= 0
+                    && this->angle >= angleDeg - 1.f
+                    && this->angle <= angleDeg + 1.f
+                ) {
                     this->targetedEnemy->damage(((TurretData*)this->data)->damage);
                     this->texture = getTexture();
                     ((TurretData*)this->data)->turretShootSound->playSound();
@@ -109,7 +113,7 @@ namespace game {
         Animation::tick(scalar);
     }
 
-    void Turret::rotateTurret(DPoint enemy, DPoint turret)
+    double Turret::rotateTurret(DPoint enemy, DPoint turret)
     {
         double eX, eY, tX, tY;
         eX = enemy.x;
@@ -137,6 +141,7 @@ namespace game {
         if (normal > this->data->rotationSpeed) this->setAngle(this->angle + this->data->rotationSpeed);
         else if (normal < this->data->rotationSpeed) this->setAngle(this->angle - this->data->rotationSpeed);
         else this->setAngle(angleDeg);
+        return angleDeg;
     }
 
     DPoint Turret::getCenter()

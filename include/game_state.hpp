@@ -88,6 +88,8 @@ namespace game {
     void GameState::reset() {
         this->cash = this->maxCash;
         this->health = this->maxHealth;
+        this->cashDisplay->setText(this->getCashText());
+        this->healthDisplay->setText(this->getHealthText());
     }
 
     void GameState::setDestRect(SDL_Rect* rect) {
@@ -103,6 +105,14 @@ namespace game {
     void GameState::setPosition(const DPoint& position) {
         this->StaticSprite::setPosition(position);
         this->updatePosition();
+    }
+
+    void GameState::setMaxCash(int amount) {
+        this->maxCash = amount;
+    }
+
+    void GameState::setMaxHealth(int amount) {
+        this->maxHealth = amount;
     }
 
     bool GameState::canBuy(int amount) {

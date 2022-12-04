@@ -41,7 +41,7 @@ namespace game{
         void setTurretData(TurretData* data);
 
         void tick(double scalar);
-        void rotateTurret(DPoint enemy, DPoint turret);
+        double rotateTurret(DPoint enemy, DPoint turret);
         DPoint getCenter();
 
         ~Turret();

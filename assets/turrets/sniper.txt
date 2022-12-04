@@ -1,9 +1,9 @@
-20
 10
+6
 20
 5
 200
-2
+4
 sniper1.bmp
 mixkit-retro-game-notification-212.wav
 50_sniper_shot-Liam-2028603980.wav

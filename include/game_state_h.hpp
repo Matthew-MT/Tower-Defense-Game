@@ -43,6 +43,8 @@ namespace game {
         virtual void setDestRect(SDL_Rect* rect);
         virtual void setPosition(const IPoint& position);
         virtual void setPosition(const DPoint& position);
+        virtual void setMaxCash(int amount);
+        virtual void setMaxHealth(int amount);
 
         virtual bool canBuy(int amount);
         virtual bool buy(int amount);
