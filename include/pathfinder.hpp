@@ -37,10 +37,13 @@ namespace game {
                 }
             );
 
-            if (r == this->path.rend()) throw "Pathfinders must receive a new path when paths are recomputed.";
+            if (r == this->path.rend()) {
+                SDL_Log("Pathfinders must receive a new path when paths are recomputed.");
+                throw 1;
+            }
             i = (++r).base();
             targetPosition = this->map->getTileCenter(*i);
-            if (i != this->path.begin()) originPosition = this->map->getTileCenter(*(i - 1));
+            // if (i != this->path.begin()) originPosition = this->map->getTileCenter(*(i - 1));
         } else {
             targetPosition = this->map->getTileCenter(*i);
             if (i + 1 != this->path.end()) {
@@ -55,14 +58,16 @@ namespace game {
             } else return {std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
         }
 
-        SDL_Log(("Current: (" + std::to_string(currentPosition.x) + ", " + std::to_string(currentPosition.y) + ")").c_str());
-        SDL_Log(("Origin:  (" + std::to_string(originPosition.x) + ", " + std::to_string(originPosition.y) + ")").c_str());
-        SDL_Log(("Target:  (" + std::to_string(targetPosition.x) + ", " + std::to_string(targetPosition.y) + ")").c_str());
+        SDL_Log((
+            "\nCurrent: (" + std::to_string(currentPosition.x) + ", " + std::to_string(currentPosition.y) + ")\n"
+            + "Origin:  (" + std::to_string(originPosition.x) + ", " + std::to_string(originPosition.y) + ")\n"
+            + "Target:  (" + std::to_string(targetPosition.x) + ", " + std::to_string(targetPosition.y) + ")"
+        ).c_str());
 
-        DPoint slope = targetPosition - currentPosition;
+        DPoint slope = targetPosition;
         
-        // if (originPosition == targetPosition) slope -= currentPosition;
-        // else slope -= originPosition;
+        if (originPosition == targetPosition) slope -= currentPosition;
+        else slope -= originPosition;
 
         // double normalizeScalar = std::sqrt(std::pow((double)slope.x, 2) + std::pow((double)slope.y, 2)) / range;
 
