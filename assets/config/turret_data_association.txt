@@ -1,2 +1,3 @@
 gatling.txt
 sniper.txt
+flamethrower.txt

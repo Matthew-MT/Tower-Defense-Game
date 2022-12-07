@@ -176,6 +176,8 @@ namespace game {
             buyPrice,
             sellPrice,
             damage,
+            damageOverTime,
+            timeLenght,
             range;
         SDL_Texture
             * texture,
@@ -193,6 +195,12 @@ namespace game {
 
         std::getline(turretFile, buffer);
         reloadTime = std::stof(buffer);
+
+        std::getline(turretFile, buffer);
+        damageOverTime = std::stof(buffer);
+
+        std::getline(turretFile, buffer);
+        timeLenght = std::stof(buffer);
 
         std::getline(turretFile, buffer);
         range = std::stoi(buffer);
@@ -235,6 +243,8 @@ namespace game {
             sellPrice,
             damage,
             reloadTime,
+            damageOverTime,
+            timeLenght,
             range,
             texture,
             menuTexture,
@@ -359,6 +369,8 @@ namespace game {
         int initSellPrice,
         int initDamage, 
         double initReload, 
+        int initDamageOverTime,
+        int initTimeLenght,
         int initRange,
         SDL_Texture* initTexture,
         SDL_Texture* initMenuTexture,
@@ -373,6 +385,8 @@ namespace game {
         sellPrice{initSellPrice},
         damage{initDamage},
         reload{initReload},
+        damageOverTime{initDamageOverTime},
+        timeLenght{initTimeLenght},
         range{initRange},
         texture{initTexture},
         menuTexture{initMenuTexture},

@@ -88,6 +88,8 @@ namespace game{
             buyPrice,
             sellPrice,
             damage,
+            damageOverTime,
+            timeLenght,
             range;
         SDL_Texture
             * texture,
@@ -105,6 +107,8 @@ namespace game{
             int initSellPrice,
             int initDamage, 
             double initReload, 
+            int initDamageOverTime,
+            int initTimeLenght,
             int initRange,
             SDL_Texture* initTexture,
             SDL_Texture* initMenuTexture,
