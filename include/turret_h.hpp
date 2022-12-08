@@ -19,7 +19,8 @@ namespace game{
         IPoint index;
         TurretHandler* turretHandler;
         Enemy* targetedEnemy = nullptr;
-        double remainingReload = 0;
+        std::vector<Enemy*> targetedEnemies;
+        double remainingReload=0;
         double angle;
         SDL_Texture* defTexture;
         Sound* shootSound;
@@ -44,9 +45,11 @@ namespace game{
         TurretData* getTurretData();
 
         void checkTarget(double scalar);
-        void findTarget();
+        void damageEnemies(int damage);
+        void findTarget(int i);
         void stopTracking();
         void setTurretData(TurretData* data);
+        bool searchTargets(Enemy* enemy);
 
         void tick(double scalar);
         void rotateTurret(DPoint enemy, DPoint turret);

@@ -14,6 +14,7 @@
 #include "animation.hpp"
 #include "projectile.hpp"
 #include <math.h>
+#include <vector>
 
 namespace game {
     Turret::Turret(
@@ -65,6 +66,21 @@ namespace game {
                 break;
             }
         }
+        return;
+    }
+
+    void Turret::damageEnemies(int damage)
+    {
+        for(Enemy* enemy: *this->turretHandler->getEnemyHandler())
+        {
+            DPoint enemyPos = enemy->getCenter();
+            DPoint proj = getCenter();
+            double enemyDistance = distance(proj, enemyPos);
+            if(range>=enemyDistance)
+            {
+                enemy->damage(damage);
+            }
+        }
     }
 
     void Turret::checkTarget(double scalar) {
@@ -72,7 +88,9 @@ namespace game {
             this->remainingReload-=scalar;
         }
 
-        if (this->targetedEnemy != nullptr) {
+        
+        if(this->targetedEnemy != nullptr || this->targetedEnemies.empty() != true)
+        {
             DPoint enemyPosition = targetedEnemy->getCenter();
             DPoint turretPosition = (DPoint)this->turretHandler->getMap()->getTileCenter(this->index);
             double enemyDistance = distance(turretPosition,enemyPosition);
@@ -82,10 +100,11 @@ namespace game {
                 {
                     if(remainingReload<=0)
                     {
+                        if(this->turretKind == 0){
                         this->targetedEnemy->damage(((TurretData*)this->data)->damage);
-                        this->texture = getTexture();
-                        this->shootSound->playSound();
-                        this->remainingReload = ((TurretData*)this->data)->reload;
+                            this->texture = getTexture();
+                            this->shootSound->playSound();
+                            this->remainingReload = ((TurretData*)this->data)->reload;
                         
                     }
                     else
@@ -101,7 +120,13 @@ namespace game {
                         this->proj = turretHandler->createProjectile(this->destRect, this->angle, this->targetedEnemy);
 
                     }
-        
+        }
+                    if(this->turretKind == 1){
+                        damageEnemies(this->damage);
+                        this->texture = getTexture();
+                        this->shootSound->playSound();
+                        this->remainingReload = reloadTime;
+                    }
                 }
                 
             }
@@ -127,13 +152,21 @@ namespace game {
                 proj = nullptr;
             }
             this->texture = defTexture;
-            this->findTarget();
+            this->findTarget(0);
         }
     }
 
     void Turret::stopTracking()
     {
         targetedEnemy = nullptr;
+        targetedEnemies.clear();
+    }
+
+    bool Turret::searchTargets(Enemy* enemy){
+        for (int i = 0; i < this->targetedEnemies.size(); i++){
+            if (this->targetedEnemies[i] == enemy) return true;
+        }
+        return false;
     }
 
     void Turret::setTurretData(TurretData* data) {
@@ -206,6 +239,7 @@ namespace game {
         this->turretTypes.push_back(readTurretData("gatling.txt"));
         this->turretTypes.push_back(readTurretData("sniper.txt"));
         this->turretTypes.push_back(readTurretData("rocket.txt"));
+            readTurretData("tesla.txt");
     }
 
     void TurretHandler::render() {
