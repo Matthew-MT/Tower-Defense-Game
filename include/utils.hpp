@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include <cmath>
 
 namespace game {
@@ -92,5 +93,12 @@ namespace game {
 
     bool contains(SDL_Rect* rect, const IPoint& point) {
         return point.x >= rect->x && point.x < rect->x + rect->w && point.y >= rect->y && point.y < rect->y + rect->h;
+    }
+
+    SDL_Texture* textureFromImageFile(SDL_Renderer* renderer, const std::string& file) {
+        SDL_Surface* surface = IMG_Load(file.c_str());
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_FreeSurface(surface);
+        return texture;
     }
 };

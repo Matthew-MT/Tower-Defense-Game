@@ -31,32 +31,25 @@ namespace game
         frames{initFrames}
 
         {
-
-
             std::string baseFile = file;
             frames++;
-            for(int i=2; i<=frames;i++)
-            {
+            for (int i = 2; i <= frames; i++) {
                 file = baseFile + std::to_string(i) + ".bmp";
-                SDL_Log(file.c_str());
                 SDL_Surface* surface = SDL_LoadBMP(file.c_str());
                 SDL_Texture* loadTexture = SDL_CreateTextureFromSurface(this->renderer, surface);
                 SDL_FreeSurface(surface);
                 images.push_back(loadTexture);
-                totalTime+=millisPerFrame;
+                totalTime += millisPerFrame;
             }
-            
         }
         
-        void Animation::tick(double scalar)
-        {
-            unsigned current = rand()%(frames+1);
-            if(current>=images.size() || current > frames) current = 0;
+        void Animation::tick(double scalar) {
+            unsigned current = rand() % (frames + 1);
+            if (current >= images.size() || current > frames) current = 0;
             storedTexture = images[current];
         }
 
-        SDL_Texture* Animation::getTexture()
-        {
+        SDL_Texture* Animation::getTexture() {
             return storedTexture;
         }
 

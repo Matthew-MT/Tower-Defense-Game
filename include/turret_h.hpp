@@ -1,28 +1,26 @@
 #pragma once
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 #include "game_state.hpp"
+#include "animation.hpp"
 #include "forward.hpp"
 #include "sprite.hpp"
 #include "enums.hpp"
-#include "map.hpp"
+#include "map_h.hpp"
 #include <vector>
-#include "animation.hpp"
+
 
 
 namespace game{
-    class Turret : public Animation
-    {
-        protected:
+    class Turret : public Animation {
+    protected:
         GameState* gamestate;
-        int damage;
-        double reloadTime;
-        int range;
+        TurretData* data;
         IPoint index;
         TurretHandler* turretHandler;
         Enemy* targetedEnemy = nullptr;
-        double remainingReload=0;
+        double remainingReload = 0;
         double angle;
-        Sound* spawnSound;
         SDL_Texture* defTexture;
         Sound* shootSound;
         int turretType;
@@ -35,26 +33,20 @@ namespace game{
             SDL_Texture* initTexture,
             SDL_Rect* initDestRect,
             SDL_Rect* initSourceRect,
-            int initDamage,
-            double initReload,
-            int initRange,
             IPoint initIndex,
             TurretHandler* initTurretHandler,
-            double initAngle,
-            Sound* initSpawnSound,
-            Sound* initShootSound,
-            std::string initTurretTexture,
-            int initFrames,
-            int initMillisPerFrame,
-            int initTurretType
+            TurretData* initData,
+            int initMillisPerFrame
         );
 
         IPoint getIndex();
+        int getSellPrice();
+        TurretData* getTurretData();
 
-        
         void checkTarget(double scalar);
         void findTarget();
         void stopTracking();
+        void setTurretData(TurretData* data);
 
         void tick(double scalar);
         void rotateTurret(DPoint enemy, DPoint turret);
@@ -65,19 +57,21 @@ namespace game{
         ~Turret();
     };
 
-    class TurretHandler : public Renderable
-    {
-        protected:
+    class TurretHandler : public Renderable {
+    protected:
         Map* map;
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
+        TurretUpgradeMenu* turretUpgradeMenu;
         bool started = false;
+        Sound* sellSound;
         ProjectileHandler* projectileHandler;
-        public:
+    public:
         TurretHandler(
             SDL_Renderer* initRenderer,
             SDL_Rect* initDestRect,
-            Map* initMap
+            Map* initMap,
+            TTF_Font* initFont
         );
 
         void render();
@@ -86,26 +80,23 @@ namespace game{
 
         void deleteProjectile(Projectile* p);
 
-        void readTurretData(const std::string& turretFileName);
-
+        TurretData* readTurretData(const std::string& turretFileName);
         void createTurret(int type, const IPoint& index);
+        bool sellTurret(Turret* turret);
+        bool upgradeTurret(Turret* turret);
 
         void handleEvent(SDL_Event* event);
-
         void tick(double scalar);
-
         void start(Option option);
 
         EnemyHandler* getEnemyHandler();
-
         Map* getMap();
-
         std::vector<TurretData*> getTurretTypes();
     };
 
     class TurretData
     {
-        public:
+    public:
         double reload;
         int
             buyPrice,
@@ -118,10 +109,12 @@ namespace game{
             * texture,
             * menuTexture,
             * menuTextureSelected;
-        Sound* turretSpawnSound;
-        Sound* turretShootSound;
+        Sound
+            * turretSpawnSound,
+            * turretShootSound;
         std::string animationFile;
-        public:
+        void* upgradePath = nullptr;
+
         TurretData(
             int initBuyPrice,
             int initSellPrice,
@@ -135,7 +128,8 @@ namespace game{
             Sound* initTurretShootSound,
             std::string animationFile,
             int initAnimationFrames,
-            int initTurrType
+            int initTurrType,
+            TurretData* initUpgradePath
         );
     };
 

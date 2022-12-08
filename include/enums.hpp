@@ -24,4 +24,10 @@ namespace game {
         Hard = 5,
         Fun = 6
     };
+
+    enum SingleOption {
+        Neither = 0,
+        Sell = 1,
+        Upgrade = 2
+    };
 };

@@ -44,6 +44,7 @@ namespace game {
         virtual void setPosition(const IPoint& position);
         virtual void setPosition(const DPoint& position);
 
+        virtual bool canBuy(int amount);
         virtual bool buy(int amount);
         virtual void earn(int amount);
         virtual void reduceHealth(int amount = 1);

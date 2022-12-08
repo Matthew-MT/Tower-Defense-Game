@@ -149,13 +149,13 @@ namespace game {
         if (!this->displayed) return;
         SDL_RenderCopy(
             this->renderer,
-            this->hovered == Option::Right ? this->arrowHovered : this->arrow,
+            this->hovered == Right ? this->arrowHovered : this->arrow,
             nullptr,
             this->arrowRightRect
         );
         SDL_RenderCopyEx(
             this->renderer,
-            this->hovered == Option::Left ? this->arrowHovered : this->arrow,
+            this->hovered == Left ? this->arrowHovered : this->arrow,
             nullptr,
             this->arrowLeftRect,
             0.f, nullptr,
@@ -163,25 +163,25 @@ namespace game {
         );
         SDL_RenderCopy(
             this->renderer,
-            this->hovered == Option::Easy ? this->difficultyEasyHovered : this->difficultyEasy,
+            this->hovered == Easy ? this->difficultyEasyHovered : this->difficultyEasy,
             nullptr,
             this->difficultyEasyRect
         );
         SDL_RenderCopy(
             this->renderer,
-            this->hovered == Option::Normal ? this->difficultyNormalHovered : this->difficultyNormal,
+            this->hovered == Normal ? this->difficultyNormalHovered : this->difficultyNormal,
             nullptr,
             this->difficultyNormalRect
         );
         SDL_RenderCopy(
             this->renderer,
-            this->hovered == Option::Hard ? this->difficultyHardHovered : this->difficultyHard,
+            this->hovered == Hard ? this->difficultyHardHovered : this->difficultyHard,
             nullptr,
             this->difficultyHardRect
         );
         SDL_RenderCopy(
             this->renderer,
-            this->hovered == Option::Fun ? this->difficultyFunHovered : this->difficultyFun,
+            this->hovered == Fun ? this->difficultyFunHovered : this->difficultyFun,
             nullptr,
             this->difficultyFunRect
         );
@@ -191,23 +191,23 @@ namespace game {
         if (!this->displayed) return;
         if (event->type == SDL_MOUSEMOTION) {
             IPoint point = {event->motion.x, event->motion.y};
-            if (contains(this->arrowLeftRect, point)) this->hovered = Option::Left;
-            else if (contains(this->arrowRightRect, point)) this->hovered = Option::Right;
-            else if (contains(this->difficultyEasyRect, point)) this->hovered = Option::Easy;
-            else if (contains(this->difficultyNormalRect, point)) this->hovered = Option::Normal;
-            else if (contains(this->difficultyHardRect, point)) this->hovered = Option::Hard;
-            else if (contains(this->difficultyFunRect, point)) this->hovered = Option::Fun;
-            else this->hovered = Option::None;
+            if (contains(this->arrowLeftRect, point)) this->hovered = Left;
+            else if (contains(this->arrowRightRect, point)) this->hovered = Right;
+            else if (contains(this->difficultyEasyRect, point)) this->hovered = Easy;
+            else if (contains(this->difficultyNormalRect, point)) this->hovered = Normal;
+            else if (contains(this->difficultyHardRect, point)) this->hovered = Hard;
+            else if (contains(this->difficultyFunRect, point)) this->hovered = Fun;
+            else this->hovered = None;
         } else if (event->type == SDL_MOUSEBUTTONUP) {
-            if (this->hovered == Option::Left) {
+            if (this->hovered == Left) {
                 this->place--;
                 while (this->place < 0) this->place += this->mapList.size();
                 this->map->loadMap(this->mapList[this->place]);
-            } else if (this->hovered == Option::Right) {
+            } else if (this->hovered == Right) {
                 this->place++;
                 this->place %= this->mapList.size();
                 this->map->loadMap(this->mapList[this->place]);
-            } else if (this->hovered != Option::None) this->map->start(this->hovered);
+            } else if (this->hovered != None) this->map->start(this->hovered);
         }
     }
 

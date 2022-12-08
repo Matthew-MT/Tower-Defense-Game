@@ -19,7 +19,8 @@ namespace game {
     class Sound;
     class Music;
     class MapMenu;
-    class TurretMenu;
+    class TurretTypeMenu;
+    class TurretUpgradeMenu;
     class Projectile;
     class ProjectileHandler;
 };

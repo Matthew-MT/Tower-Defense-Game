@@ -110,18 +110,20 @@ namespace game {
             );
         }
 
+        virtual void setDestRect(SDL_Rect* newDestRect) {
+            this->position.x = (double)newDestRect->x;
+            this->position.y = (double)newDestRect->y;
+            this->Renderable::setDestRect(newDestRect);
+        }
+
         virtual void setPosition(const IPoint& position) {
-            this->position.x = (double)position.x;
-            this->position.y = (double)position.y;
+            this->position = (DPoint)position;
             this->Renderable::setPosition(position);
         }
 
         virtual void setPosition(const DPoint& position) {
             this->position = position;
-            this->Renderable::setPosition({
-                (int)position.x,
-                (int)position.y
-            });
+            this->Renderable::setPosition((IPoint)position);
         }
 
         virtual void setTexture(SDL_Texture* texture) {
