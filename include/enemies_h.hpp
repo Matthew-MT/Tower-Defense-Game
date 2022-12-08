@@ -29,6 +29,8 @@ namespace game {
         int
             movementSpeed,
             health,
+            time,
+            damageOverTime,
             reward;
     public:
         Enemy(
@@ -50,6 +52,7 @@ namespace game {
         virtual void setPath(Path* path);
         virtual void setCenter(const DPoint& center);
         virtual void damage(int amount);
+        virtual void DOT(int time, int amount);
         virtual void track(Turret* turret);
 
         virtual DPoint getCenter();

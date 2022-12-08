@@ -55,6 +55,10 @@ namespace game {
         DPoint
             center = this->getCenter(),
             next = this->path->next(scalar, center, this->movementSpeed);
+        if (this->time > 0){
+            this->damage(this->damageOverTime);
+            this->time--;
+        }
         if (next.x != std::numeric_limits<double>::max() && next.y != std::numeric_limits<double>::max()) {
             this->setCenter(next);
         } else {
@@ -83,6 +87,11 @@ namespace game {
                 this->handler->despawn(this);
             }
         }
+    }
+
+    void Enemy::DOT(int newTime, int newDamage){
+        this->time = newTime;
+        this->damageOverTime = newDamage;
     }
 
     void Enemy::track(Turret* turret) {

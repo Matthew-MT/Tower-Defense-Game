@@ -2,6 +2,8 @@
 10
 1.5
 0.1
+0
+0
 85
 gatling1.bmp
 mixkit-retro-game-notification-212.wav

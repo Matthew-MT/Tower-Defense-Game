@@ -78,6 +78,7 @@ namespace game {
                 this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
                 if (remainingReload <= 0) {
                     this->targetedEnemy->damage(((TurretData*)this->data)->damage);
+                    this->targetedEnemy->DOT(((TurretData*)this->data)->timeLenght, ((TurretData*)this->data)->damageOverTime);
                     this->texture = getTexture();
                     ((TurretData*)this->data)->turretShootSound->playSound();
                     this->remainingReload = ((TurretData*)this->data)->reload;
@@ -158,6 +159,7 @@ namespace game {
         sellSound{new Sound("assets/sounds/coinbag-91016.mp3")} {
         this->turretTypes.push_back(readTurretData("gatling.txt"));
         this->turretTypes.push_back(readTurretData("sniper.txt"));
+        this->turretTypes.push_back(readTurretData("flamethrower.txt"));
     }
 
     void TurretHandler::render() {
