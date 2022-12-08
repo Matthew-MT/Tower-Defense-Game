@@ -55,10 +55,6 @@ namespace game {
         DPoint
             center = this->getCenter(),
             next = this->path->next(scalar, center, this->movementSpeed);
-        if (this->time > 0){
-            this->damage(this->damageOverTime);
-            this->time--;
-        }
         if (next.x != std::numeric_limits<double>::max() && next.y != std::numeric_limits<double>::max()) {
             this->setCenter(next);
         } else {
