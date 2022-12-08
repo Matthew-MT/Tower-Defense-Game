@@ -78,29 +78,31 @@ namespace game {
             double enemyDistance = distance(turretPosition,enemyPosition);
             if (((TurretData*)this->data)->range >= enemyDistance) {
                 this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
-                if(turretType == 0)
+                if( ((TurretData*)this->data)->tType == 0)
                 {
                     if(remainingReload<=0)
                     {
                         this->targetedEnemy->damage(((TurretData*)this->data)->damage);
                         this->texture = getTexture();
-                        this->shootSound->playSound();
+                        ((TurretData*)this->data)->turretShootSound->playSound();
                         this->remainingReload = ((TurretData*)this->data)->reload;
                         
                     }
                     else
                         this->texture = defTexture;
                 }
-                else if (turretType == 1)
+                else if (((TurretData*)this->data)->tType == 1)
                 {
                     if(remainingReload<=0 && proj == nullptr)
                     {
-                        //this->texture = getTexture();
-                        this->shootSound->playSound();
+                        this->texture = getTexture();
+                        ((TurretData*)this->data)->turretShootSound->playSound();
                         this->remainingReload = ((TurretData*)this->data)->reload;
                         this->proj = turretHandler->createProjectile(this->destRect, this->angle, this->targetedEnemy);
 
                     }
+                    else
+                        this->texture = defTexture;
         
                 }
                 
