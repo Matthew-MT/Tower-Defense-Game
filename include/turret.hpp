@@ -66,23 +66,26 @@ namespace game{
 
             if(range>=enemyDistance)
             {
-                if(this->turretKind == 1){
-                    this->targetedEnemy = enemy;
-                    if(!searchTargets(enemy)){
-                        this->targetedEnemies.push_back(enemy);
-                        this->targetedEnemy->track(this);
-                    }
-                    i++;
-                    continue;
-                }
-                else{
-                    this->targetedEnemy = enemy;
-                    this->targetedEnemy->track(this);
-                }
+                this->targetedEnemy = enemy;
+                this->targetedEnemy->track(this);
                 break;
             }
         }
         return;
+    }
+
+    void Turret::damageEnemies(int damage)
+    {
+        for(Enemy* enemy: *this->turretHandler->getEnemyHandler())
+        {
+            DPoint enemyPos = enemy->getCenter();
+            DPoint proj = getCenter();
+            double enemyDistance = distance(proj, enemyPos);
+            if(range>=enemyDistance)
+            {
+                enemy->damage(damage);
+            }
+        }
     }
 
     void Turret::checkTarget(double scalar) {
@@ -110,12 +113,9 @@ namespace game{
                         this->remainingReload = reloadTime;
                     }
                     if(this->turretKind == 1){
-                        for (int i = 0; i < this->targetedEnemies.size(); i++){
-                            std::cout << i << std::endl;
-                            this->targetedEnemies[i]->damage(this->damage);
-                            this->texture = getTexture();
-                            this->shootSound->playSound();
-                        }
+                        damageEnemies(this->damage);
+                        this->texture = getTexture();
+                        this->shootSound->playSound();
                         this->remainingReload = reloadTime;
                     }
                 }
