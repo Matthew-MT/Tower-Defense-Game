@@ -8,6 +8,7 @@
 #include <vector>
 #include "animation.hpp"
 
+
 namespace game{
     class Turret : public Animation
     {
@@ -24,6 +25,9 @@ namespace game{
         Sound* spawnSound;
         SDL_Texture* defTexture;
         Sound* shootSound;
+        int turretType;
+        Projectile* proj = nullptr;
+        ProjectileHandler* projectileHandler;
         public:
        
         Turret(
@@ -41,7 +45,8 @@ namespace game{
             Sound* initShootSound,
             std::string initTurretTexture,
             int initFrames,
-            int initMillisPerFrame
+            int initMillisPerFrame,
+            int initTurretType
         );
 
         IPoint getIndex();
@@ -55,6 +60,8 @@ namespace game{
         void rotateTurret(DPoint enemy, DPoint turret);
         DPoint getCenter();
 
+
+
         ~Turret();
     };
 
@@ -65,6 +72,7 @@ namespace game{
         std::unordered_set<Turret*> turrets;
         std::vector<TurretData*>  turretTypes;
         bool started = false;
+        ProjectileHandler* projectileHandler;
         public:
         TurretHandler(
             SDL_Renderer* initRenderer,
@@ -73,6 +81,10 @@ namespace game{
         );
 
         void render();
+
+        Projectile* createProjectile(SDL_Rect* dRect, double ang, Enemy* enemy);
+
+        void deleteProjectile(Projectile* p);
 
         void readTurretData(const std::string& turretFileName);
 
@@ -99,7 +111,9 @@ namespace game{
             buyPrice,
             sellPrice,
             damage,
-            range;
+            range,
+            animationFrames,
+            tType;
         SDL_Texture
             * texture,
             * menuTexture,
@@ -107,7 +121,6 @@ namespace game{
         Sound* turretSpawnSound;
         Sound* turretShootSound;
         std::string animationFile;
-        int animationFrames;
         public:
         TurretData(
             int initBuyPrice,
@@ -121,7 +134,10 @@ namespace game{
             Sound* initTurretSpawnSound,
             Sound* initTurretShootSound,
             std::string animationFile,
-            int initAnimationFrames
+            int initAnimationFrames,
+            int initTurrType
         );
     };
+
+    
 };

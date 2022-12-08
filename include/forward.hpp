@@ -20,4 +20,6 @@ namespace game {
     class Music;
     class MapMenu;
     class TurretMenu;
+    class Projectile;
+    class ProjectileHandler;
 };

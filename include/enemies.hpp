@@ -11,6 +11,7 @@
 #include "sound.hpp"
 #include <vector>
 
+
 namespace game {
     EnemyData::EnemyData(
         SDL_Texture* initTexture,

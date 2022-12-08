@@ -10,3 +10,4 @@ sniper1.bmp
 sniper1_select.png
 assets/images/sniper/sniper
 4
+0

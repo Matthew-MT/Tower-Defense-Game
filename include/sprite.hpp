@@ -140,6 +140,7 @@ namespace game {
         virtual const SDL_Rect* getSourceRect() const {
             return this->sourceRect;
         }
+        
     };
 
     class Sprite : public StaticSprite {
@@ -190,6 +191,14 @@ namespace game {
 
         virtual double getAngle() const {
             return this->angle;
+        }
+
+        virtual void setCenter(const DPoint& center){
+            IPoint size = this->getSize();
+            this->setPosition(DPoint{
+                center.x - ((double)size.x / 2.f),
+                center.y - ((double)size.y / 2.f)
+            });
         }
     };
 };

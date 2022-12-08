@@ -10,6 +10,7 @@
 #include <cstring>
 #include "sound.hpp"
 #include "animation.hpp"
+#include "projectile.hpp"
 #include <math.h>
 
 namespace game{
@@ -28,7 +29,8 @@ namespace game{
         Sound* initShootSound,
         std::string initTurretTexture,
         int initFrames,
-        int initMillisPerFrame
+        int initMillisPerFrame,
+        int initTurretType
     ) : Animation {
         initRenderer, 
         initTexture, 
@@ -46,7 +48,8 @@ namespace game{
     turretHandler{initTurretHandler},
     spawnSound{initSpawnSound},
     shootSound{initShootSound},
-    defTexture{texture}{}
+    defTexture{texture},
+    turretType{initTurretType}{}
 
     IPoint Turret::getIndex()
     {
@@ -72,6 +75,7 @@ namespace game{
 
     void Turret::checkTarget(double scalar) {
 
+
         if(remainingReload>0)
         {
             this->remainingReload-=scalar;
@@ -86,26 +90,56 @@ namespace game{
             double enemyDistance = distance(turretPosition,enemyPosition);
             if(range>=enemyDistance)
             {
+                
                 this->rotateTurret(this->targetedEnemy->getCenter(), this->getCenter());
-                if(remainingReload<=0)
+                if(turretType == 0)
                 {
-                    this->targetedEnemy->damage(this->damage);
-                    this->texture = getTexture();
-                    this->shootSound->playSound();
-                    this->remainingReload = reloadTime;
-                    
+                    if(remainingReload<=0)
+                    {
+                        this->targetedEnemy->damage(this->damage);
+                        this->texture = getTexture();
+                        this->shootSound->playSound();
+                        this->remainingReload = reloadTime;
+                        
+                    }
+                    else
+                        this->texture = defTexture;
                 }
-                else
-                    this->texture = defTexture;
+                else if (turretType == 1)
+                {
+                    if(remainingReload<=0 && proj == nullptr)
+                    {
+                        //this->texture = getTexture();
+                        this->shootSound->playSound();
+                        this->remainingReload = reloadTime;
+                        this->proj = turretHandler->createProjectile(this->destRect, this->angle, this->targetedEnemy);
+
+                    }
+        
+                }
+                
             }
             else
             {
                 stopTracking();
                 //this->texture = defTexture;
             }
+           
+            if(this->proj != nullptr && this->proj->detectHit(scalar, enemyPosition) == true)
+            {   
+                this->proj->damageEnemies(this->damage);
+                turretHandler->deleteProjectile(this->proj);
+                //this->targetedEnemy->damage(this->damage);
+                proj = nullptr;
+            }
         }
         else
         {
+            if(this->targetedEnemy == nullptr && this->proj != nullptr)
+            {
+                turretHandler->deleteProjectile(this->proj);
+                proj = nullptr;
+            }
             this->texture = defTexture;
             this->findTarget();
         }
@@ -157,16 +191,23 @@ namespace game{
         };
     }
 
+    
+
 
 
     TurretHandler::TurretHandler(
         SDL_Renderer* initRenderer,
         SDL_Rect* initDestRect,
         Map* initMap
-        ) : Renderable{initRenderer, initDestRect}, map{initMap}
+        ) : Renderable{initRenderer, initDestRect}, map{initMap},
+        projectileHandler{new ProjectileHandler(
+        this->renderer,
+        this->destRect,
+        this->getMap())}
         {
             readTurretData("gatling.txt");
             readTurretData("sniper.txt");
+            readTurretData("rocket.txt");
         }
 
     void TurretHandler::render()
@@ -175,6 +216,7 @@ namespace game{
         {
             turret->render();
         }
+        projectileHandler->render();
     }    
 
     void  TurretHandler::readTurretData(const std::string& turretFileName)
@@ -187,7 +229,8 @@ namespace game{
             buyPrice,
             sellPrice,
             damage,
-            range;
+            range,
+            tType;
         SDL_Texture
             * texture,
             * menuTexture,
@@ -223,6 +266,8 @@ namespace game{
         std::string aFile = buffer;
         std::getline(turretFile, buffer);
         int aFrames = stoi(buffer);
+        std::getline(turretFile, buffer);
+        tType = stoi(buffer);
         turretTypes.push_back(new TurretData(
             buyPrice,
             sellPrice,
@@ -235,7 +280,8 @@ namespace game{
             turretSpawnSound,
             turretShootSound,
             aFile,
-            aFrames
+            aFrames,
+            tType
         ));
     }
 
@@ -259,8 +305,10 @@ namespace game{
             data->turretShootSound,
             data->animationFile,
             data->animationFrames,
-            100
+            100,
+            data->tType
         );
+        
         this->turrets.insert(turret);
     }
 
@@ -301,6 +349,9 @@ namespace game{
     {
         for(Turret* turret : this->turrets) 
             turret->tick(scalar);
+         
+        projectileHandler->tick(scalar);
+    
     }
 
     void TurretHandler::start(Option option) {
@@ -321,6 +372,17 @@ namespace game{
         return this->turretTypes;
     }
 
+    Projectile* TurretHandler::createProjectile(SDL_Rect* dRect, double ang, Enemy* enemy)
+    {
+        return projectileHandler->createProjectile(dRect, ang, enemy);
+    }
+
+    void TurretHandler::deleteProjectile(Projectile* p)
+    {
+        projectileHandler->deleteProjectile(p);
+    }
+
+
     TurretData::TurretData(
         int initBuyPrice,
         int initSellPrice,
@@ -333,7 +395,8 @@ namespace game{
         Sound* initTurretSpawnSound,
         Sound* initTurretShootSound,
         std::string initAnimationFile,
-        int initAnimationFrames
+        int initAnimationFrames,
+        int initTurrType
     ) :
         buyPrice{initBuyPrice},
         sellPrice{initSellPrice},
@@ -346,5 +409,7 @@ namespace game{
         turretSpawnSound{initTurretSpawnSound},
         turretShootSound{initTurretShootSound},
         animationFile{initAnimationFile},
-        animationFrames{initAnimationFrames}{}
+        animationFrames{initAnimationFrames},
+        tType{initTurrType}{}
+
 };
