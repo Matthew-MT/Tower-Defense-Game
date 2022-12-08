@@ -76,7 +76,7 @@ namespace game {
             DPoint enemyPos = enemy->getCenter();
             DPoint proj = getCenter();
             double enemyDistance = distance(proj, enemyPos);
-            if(range>=enemyDistance)
+            if(((TurretData*)this->data)->range>=enemyDistance)
             {
                 enemy->damage(damage);
             }
@@ -100,7 +100,7 @@ namespace game {
                 {
                     if(remainingReload<=0)
                     {
-                        if(this->turretKind == 0){
+                        if(this->turretType == 0){
                         this->targetedEnemy->damage(((TurretData*)this->data)->damage);
                             this->texture = getTexture();
                             this->shootSound->playSound();
@@ -120,12 +120,14 @@ namespace game {
                         this->proj = turretHandler->createProjectile(this->destRect, this->angle, this->targetedEnemy);
 
                     }
-        }
-                    if(this->turretKind == 1){
-                        damageEnemies(this->damage);
+                }
+                if(this->turretType == 2){
+                    if(remainingReload<=0)
+                    {
+                        damageEnemies(((TurretData*)this->data)->damage);
                         this->texture = getTexture();
                         this->shootSound->playSound();
-                        this->remainingReload = reloadTime;
+                        this->remainingReload = ((TurretData*)this->data)->reload;
                     }
                 }
                 
@@ -152,13 +154,14 @@ namespace game {
                 proj = nullptr;
             }
             this->texture = defTexture;
-            this->findTarget(0);
+            this->findTarget();
         }
     }
+}
 
     void Turret::stopTracking()
     {
-        targetedEnemy = nullptr;
+        this->targetedEnemy = nullptr;
         targetedEnemies.clear();
     }
 
@@ -239,7 +242,7 @@ namespace game {
         this->turretTypes.push_back(readTurretData("gatling.txt"));
         this->turretTypes.push_back(readTurretData("sniper.txt"));
         this->turretTypes.push_back(readTurretData("rocket.txt"));
-            readTurretData("tesla.txt");
+        this->turretTypes.push_back(readTurretData("tesla.txt"));
     }
 
     void TurretHandler::render() {

@@ -10,4 +10,4 @@ gatling1.bmp
 gatling1_select.png
 assets/images/gatling/gatling
 6
-1
+2

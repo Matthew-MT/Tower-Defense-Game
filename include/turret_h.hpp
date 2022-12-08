@@ -46,7 +46,7 @@ namespace game{
 
         void checkTarget(double scalar);
         void damageEnemies(int damage);
-        void findTarget(int i);
+        void findTarget();
         void stopTracking();
         void setTurretData(TurretData* data);
         bool searchTargets(Enemy* enemy);
