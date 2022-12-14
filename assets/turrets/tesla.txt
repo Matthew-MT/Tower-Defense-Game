@@ -1,0 +1,13 @@
+10
+5
+100
+1
+80
+gatling1.bmp
+mixkit-retro-game-notification-212.wav
+076415_light-machine-gun-m249-39827.wav
+gatling1.bmp
+gatling1_select.png
+assets/images/gatling/gatling
+6
+2
