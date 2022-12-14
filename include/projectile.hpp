@@ -160,7 +160,7 @@ namespace game{
             rect,
             nullptr,
             ang,
-            100,
+            120,
             enemy,
             80,
             this);
