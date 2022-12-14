@@ -1,7 +1,7 @@
-10
 25
-100
-1
+15
+50
+3
 200
 rocketlauncher1.bmp
 mixkit-retro-game-notification-212.wav
